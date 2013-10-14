@@ -30,7 +30,7 @@
     <p:input port="source"><p:empty/></p:input>
   </cx:message>
 
-  <bc:load-cascaded name="load-mapping-rng" fallback="http://transpect.le-tex.de/xml2idml/lib/schema/mapping.rng">
+  <bc:load-cascaded name="load-mapping-rng" fallback="http://transpect.le-tex.de/xml2idml/schema/mapping.rng">
     <p:with-option name="filename" select="'xml2idml/mapping.rng'"/>
     <p:with-option name="set-xml-base-attribute" select="'no'"/>
     <p:input port="paths">
@@ -42,7 +42,7 @@
 
   <p:sink/>
 
-  <bc:load-cascaded name="load-mapping-xsl" fallback="http://transpect.le-tex.de/xml2idml/lib/xsl/mapping2xsl.xsl">
+  <bc:load-cascaded name="load-mapping-xsl" fallback="http://transpect.le-tex.de/xml2idml/xsl/mapping2xsl.xsl">
     <p:with-option name="filename" select="'xml2idml/mapping2xsl.xsl'"/>
     <p:with-option name="set-xml-base-attribute" select="'yes'"/>
     <p:input port="paths">

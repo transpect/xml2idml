@@ -112,8 +112,8 @@
 
   <cx:message message="xml2idml: now storifying"/>
 
-  <bc:load-cascaded name="load-storify" fallback="http://transpect.le-tex.de/xml2idml/lib/xsl/storify.xsl">
-    <p:with-option name="filename" select="xml2idml/storify.xsl"/>
+  <bc:load-cascaded name="load-storify" fallback="http://transpect.le-tex.de/xml2idml/xsl/storify.xsl">
+    <p:with-option name="filename" select="'xml2idml/storify.xsl'"/>
     <p:with-option name="set-xml-base-attribute" select="'no'"/>
     <p:input port="paths">
       <p:pipe port="paths" step="xml2idml"/>
@@ -122,8 +122,8 @@
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>    
   </bc:load-cascaded>
 
-  <bc:load-cascaded name="load-remove-tagging" fallback="http://transpect.le-tex.de/xml2idml/lib/xsl/remove-tagging.xsl">
-    <p:with-option name="filename" select="xml2idml/remove-tagging.xsl"/>
+  <bc:load-cascaded name="load-remove-tagging" fallback="http://transpect.le-tex.de/xml2idml/xsl/remove-tagging.xsl">
+    <p:with-option name="filename" select="'xml2idml/remove-tagging.xsl'"/>
     <p:with-option name="set-xml-base-attribute" select="'no'"/>
     <p:input port="paths">
       <p:pipe port="paths" step="xml2idml"/>
@@ -197,8 +197,8 @@
 
   <cx:message message="xml2idml: now merging generated stories into template"/>
 
-  <bc:load-cascaded name="load-merge" fallback="http://transpect.le-tex.de/xml2idml/lib/xsl/merge.xsl">
-    <p:with-option name="filename" select="xml2idml/merge.xsl"/>
+  <bc:load-cascaded name="load-merge" fallback="http://transpect.le-tex.de/xml2idml/xsl/merge.xsl">
+    <p:with-option name="filename" select="'xml2idml/merge.xsl'"/>
     <p:with-option name="set-xml-base-attribute" select="'no'"/>
     <p:input port="paths">
       <p:pipe port="paths" step="xml2idml"/>
@@ -231,8 +231,8 @@
 
   <cx:message message="xml2idml: now checking for styles not defined in template"/>
 
-  <bc:load-cascaded name="load-add-nonexisting-styles" fallback="http://transpect.le-tex.de/xml2idml/lib/xsl/add-nonexisting-styles.xsl">
-    <p:with-option name="filename" select="xml2idml/add-nonexisting-styles.xsl"/>
+  <bc:load-cascaded name="load-add-nonexisting-styles" fallback="http://transpect.le-tex.de/xml2idml/xsl/add-nonexisting-styles.xsl">
+    <p:with-option name="filename" select="'xml2idml/add-nonexisting-styles.xsl'"/>
     <p:with-option name="set-xml-base-attribute" select="'no'"/>
     <p:input port="paths">
       <p:pipe port="paths" step="xml2idml"/>
