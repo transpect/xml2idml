@@ -13,13 +13,26 @@
   type="bc:xml2idml"
   >
 
-  <p:option name="template" />
-  <p:option name="mapping" />
-  <p:option name="debug" />
-  <p:option name="debug-dir-uri" required="false" select="resolve-uri('debug')"/>
+  <p:input port="source" primary="true"/>
+  <p:input port="paths"  kind="parameter"/>
 
-  <p:input port="source"  primary="true"/>
-  <p:input port="paths" kind="parameter"/>
+  <p:option name="template">
+    <p:documentation>IDML Template file.</p:documentation>
+  </p:option>
+  <p:option name="mapping">
+    <p:documentation>xml2idml mapping file. Will be used to create paragraphs, tables, character style, etc.
+      See ../schema/mapping.rng.</p:documentation>
+  </p:option>
+  <p:option name="idml-target-uri" select="''">
+    <p:documentation>
+      URI where the generated idml will be saved. Possibilities:
+      - leave it empty to save the idml near input source xml file (only file suffix is changed)
+      - absolute path to an file. 
+      - absolute path to an directory (path ends with '/'). Filename taken from base-uri().
+    </p:documentation>
+  </p:option>
+  <p:option name="debug" />
+  <p:option name="debug-dir-uri" required="false" select="resolve-uri('debug')" />
 
   <p:output port="result" primary="true" sequence="true">
     <p:pipe step="with-aid" port="result"/>
@@ -260,20 +273,66 @@
     <p:with-option name="base-uri" select="$debug-dir-uri" />
   </letex:store-debug>
 
-  <cx:message>
-    <p:with-option name="message" select="concat('xml2idml: now storing as zip: ', replace(base-uri(/*), '\.\w+$', '.idml'))">
-      <p:pipe step="xml2idml" port="source"/>
-    </p:with-option>
-  </cx:message>
-
   <!-- important step: remove @xml:space, otherwise it wont be valid -->
   <p:delete name="delete-xml-space-attr" match="@xml:space"/>
 
+  <p:xslt name="zip-file-uri" template-name="main">
+    <p:with-param name="idml-uri" select="$idml-target-uri"/>
+    <p:with-param name="base-uri" select="resolve-uri(base-uri(/*))">
+      <p:pipe step="xml2idml" port="source"/>
+    </p:with-param>
+    <p:input port="stylesheet">
+      <p:inline>
+        <xsl:stylesheet version="2.0" xmlns:c="http://www.w3.org/ns/xproc-step" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+          <xsl:param name="idml-uri" required="yes" as="xs:string" />
+          <xsl:param name="base-uri" required="yes" as="xs:string" />
+          <xsl:template name="main">
+            <xsl:variable name="result" as="element(c:result)">
+              <c:result>
+                <xsl:choose>
+                  <!-- no path (empty string) given -->
+                  <xsl:when test="$idml-uri eq ''">
+                    <xsl:value-of select="replace($base-uri, '\.\w+$', '.idml')"/>
+                  </xsl:when>
+                  <!-- full path given -->
+                  <xsl:when test="matches($idml-uri, '^.+\.\w+$')">
+                    <xsl:value-of select="$idml-uri"/>
+                  </xsl:when>
+                  <!-- path ends with '/' -->
+                  <xsl:when test="matches($idml-uri, '^.+/$')">
+                    <xsl:value-of select="concat(
+                                            $idml-uri, 
+                                            replace(
+                                              tokenize($base-uri,'/')[last()], 
+                                              '\.\w+$', 
+                                              '.idml'
+                                            )
+                                          )"/>
+                  </xsl:when>
+                  <!-- hm? -->
+                  <xsl:otherwise>
+                    <xsl:value-of select="replace($base-uri, '\.\w+$', '.idml')"/>
+                  </xsl:otherwise>
+                </xsl:choose>
+              </c:result>
+            </xsl:variable>
+            <xsl:message select="concat('xml2idml: now storing as zip in ', $result)"/>
+            <xsl:sequence select="$result"/>
+          </xsl:template>
+        </xsl:stylesheet>
+      </p:inline>
+    </p:input>
+  </p:xslt>
+  <p:sink/>
+
   <xml2idml:store name="store">
+    <p:input port="source">
+      <p:pipe step="delete-xml-space-attr" port="result"/>
+    </p:input>
     <p:with-option name="debug" select="$debug" />
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri" />
-    <p:with-option name="zip-file-uri" select="replace(base-uri(/*), '\.\w+$', '.idml')">
-      <p:pipe step="xml2idml" port="source"/>
+    <p:with-option name="zip-file-uri" select="/c:result">
+      <p:pipe step="zip-file-uri" port="result"/>
     </p:with-option>
   </xml2idml:store>
 
