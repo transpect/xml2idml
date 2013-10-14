@@ -1,0 +1,478 @@
+<grammar
+  xmlns="http://relaxng.org/ns/structure/1.0"
+  xmlns:css="http://www.w3.org/1996/css"
+  xmlns:s="http://purl.oclc.org/dsdl/schematron"
+  xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0"
+  xmlns:html="http://www.w3.org/1999/xhtml"
+  xmlns:xml2idml="http://www.le-tex.de/namespace/xml2idml"
+  datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"
+  ns="http://www.le-tex.de/namespace/xml2idml"
+  >
+
+  <s:ns prefix="css" uri="http://www.w3.org/1996/css"/>
+  <s:ns prefix="xlink" uri="http://www.w3.org/1999/xlink"/>
+  <s:ns prefix="xml2idml" uri="http://www.le-tex.de/namespace/xml2idml"/>
+
+  <html:h1>XML to IDML converter</html:h1>
+
+  <start>
+    <ref name="mapping.instructions"/>
+  </start>
+
+  <define name="mapping.instructions">
+    <element name="mapping-instructions">
+      <ref name="mapping.att.xpath-default-namespace"/>
+      <ref name="mapping.att.retain-tagging"/>
+      <zeroOrMore>
+        <ref name="mapping.import" />
+      </zeroOrMore>
+      <optional>
+        <ref name="mapping.inline-xsl" />
+      </optional>
+      <optional>
+        <ref name="mapping.xslt-pipeline" />
+      </optional>
+      <interleave>
+        <optional><ref name="mapping.discard" /></optional>
+        <optional><ref name="mapping.stories" /></optional>
+        <optional><ref name="mapping.styles.para" /></optional>
+        <optional><ref name="mapping.styles.inline" /></optional>
+        <optional><ref name="mapping.styles.table" /></optional>
+        <optional><ref name="mapping.styles.cell" /></optional>
+        <optional><ref name="mapping.styles.object" /></optional>
+      </interleave>
+    </element>
+  </define>
+
+  <define name="mapping.import">
+    <element name="import">
+      <attribute name="href">
+        <data type="anyURI" />
+      </attribute>
+    </element>
+  </define>
+
+  <define name="anything">
+    <element>  
+      <anyName/>
+      <zeroOrMore>
+        <attribute>
+          <anyName/>
+        </attribute>
+      </zeroOrMore>
+      <zeroOrMore>
+        <ref name="anything" />
+      </zeroOrMore>
+    </element>
+  </define>
+
+  <define name="mapping.inline-xsl">
+    <element name="inline">
+      <zeroOrMore>
+        <ref name="anything" />
+      </zeroOrMore>
+    </element>
+  </define>
+
+  <define name="mapping.xslt-pipeline">
+    <element name="xslt-pipeline">
+      <zeroOrMore>
+        <ref name="mapping.xslt-step" />
+      </zeroOrMore>
+    </element>
+  </define>
+  <define name="mapping.xslt-step">
+    <element name="step">
+      <attribute name="mode">
+        <data type="QName" />
+      </attribute>
+      <optional>
+        <attribute name="identity">
+          <choice>
+            <value>true</value>
+            <value>false</value>
+          </choice>
+        </attribute>
+      </optional>
+      <optional>
+        <attribute name="before">
+          <choice>
+            <value>xml2idml:Discard</value>
+            <value>xml2idml:Stories</value>
+            <value>xml2idml:ParaStyles</value>
+            <value>xml2idml:InlineStyles</value>
+            <value>xml2idml:TableStyles</value>
+            <value>xml2idml:CellStyles</value>
+            <value>xml2idml:ObjectStyles</value>
+          </choice>
+        </attribute>
+      </optional>
+    </element>
+  </define>
+
+  <define name="mapping.discard">
+    <element name="Discard">
+      <zeroOrMore>
+        <ref name="mapping.discard-instruction"/>
+      </zeroOrMore>
+    </element>
+  </define>
+
+  <define name="mapping.stories">
+    <element name="Stories">
+      <interleave>
+        <zeroOrMore>
+          <ref name="keep.story"/>
+        </zeroOrMore>
+        <zeroOrMore>
+          <ref name="mapping.story"/>
+        </zeroOrMore>
+      </interleave>
+    </element>
+  </define>
+
+  <define name="mapping.styles.para">
+    <element name="ParaStyles">
+      <zeroOrMore>
+        <ref name="mapping.para"/>
+      </zeroOrMore>
+    </element>
+  </define>
+
+  <define name="mapping.styles.inline">
+    <element name="InlineStyles">
+      <zeroOrMore>
+        <ref name="mapping.inline"/>
+      </zeroOrMore>
+    </element>
+  </define>
+
+  <define name="mapping.styles.table">
+    <element name="TableStyles">
+      <zeroOrMore>
+        <ref name="mapping.table"/>
+      </zeroOrMore>
+    </element>
+  </define>
+
+  <define name="mapping.styles.cell">
+    <element name="CellStyles">
+      <zeroOrMore>
+        <ref name="mapping.cell"/>
+      </zeroOrMore>
+    </element>
+  </define>
+
+  <define name="mapping.styles.object">
+    <element name="ObjectStyles">
+      <zeroOrMore>
+        <ref name="mapping.object"/>
+      </zeroOrMore>
+    </element>
+  </define>
+
+  <define name="mapping.model.simple">
+    <interleave>
+      <ref name="mapping.path"/>
+      <optional>
+        <ref name="mapping.format"/>
+      </optional>
+      <optional>
+        <ref name="mapping.condition"/>
+      </optional>
+    </interleave>
+  </define>
+
+  <define name="mapping.model.nesting">
+    <choice>
+      <ref name="mapping.nest"/>
+      <ref name="mapping.wrap"/>
+    </choice>
+  </define>
+
+  <define name="mapping.path">
+    <element name="path">
+      <optional>
+	<attribute name="priority">
+	  <data type="double" />
+	</attribute>
+      </optional>
+      <data type="string">
+        <param name="pattern">.*\S.*</param>
+      </data>
+    </element>
+  </define>
+
+  <define name="mapping.format">
+    <element name="format">
+      <data type="string">
+        <param name="pattern">.*\S.*</param>
+      </data>
+    </element>
+  </define>
+
+  <define name="mapping.format.cell">
+    <element name="format">
+      <optional>
+        <attribute name="priority">
+          <choice>
+            <value>higher</value>
+            <value>lower</value>
+            <value>highest</value>
+            <value>lowest</value>
+          </choice>
+        </attribute>
+      </optional>
+      <data type="string">
+        <param name="pattern">.*\S.*</param>
+      </data>
+    </element>
+  </define>
+
+  <define name="mapping.condition">
+    <element name="condition">
+      <optional>
+        <attribute name="hidden">
+          <choice>
+            <value>true</value>
+            <value>false</value>
+          </choice>
+        </attribute>
+      </optional>
+      <data type="string">
+        <param name="pattern">.*\S.*</param>
+      </data>
+    </element>
+  </define>
+
+  <define name="mapping.model.insert-special-char">
+    <element name="insert-special-char">
+      <attribute name="name">
+        <choice>
+          <value>tabulator</value>
+          <value>line-break</value>
+<!--          <value>end-nested-style</value>--><!-- ACE 3 -->
+<!--          <value>footnote-symbol</value>--><!-- ACE 4 -->
+              <value>right-indent-tab</value>
+<!--          <value>page-number-next</value>--><!-- ACE 18 and ../@PageNumberType = 'NextPageNumber' -->
+<!--          <value>page-number-previous</value>--><!-- ACE 18 and ../@PageNumberType = 'PreviousPageNumber' -->
+              <value>section-marker</value>
+          <value>indent-to-here</value>
+        </choice>
+      </attribute>
+      <attribute name="method">
+        <choice>
+          <value>after</value>
+          <value>before</value>
+          <value>replace</value>
+        </choice>
+      </attribute>
+      <optional>
+        <attribute name="format">
+          <data type="string">
+            <param name="pattern">.*\S.*</param>
+          </data>
+        </attribute>
+      </optional>
+    </element>
+  </define>
+
+  <define name="mapping.name">
+    <element name="name">
+      <data type="string">
+        <param name="pattern">.*\S.*</param>
+      </data>
+    </element>
+  </define>
+
+  <define name="mapping.nest">
+    <element name="nest">
+      <empty/>
+    </element>
+  </define>
+
+  <define name="mapping.wrap">
+    <element name="wrap">
+      <empty/>
+    </element>
+  </define>
+
+  <define name="mapping.discard-instruction">
+    <element name="mapping-instruction">
+      <ref name="mapping.path"/>
+    </element>
+  </define>
+
+  <define name="keep.story">
+    <element name="keep">
+      <optional>
+        <attribute name="debug-only">
+          <choice>
+            <value>true</value>
+            <value>false</value>
+          </choice>
+        </attribute>
+      </optional>
+      <ref name="mapping.name"/>
+    </element>
+  </define>
+
+  <define name="mapping.story">
+    <element name="mapping-instruction">
+      <interleave>
+        <ref name="mapping.path"/>
+        <ref name="mapping.name"/>
+      </interleave>
+    </element>
+  </define>
+
+  <define name="mapping.para">
+    <element name="mapping-instruction">
+      <interleave>
+        <ref name="mapping.model.simple" />
+        <optional>
+          <ref name="mapping.model.nesting" />
+        </optional>
+      </interleave>
+    </element>
+  </define>
+
+  <define name="mapping.inline">
+    <element name="mapping-instruction">
+      <ref name="mapping.model.simple" />
+      <optional>
+        <ref name="mapping.model.insert-special-char" />
+      </optional>
+    </element>
+  </define>
+
+  <define name="mapping.table">
+    <element name="mapping-instruction">
+      <interleave>
+        <ref name="mapping.model.simple" />
+        <optional>
+          <ref name="mapping.width" />
+        </optional>
+      </interleave>
+    </element>
+  </define>
+
+  <define name="mapping.cell">
+    <element name="mapping-instruction">
+      <interleave>
+        <ref name="mapping.path"/>
+        <optional>
+          <ref name="mapping.format.cell"/>
+        </optional>
+        <optional>
+          <ref name="mapping.width" />
+        </optional>
+        <optional>
+          <ref name="mapping.condition"/>
+        </optional>
+      </interleave>
+    </element>
+  </define>
+
+  <define name="mapping.object">
+    <element name="mapping-instruction">
+      <interleave>
+        <ref name="mapping.model.simple" />
+        <optional>
+          <ref name="mapping.width" />
+        </optional>
+        <optional>
+          <ref name="mapping.height" />
+        </optional>
+        <ref name="mapping.anchoring" />
+      </interleave>
+    </element>
+  </define>
+
+  <define name="mapping.width">
+    <element name="width">
+      <ref name="mapping.model.dimension" />
+    </element>
+  </define>  
+
+  <define name="mapping.height">
+    <element name="height">
+      <ref name="mapping.model.dimension" />
+    </element>
+  </define>  
+
+  <define name="mapping.model.dimension">
+    <optional>
+      <ref name="mapping.att.select"/>
+    </optional>
+    <ref name="mapping.att.type"/>
+  </define>
+
+  <define name="mapping.att.select">
+    <attribute name="select">
+      <data type="string"/>
+    </attribute>
+  </define>
+
+  <define name="mapping.att.type">
+    <attribute name="type">
+      <data type="QName" />
+    </attribute>
+    <ref name="mapping.model.params.named" />
+  </define>
+
+  <define name="mapping.model.params">
+    <zeroOrMore>
+      <element name="param">
+        <choice>
+          <attribute name="select"/>
+          <data type="string" />
+        </choice>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <define name="mapping.model.params.named">
+    <zeroOrMore>
+      <element name="param">
+        <attribute name="name"/>
+        <choice>
+          <attribute name="select"/>
+          <data type="string" />
+        </choice>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <define name="mapping.anchoring">
+    <element name="anchoring">
+      <attribute name="type">
+        <choice>
+          <value>inline</value>
+          <value>empty-para</value>
+        </choice>
+      </attribute>
+    </element>
+  </define>  
+
+  <define name="mapping.att.xpath-default-namespace">
+    <optional>
+      <attribute name="xpath-default-namespace">
+        <data type="anyURI" />
+      </attribute>
+    </optional>
+  </define>
+
+  <define name="mapping.att.retain-tagging">
+    <optional>
+      <attribute name="retain-tagging">
+        <choice>
+          <value>true</value>
+          <value>false</value>
+        </choice>
+      </attribute>
+    </optional>
+  </define>
+
+
+</grammar>
