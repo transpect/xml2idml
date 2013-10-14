@@ -28,7 +28,7 @@
 
   <bc:load-cascaded name="load-serialize-compound-idml-xsl" 
     fallback="http://transpect.le-tex.de/xml2idml/xsl/serialize-compound-idml.xsl">
-    <p:with-option name="filename" select="xml2idml/serialize-compound-idml.xsl"/>
+    <p:with-option name="filename" select="'xml2idml/serialize-compound-idml.xsl'"/>
     <p:with-option name="set-xml-base-attribute" select="'no'"/>
     <p:input port="paths">
       <p:pipe port="paths" step="store"/>
