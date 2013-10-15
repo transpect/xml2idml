@@ -283,35 +283,45 @@
     </p:with-param>
     <p:input port="stylesheet">
       <p:inline>
-        <xsl:stylesheet version="2.0" xmlns:c="http://www.w3.org/ns/xproc-step" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+        <xsl:stylesheet version="2.0" 
+          xmlns:c="http://www.w3.org/ns/xproc-step" 
+          xmlns:xs="http://www.w3.org/2001/XMLSchema"
+          xmlns:letex="http://www.le-tex.de/namespace">
           <xsl:param name="idml-uri" required="yes" as="xs:string" />
           <xsl:param name="base-uri" required="yes" as="xs:string" />
+          <xsl:include href="http://transpect.le-tex.de/xslt-util/resolve-uri/resolve-uri.xsl"/>
           <xsl:template name="main">
             <xsl:variable name="result" as="element(c:result)">
               <c:result>
                 <xsl:choose>
                   <!-- no path (empty string) given -->
                   <xsl:when test="$idml-uri eq ''">
-                    <xsl:value-of select="replace($base-uri, '\.\w+$', '.idml')"/>
+                    <xsl:value-of select="letex:resolve-system-from-uri(
+                                            replace($base-uri, '\.\w+$', '.idml')
+                                          )"/>
                   </xsl:when>
                   <!-- full path given -->
                   <xsl:when test="matches($idml-uri, '^.+\.\w+$')">
-                    <xsl:value-of select="$idml-uri"/>
+                    <xsl:value-of select="letex:resolve-system-from-uri($idml-uri)"/>
                   </xsl:when>
                   <!-- path ends with '/' -->
                   <xsl:when test="matches($idml-uri, '^.+/$')">
-                    <xsl:value-of select="concat(
-                                            $idml-uri, 
-                                            replace(
-                                              tokenize($base-uri,'/')[last()], 
-                                              '\.\w+$', 
-                                              '.idml'
+                    <xsl:value-of select="letex:resolve-system-from-uri(
+                                            concat(
+                                              $idml-uri, 
+                                              replace(
+                                                tokenize($base-uri,'/')[last()], 
+                                                '\.\w+$', 
+                                                '.idml'
+                                              )
                                             )
                                           )"/>
                   </xsl:when>
                   <!-- hm? -->
                   <xsl:otherwise>
-                    <xsl:value-of select="replace($base-uri, '\.\w+$', '.idml')"/>
+                    <xsl:value-of select="letex:resolve-system-from-uri(
+                                            replace($base-uri, '\.\w+$', '.idml')
+                                          )"/>
                   </xsl:otherwise>
                 </xsl:choose>
               </c:result>
