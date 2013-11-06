@@ -75,7 +75,6 @@
     </p:input>
     <p:input port="stylesheet">
       <p:pipe step="load-mapping-xsl" port="result" />
-<!--      <p:document href="../xsl/mapping2xsl.xsl" />-->
     </p:input>
   </p:xslt>
 
