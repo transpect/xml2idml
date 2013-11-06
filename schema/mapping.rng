@@ -26,6 +26,9 @@
       <zeroOrMore>
         <ref name="mapping.import" />
       </zeroOrMore>
+      <zeroOrMore>
+        <ref name="mapping.include-mapping" />
+      </zeroOrMore>
       <optional>
         <ref name="mapping.inline-xsl" />
       </optional>
@@ -46,6 +49,15 @@
 
   <define name="mapping.import">
     <element name="import">
+      <attribute name="href">
+        <data type="anyURI" />
+      </attribute>
+    </element>
+  </define>
+
+  <!-- mechanism to include another mapping file(s) -->
+  <define name="mapping.include-mapping">
+    <element name="include-mapping">
       <attribute name="href">
         <data type="anyURI" />
       </attribute>
@@ -120,6 +132,9 @@
 
   <define name="mapping.stories">
     <element name="Stories">
+      <optional>
+        <ref name="mapping.att.keep-xml-space-preserve"/>
+      </optional>
       <interleave>
         <zeroOrMore>
           <ref name="keep.story"/>
@@ -466,6 +481,17 @@
   <define name="mapping.att.retain-tagging">
     <optional>
       <attribute name="retain-tagging">
+        <choice>
+          <value>true</value>
+          <value>false</value>
+        </choice>
+      </attribute>
+    </optional>
+  </define>
+
+  <define name="mapping.att.keep-xml-space-preserve">
+    <optional>
+      <attribute name="keep-xml-space-preserve">
         <choice>
           <value>true</value>
           <value>false</value>
