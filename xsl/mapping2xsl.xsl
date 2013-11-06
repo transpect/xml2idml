@@ -37,23 +37,37 @@
       xmlns:css="http://www.w3.org/1996/css"
       xmlns="http://ns.adobe.com/AdobeInDesign/4.0/"
       >
-      <xsl:copy-of select="@xpath-default-namespace" />
+      <xsl:variable name="included-mapping" as="element(mapping-instructions)?"
+        select="doc(include-mapping/@href)/mapping-instructions"/>
+
+      <xsl:if test="$included-mapping[include-mapping]">
+        <xsl:message terminate="yes" 
+          select="'&#xa;ERROR: Element xml2idml:include-mapping in included mapping not supported!'"/>
+      </xsl:if>
+
+      <xsl:copy-of select="@xpath-default-namespace, $included-mapping/@xpath-default-namespace" />
 
       <xslout:import href="{resolve-uri('util.xsl')}" />
       <xslout:import href="http://transpect.le-tex.de/xslt-util/lengths/lengths.xsl" />
-      <xsl:apply-templates select="import | inline" />
+      <xsl:apply-templates select="$included-mapping/import, import[@href != $included-mapping/import/@href]" />
+      <xsl:apply-templates select="inline, $included-mapping/inline" />
       <xslout:output method="xml" encoding="UTF-8" indent="no" />
       <xslout:output name="debug" method="xml" encoding="UTF-8" indent="yes" />
 
       <xsl:text>&#xa;&#xa;</xsl:text>
       <xsl:comment select="' PIPELINE '"/>
       <xsl:text>&#xa;  </xsl:text>
-      <xsl:apply-templates select="xslt-pipeline" />
+      <xsl:apply-templates select="xslt-pipeline | $included-mapping/xslt-pipeline" />
 
       <xsl:text>&#xa;&#xa;</xsl:text>
       <xsl:comment select="' GENERATED RULES '"/>
       <xsl:text>&#xa;  </xsl:text>
-      <xsl:apply-templates select="Stories[keep] | */mapping-instruction" />
+      <xsl:apply-templates select="  $included-mapping/Stories[keep[name != Stories/keep/name]]
+                                   | Stories[keep[name != $included-mapping/Stories/keep/name]] 
+                                   | */mapping-instruction 
+                                   | $included-mapping/*/mapping-instruction">
+        <xsl:with-param name="included-mapping" select="$included-mapping" tunnel="yes"/>
+      </xsl:apply-templates>
 
     </xslout:stylesheet>
 
@@ -78,16 +92,20 @@
                          ]
                        ]"
     xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    <xsl:param name="included-mapping" tunnel="yes"/>
     <xslout:template match="/*" mode="xml2idml:Discard">
       <xslout:copy copy-namespaces="no">
         <xslout:copy-of select="@*" />
         <xslout:attribute name="xml2idml:keep-stories" select="'{keep/name}'" />
         <xslout:attribute name="xml2idml:keep-xml-space-preserve" 
           select="'{if(
-                      //inline/
-                        *[@name[. eq 'keep-xml-space-preserve']]
-                          /@select[matches(., 'yes|true|1')]
-                    ) then 'yes' else 'no'}'" />
+                        $included-mapping//Stories[keep/name[ . eq current()/keep/name]]/@keep-xml-space-preserve eq 'true'
+                          and 
+                        not(@keep-xml-space-preserve eq 'false')
+                        or
+                        @keep-xml-space-preserve eq 'true'
+                      ) 
+                    then 'yes' else 'no'}'" />
         <xslout:apply-templates mode="#current" />
       </xslout:copy>
     </xslout:template>
