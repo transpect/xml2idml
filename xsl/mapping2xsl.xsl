@@ -22,6 +22,98 @@
 
   <xsl:param name="debug" as="xs:string?" />
 
+  <xsl:variable name="collect-included-instructions" as="element(xml2idml:collect-included-instructions)">
+    <xsl:element name="xml2idml:collect-included-instructions">
+      <xsl:apply-templates select="/xml2idml:mapping-instructions/xml2idml:include-mapping" 
+      mode="xml2idml:collect-included-instructions"/>
+    </xsl:element>
+  </xsl:variable>
+
+  <xsl:variable name="included-mappings" as="element(xml2idml:mapping-instructions)">
+      <!-- set apply start point to innermost mapping-instructions, 
+       then apply parent mapping-instructions (and so on) for overwrite importance  -->
+    <xsl:element name="xml2idml:mapping-instructions">
+      <xsl:apply-templates select="$collect-included-instructions//xml2idml:mapping-instructions[not(xml2idml:mapping-instructions)]" mode="xml2idml:set-lower-priority-and-clean" />
+    </xsl:element>
+  </xsl:variable>
+
+  <xsl:template match="include-mapping"
+    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml"
+    mode="xml2idml:collect-included-instructions">
+    <mapping-instructions included="true" xmlns="http://www.le-tex.de/namespace/xml2idml">
+      <xsl:apply-templates select="doc(@href)/mapping-instructions/node()" mode="#current"/>
+    </mapping-instructions>
+  </xsl:template>
+
+  <xsl:template mode="xml2idml:collect-included-instructions"
+    match="*[local-name() = ('ParaStyles', 'InlineStyles', 'TableStyles', 'CellStyles', 'ObjectStyles')]" >
+    <xsl:apply-templates select="." /><!-- default mode! -->
+  </xsl:template>
+
+  <!-- template-match: in mode xml2idml:set-lower-priority-and-clean 
+       the namespace already changed from xslout to xsl -->
+
+  <xsl:template match="xsl:template[@match]" mode="xml2idml:set-lower-priority-and-clean">
+    <xsl:copy>
+      <xsl:apply-templates select="@*" mode="#current" />
+      <xsl:attribute name="priority" 
+        select="xs:integer((@priority, 0)[1]) - count(ancestor::xml2idml:mapping-instructions)"/>
+      <xsl:apply-templates select="node()" mode="#current" />
+    </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="mapping-instructions" mode="xml2idml:set-lower-priority-and-clean"
+    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    <xsl:apply-templates mode="#current"
+      select="@*, 
+              ancestor::mapping-instructions[1]/@*,
+              ancestor::mapping-instructions[1],
+              node()[not(self::mapping-instructions)]" />
+  </xsl:template>
+
+  <xsl:template match="mapping-instructions/import" mode="xml2idml:set-lower-priority-and-clean"
+    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    <xsl:if test="not(@href = ancestor::mapping-instructions[2]/import/@href)">
+      <xsl:copy-of select="." />
+    </xsl:if>
+  </xsl:template>
+
+  <xsl:template match="mapping-instructions/xslt-pipeline" mode="xml2idml:set-lower-priority-and-clean"
+    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    <xsl:if test="not(ancestor::mapping-instructions[2][xslt-pipeline])">
+      <xsl:copy-of select="."/>
+    </xsl:if>
+  </xsl:template>
+
+  <xsl:template match="mapping-instructions/inline" mode="xml2idml:set-lower-priority-and-clean"
+    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    <xsl:if test="not(ancestor::mapping-instructions[2][inline])">
+      <xsl:copy-of select="."/>
+    </xsl:if>
+  </xsl:template>
+
+  <xsl:template match="mapping-instructions/Discard" mode="xml2idml:set-lower-priority-and-clean"
+    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    <xsl:if test="not(ancestor::mapping-instructions[2][Discard])">
+      <xsl:copy-of select="."/>
+    </xsl:if>
+  </xsl:template>
+
+  <xsl:template match="mapping-instructions/Stories" mode="xml2idml:set-lower-priority-and-clean"
+    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    <xsl:if test="not(ancestor::mapping-instructions[2][Stories])">
+      <xsl:copy-of select="."/>
+    </xsl:if>
+  </xsl:template>
+
+  <xsl:template match="@* | node() | comment() | processing-instruction()" 
+    mode="xml2idml:set-lower-priority-and-clean xml2idml:collect-included-instructions">
+    <xsl:copy>
+      <xsl:apply-templates select="@*, node()" mode="#current" />
+    </xsl:copy>
+  </xsl:template>
+
+
   <xsl:template match="/mapping-instructions"
     xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
     <xslout:stylesheet 
@@ -37,37 +129,48 @@
       xmlns:css="http://www.w3.org/1996/css"
       xmlns="http://ns.adobe.com/AdobeInDesign/4.0/"
       >
-      <xsl:variable name="included-mapping" as="element(mapping-instructions)?"
-        select="doc(include-mapping/@href)/mapping-instructions"/>
+      
+      <xsl:copy-of select="$included-mappings/@xpath-default-namespace,
+                           @xpath-default-namespace" />
 
-      <xsl:if test="$included-mapping[include-mapping]">
-        <xsl:message terminate="yes" 
-          select="'&#xa;ERROR: Element xml2idml:include-mapping in included mapping not supported!'"/>
-      </xsl:if>
-
-      <xsl:copy-of select="@xpath-default-namespace, $included-mapping/@xpath-default-namespace" />
-
+      <!-- 
+        DEBUG_included-mappings_START
+        <xsl:sequence select="$included-mappings"/>
+        DEBUG_included-mappings_END
+      -->
       <xslout:import href="{resolve-uri('util.xsl')}" />
       <xslout:import href="http://transpect.le-tex.de/xslt-util/lengths/lengths.xsl" />
-      <xsl:apply-templates select="$included-mapping/import, import[@href != $included-mapping/import/@href]" />
-      <xsl:apply-templates select="inline, $included-mapping/inline" />
+      <xsl:apply-templates select="import[not(@href = $included-mappings/import/@href)],
+                                   $included-mappings/import"/>
+      <xsl:apply-templates select="if(not(inline)) 
+                                   then $included-mappings/inline
+                                   else inline" />
+      
       <xslout:output method="xml" encoding="UTF-8" indent="no" />
       <xslout:output name="debug" method="xml" encoding="UTF-8" indent="yes" />
 
       <xsl:text>&#xa;&#xa;</xsl:text>
       <xsl:comment select="' PIPELINE '"/>
       <xsl:text>&#xa;  </xsl:text>
-      <xsl:apply-templates select="xslt-pipeline | $included-mapping/xslt-pipeline" />
+      <xsl:apply-templates select="if(not(xslt-pipeline)) 
+                                   then $included-mappings/xslt-pipeline
+                                   else xslt-pipeline" />
 
       <xsl:text>&#xa;&#xa;</xsl:text>
       <xsl:comment select="' GENERATED RULES '"/>
       <xsl:text>&#xa;  </xsl:text>
-      <xsl:apply-templates select="  $included-mapping/Stories[keep[name != Stories/keep/name]]
-                                   | Stories[keep[name != $included-mapping/Stories/keep/name]] 
-                                   | */mapping-instruction 
-                                   | $included-mapping/*/mapping-instruction">
-        <xsl:with-param name="included-mapping" select="$included-mapping" tunnel="yes"/>
-      </xsl:apply-templates>
+      <xsl:apply-templates select="if(not(Stories/mapping-instruction)) 
+                                   then $included-mappings/Stories/mapping-instruction
+                                   else ()" />
+      <xsl:apply-templates select="if(not(Stories[keep])) 
+                                   then $included-mappings/Stories[keep]
+                                   else Stories[keep]" />
+      <xsl:apply-templates select="if(not(Discard)) 
+                                   then $included-mappings/Discard/mapping-instruction
+                                   else ()" />
+      <xsl:apply-templates select="*/mapping-instruction"/>
+
+      <xsl:copy-of select="$included-mappings/*:template"/>
 
     </xslout:stylesheet>
 

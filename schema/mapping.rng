@@ -23,11 +23,11 @@
     <element name="mapping-instructions">
       <ref name="mapping.att.xpath-default-namespace"/>
       <ref name="mapping.att.retain-tagging"/>
+      <optional>
+        <ref name="mapping.include-mapping" />
+      </optional>
       <zeroOrMore>
         <ref name="mapping.import" />
-      </zeroOrMore>
-      <zeroOrMore>
-        <ref name="mapping.include-mapping" />
       </zeroOrMore>
       <optional>
         <ref name="mapping.inline-xsl" />
