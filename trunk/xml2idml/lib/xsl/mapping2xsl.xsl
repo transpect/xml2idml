@@ -395,7 +395,7 @@
          (can't generate them here because they'd have higher import precedence
          than any of the imported templates) -->
     <xslout:template match="* | @* | processing-instruction()"
-      mode="xml2idml:Discard xml2idml:Stories xml2idml:ParaStyles xml2idml:InlineStyles xml2idml:TableStyles xml2idml:CellStyles xml2idml:ObjectStyles">
+      mode="xml2idml:Discard xml2idml:Stories xml2idml:ParaStyles xml2idml:InlineStyles xml2idml:TableStyles xml2idml:CellStyles xml2idml:ObjectStyles" priority="-100">
       <xslout:copy copy-namespaces="no">
         <xslout:apply-templates select="@*, node()" mode="#current" />
       </xslout:copy>
