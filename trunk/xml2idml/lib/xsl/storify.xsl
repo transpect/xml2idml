@@ -25,16 +25,14 @@
   <xsl:key name="story" match="Story" use="@Self" />
   <xsl:key name="pstyle" match="ParagraphStyle" use="@Self" />
   <xsl:key name="cellstyle" match="CellStyle" use="@Self" />
-  <xsl:key name="icon" match="*[self::Polygon or self::TextFrame or self::Group]
+  <xsl:key name="icon" match="*[self::Polygon or self::TextFrame or self::Group or self::Rectangle]
                                [ancestor::*/@AppliedConditions = 'Condition/icon']" 
-    use="upper-case(
-           normalize-space(
-             (
-               following-sibling::Content
-               union
-               ../following-sibling::CharacterStyleRange/Content
-             )[matches(., '\S')][1]
-           )
+    use="normalize-space(
+           (
+             following-sibling::Content
+             union
+             ../following-sibling::CharacterStyleRange/Content
+           )[matches(., '\S')][1]
          )" />
 
   <xsl:template match="* | @* | processing-instruction()" mode="xml2idml:storify_content-n-cleanup xml2idml:reproduce-icons">
@@ -200,15 +198,29 @@
     </Content>
   </xsl:template>
 
-  <!-- span[@class = 'icon'] is ad hoc; needs to be configurable
-       That probably means that storify.xsl has to be generated too,
-       or it needs to be imported by a generated stylesheet. -->
-  <xsl:template match="*:span[@class = ('icon', 'hru-infobox-icon')]" mode="xml2idml:storify" priority="1">
-<!--     <xsl:copy-of select="key('icon', upper-case(.), $expanded-template)" /> -->
+  <xsl:variable name="xml2idml:icon-element-role-regex" as="xs:string"
+    select="'^icon|hru-infobox-icon$'"/>
+
+  <xsl:function name="xml2idml:icon-reference-name" as="xs:string">
+    <xsl:param name="el" as="element(*)"/>
+    <xsl:sequence select="$el"/>
+  </xsl:function>
+
+  <xsl:template match="*:span[matches(@class, $xml2idml:icon-element-role-regex)]" mode="xml2idml:storify" priority="1">
     <xsl:variable name="new-story-id" select="concat('st_icon_', generate-id())" as="xs:string"/>
-    <xsl:apply-templates select="key('icon', upper-case(.), $expanded-template)" mode="xml2idml:reproduce-icons">
-      <xsl:with-param name="new-story-id" select="$new-story-id" tunnel="yes"/>
-    </xsl:apply-templates>
+    <xsl:variable name="icon-lookup" as="element(*)?"
+      select="key('icon', xml2idml:icon-reference-name(.), $expanded-template)"/>
+    <xsl:choose>
+      <xsl:when test="$icon-lookup">
+        <xsl:apply-templates select="$icon-lookup" mode="xml2idml:reproduce-icons">
+          <xsl:with-param name="new-story-id" select="$new-story-id" tunnel="yes"/>
+        </xsl:apply-templates>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:message select="' Could not found icon in idml template:', xml2idml:icon-reference-name(.)"/>
+        <xsl:next-match/>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
   <xsl:template match="TextFrame" mode="xml2idml:reproduce-icons">
@@ -244,16 +256,6 @@
         <xsl:apply-templates select="@* except @Self, node()" mode="#current" />
       </xsl:copy>
     </idPkg:Story>
-  </xsl:template>
-
-  <!-- ToDo: move this to cornelsen-hru and find a generic solution, e.g.: 
-       Separate pass or at least additional templates in a generated stylesheet that imports storify.xsl
-       -->
-  <xsl:template match="*:span[@class = 'link' and matches(., '^CD')]" mode="xml2idml:storify" priority="4.25">
-    <xsl:text xml:space="preserve">Audio-CD </xsl:text>
-    <xsl:copy-of select="key('icon', 'CD', $expanded-template)" />
-    <!-- must deal with tracks (plural), too: -->
-    <xsl:value-of select="replace(., '^CD track (\d+|XX)','$1')"/>
   </xsl:template>
 
   <xsl:template match="@xml2idml:condition" mode="xml2idml:storify">
