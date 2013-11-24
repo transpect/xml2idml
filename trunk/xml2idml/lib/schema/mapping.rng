@@ -260,6 +260,23 @@
     </element>
   </define>
 
+  <define name="mapping.model.insert-content">
+    <element name="insert-content">
+      <ref name="mapping.att.method"/>
+      <optional>
+        <attribute name="format">
+          <data type="string">
+            <param name="pattern">.*\S.*</param>
+          </data>
+        </attribute>
+      </optional>
+      <attribute name="content">
+        <data type="string"/>
+      </attribute>
+      <empty/>
+    </element>
+  </define>
+
   <define name="mapping.model.insert-special-char">
     <element name="insert-special-char">
       <attribute name="name">
@@ -275,13 +292,7 @@
           <value>indent-to-here</value>
         </choice>
       </attribute>
-      <attribute name="method">
-        <choice>
-          <value>after</value>
-          <value>before</value>
-          <value>replace</value>
-        </choice>
-      </attribute>
+      <ref name="mapping.att.method"/>
       <optional>
         <attribute name="format">
           <data type="string">
@@ -354,10 +365,15 @@
 
   <define name="mapping.inline">
     <element name="mapping-instruction">
-      <ref name="mapping.model.simple" />
-      <optional>
-        <ref name="mapping.model.insert-special-char" />
-      </optional>
+      <interleave>
+        <ref name="mapping.model.simple" />
+        <optional>
+          <choice>
+            <ref name="mapping.model.insert-content" />
+            <ref name="mapping.model.insert-special-char" />
+          </choice>
+        </optional>
+      </interleave>
     </element>
   </define>
 
@@ -434,6 +450,16 @@
       <data type="QName" />
     </attribute>
     <ref name="mapping.model.params.named" />
+  </define>
+
+  <define name="mapping.att.method">
+    <attribute name="method">
+      <choice>
+        <value>after</value>
+        <value>before</value>
+        <value>replace</value>
+      </choice>
+    </attribute>
   </define>
 
   <define name="mapping.model.params">
