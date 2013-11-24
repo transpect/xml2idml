@@ -268,13 +268,24 @@
       <xsl:if test="@xml2idml:insert-special-char-method eq 'before'">
         <xsl:sequence select="xml2idml:insert-special-char-wrapper(.)"/>
       </xsl:if>
+      <xsl:if test="@xml2idml:insert-content-method eq 'before'">
+        <xsl:sequence select="xml2idml:insert-content-wrapper(.)"/>
+      </xsl:if>
       <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/{@aid:cstyle}">
         <xsl:apply-templates select="@xml2idml:condition" mode="#current"/>
         <xsl:choose>
           <xsl:when test="@xml2idml:insert-special-char-method eq 'replace'">
             <xsl:attribute name="AppliedCharacterStyle" 
-              select="concat('CharacterStyle/', (@xml2idml:insert-special-char-format, '$ID/[No character style]')[1])"/>
+              select="concat('CharacterStyle/', (@xml2idml:insert-special-char-format, @aid:cstyle,'$ID/[No character style]')[1])"/>
             <xsl:sequence select="xml2idml:insert-special-char(@xml2idml:insert-special-char)"/>
+          </xsl:when>
+          <xsl:when test="@xml2idml:insert-content-method eq 'replace'">
+            <xsl:attribute name="AppliedCharacterStyle" 
+              select="concat('CharacterStyle/', (@xml2idml:insert-content-format, @aid:cstyle, '$ID/[No character style]')[1])"/>
+              <xsl:message select="'inner:', concat('CharacterStyle/', (@xml2idml:insert-content-format, @aid:cstyle, '$ID/[No character style]')[1])"/>
+            <Content>
+              <xsl:value-of select="@xml2idml:insert-content"/>
+            </Content>
           </xsl:when>
           <xsl:otherwise>
             <xsl:next-match>
@@ -285,6 +296,9 @@
       </CharacterStyleRange>
       <xsl:if test="@xml2idml:insert-special-char-method eq 'after'">
         <xsl:sequence select="xml2idml:insert-special-char-wrapper(.)"/>
+      </xsl:if>
+      <xsl:if test="@xml2idml:insert-content-method eq 'after'">
+        <xsl:sequence select="xml2idml:insert-content-wrapper(.)"/>
       </xsl:if>
     </xsl:variable>
     <xsl:variable name="psr" as="element(*)+">
@@ -346,18 +360,40 @@
 
   <xsl:function name="xml2idml:insert-special-char-wrapper" as="element(CharacterStyleRange)">
     <xsl:param name="cstyle-node" as="element(*)" />
+    <xsl:sequence select="xml2idml:insert-csr-wrapper(
+                            xs:string($cstyle-node/@xml2idml:insert-special-format),
+                            xml2idml:insert-special-char($cstyle-node/@xml2idml:insert-special-char)
+                          )"/>
+  </xsl:function>
+
+  <xsl:function name="xml2idml:insert-content-wrapper" as="element(CharacterStyleRange)">
+    <xsl:param name="cstyle-node" as="element(*)" />
+    <xsl:variable name="content" as="element(Content)">
+      <Content>
+        <xsl:value-of select="$cstyle-node/@xml2idml:insert-content"/>
+      </Content>
+    </xsl:variable>
+    <xsl:sequence select="xml2idml:insert-csr-wrapper(
+                            ($cstyle-node/@xml2idml:insert-content-format, $cstyle-node/@aid:cstyle)[1],
+                            $content
+                          )"/>
+  </xsl:function>
+
+  <xsl:function name="xml2idml:insert-csr-wrapper" as="element(CharacterStyleRange)">
+    <xsl:param name="csr-format" as="xs:string" />
+    <xsl:param name="content" as="node()*" />
     <CharacterStyleRange>
-      <xsl:if test="$cstyle-node/@xml2idml:insert-special-char-format ne ''">
+      <xsl:if test="$csr-format ne ''">
         <xsl:attribute name="AppliedCharacterStyle" 
-          select="concat('CharacterStyle/', $cstyle-node/@xml2idml:insert-special-char-format)"/>
+          select="concat('CharacterStyle/', $csr-format)"/>
       </xsl:if>
-      <xsl:sequence select="xml2idml:insert-special-char($cstyle-node/@xml2idml:insert-special-char)"/>
+      <xsl:sequence select="$content"/>
     </CharacterStyleRange>
   </xsl:function>
 
   <xsl:function name="xml2idml:insert-special-char" as="node()">
     <xsl:param name="character-name" />
-    <xsl:variable name="special-char-content" as="node()">
+    <xsl:variable name="content" as="node()">
       <xsl:choose>
         <xsl:when test="$character-name eq 'tabulator'">
           <Content xml:space="preserve"><xsl:value-of select="'&#x9;'"/></Content>
@@ -379,7 +415,7 @@
         </xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
-    <xsl:sequence select="$special-char-content"/>
+    <xsl:sequence select="$content"/>
   </xsl:function>
 
   <xsl:template match="@*" mode="xml2idml:storify_atts">

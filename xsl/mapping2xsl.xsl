@@ -421,7 +421,7 @@
 
   <xsl:template match="ParaStyles/mapping-instruction" mode="xml2idml:style-atts"
     xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
-    <xslout:attribute name="aid:pstyle" select="'{(xml2idml:escape-style-name(format), '$ID/NormalParagraphStyle')[1]}'" />
+    <xslout:attribute name="aid:pstyle" select="'{(xml2idml:escape-style-name(format), '$ID/NormalParagraphStyle')[. ne ''][1]}'" />
     <xsl:if test="condition">
       <xslout:attribute name="xml2idml:condition" select="'{condition}'" />
       <xsl:if test="condition/@hidden = 'true'">
@@ -432,7 +432,7 @@
 
   <xsl:template match="InlineStyles/mapping-instruction" mode="xml2idml:style-atts"
     xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
-    <xslout:attribute name="aid:cstyle" select="'{(xml2idml:escape-style-name(format), '$ID/[No character style]')[1]}'" />
+    <xslout:attribute name="aid:cstyle" select="'{(xml2idml:escape-style-name(format), '$ID/[No character style]')[. ne ''][1]}'" />
     <xsl:if test="condition">
       <xslout:attribute name="xml2idml:condition" select="'{condition}'" />
       <xsl:if test="condition/@hidden = 'true'">
@@ -443,24 +443,31 @@
       <xslout:attribute name="xml2idml:insert-special-char" select="'{insert-special-char/@name}'" />
       <xslout:attribute name="xml2idml:insert-special-char-method" select="'{insert-special-char/@method}'" />
     </xsl:if>
-    <xsl:if test="xml2idml:insert-special-char/@format">
+    <xsl:if test="xml2idml:insert-special-char/@format[. ne '']">
       <xslout:attribute name="xml2idml:insert-special-char-format" select="'{insert-special-char/@format}'" />
+    </xsl:if>
+    <xsl:if test="xml2idml:insert-content">
+      <xslout:attribute name="xml2idml:insert-content" select="'{insert-content/@content}'" />
+      <xslout:attribute name="xml2idml:insert-content-method" select="'{insert-content/@method}'" />
+    </xsl:if>
+    <xsl:if test="xml2idml:insert-content/@format[. ne '']">
+      <xslout:attribute name="xml2idml:insert-content-format" select="'{insert-content/@format}'" />
     </xsl:if>
   </xsl:template>
   <xsl:template match="ObjectStyles/mapping-instruction" mode="xml2idml:style-atts"
     xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
-    <xslout:attribute name="xml2idml:ObjectStyle" select="'{(xml2idml:escape-style-name(format), '$ID/[None]')[1]}'" />
+    <xslout:attribute name="xml2idml:ObjectStyle" select="'{(xml2idml:escape-style-name(format), '$ID/[None]')[. ne ''][1]}'" />
     <xslout:attribute name="xml2idml:anchoring" select="'{xml2idml:anchoring/@type}'" />
     <xsl:apply-templates select="width | height" mode="#current" />
   </xsl:template>
   <xsl:template match="TableStyles/mapping-instruction" mode="xml2idml:style-atts"
     xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
-    <xslout:attribute name="aid5:tablestyle" select="'{(xml2idml:escape-style-name(format), '$ID/[No table style]')[1]}'" />
+    <xslout:attribute name="aid5:tablestyle" select="'{(xml2idml:escape-style-name(format), '$ID/[No table style]')[. ne ''][1]}'" />
     <xslout:attribute name="aid:table" select="'table'" />
   </xsl:template>
   <xsl:template match="CellStyles/mapping-instruction" mode="xml2idml:style-atts"
     xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
-    <xslout:attribute name="aid5:cellstyle" select="'{(xml2idml:escape-style-name(format), '$ID/[None]')[1]}'" />
+    <xslout:attribute name="aid5:cellstyle" select="'{(xml2idml:escape-style-name(format), '$ID/[None]')[. ne ''][1]}'" />
     <xslout:attribute name="aid:table" select="'cell'" />
     <xsl:apply-templates select="format/@priority" mode="#current" />
   </xsl:template>
