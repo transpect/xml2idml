@@ -427,7 +427,9 @@
   <xsl:template match="*[@aid:table eq 'table']" mode="xml2idml:storify" priority="1.5">
     <xsl:variable name="base-id" select="concat('tb_', generate-id())" as="xs:string"/>
     <Table Self="{$base-id}">
-      <xsl:apply-templates select="@aid5:tablestyle | @data-colcount | @data-rowcount" mode="#current" />
+      <xsl:apply-templates select="  @aid5:tablestyle 
+                                   | *:tbody/@data-colcount | @data-colcount
+                                   | *:tbody/@data-rowcount | @data-rowcount" mode="#current" />
       <xsl:apply-templates select="." mode="xml2idml:storify_table-declarations" />
       <!-- default template rules (i.e., process content): -->
       <xsl:next-match/>
@@ -464,7 +466,7 @@
     <xsl:for-each select="0 to xs:integer((@data-rowcount, count(*:tr))[1]) - 1">
       <Row Self="{concat('tb_', generate-id($context))}Row{.}" Name="{.}"/>
     </xsl:for-each>
-    <xsl:apply-templates select="*:colgroup/*:col | *:col" mode="#current" />
+    <xsl:apply-templates select="*:tbody/*:colgroup/*:col | *:colgroup/*:col | *:col" mode="#current" />
   </xsl:template>
 
   <xsl:template match="*:col" mode="xml2idml:storify_table-declarations">
