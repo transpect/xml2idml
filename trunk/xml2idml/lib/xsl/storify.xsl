@@ -282,7 +282,6 @@
           <xsl:when test="@xml2idml:insert-content-method eq 'replace'">
             <xsl:attribute name="AppliedCharacterStyle" 
               select="concat('CharacterStyle/', (@xml2idml:insert-content-format, @aid:cstyle, '$ID/[No character style]')[1])"/>
-              <xsl:message select="'inner:', concat('CharacterStyle/', (@xml2idml:insert-content-format, @aid:cstyle, '$ID/[No character style]')[1])"/>
             <Content>
               <xsl:value-of select="@xml2idml:insert-content"/>
             </Content>
