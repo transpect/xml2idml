@@ -178,9 +178,31 @@
       <xsl:next-match>
         <xsl:with-param name="pstyle" select="()" tunnel="yes" />
       </xsl:next-match>
-      <Br/>
+      <xsl:sequence select="xml2idml:insert-Br(.)"/>
     </ParagraphStyleRange>
   </xsl:template>
+
+  <xsl:variable name="xml2idml:mapping2xsl-paragraph-attribute-names" as="xs:string+"
+    select="('aid:pstyle', 'xml2idml:ObjectStyle', 'aid5:tablestyle', 'aid5:cellstyle')"/>
+
+  <xsl:function name="xml2idml:insert-Br" as="element(Br)?">
+    <xsl:param name="node" as="element(*)"/>
+    <xsl:variable name="ancestor-scope" as="element(*)?"
+      select="$node/ancestor::*[
+                @*[name() = $xml2idml:mapping2xsl-paragraph-attribute-names]
+              ][1]"/>
+    <xsl:variable name="ancestor-last-break-child" as="element(*)*"
+      select="$ancestor-scope//*[
+                @*[name() = $xml2idml:mapping2xsl-paragraph-attribute-names]
+              ][last()]"/>
+    <xsl:if test="not($ancestor-scope) or
+                    (
+                      $ancestor-last-break-child and
+                      not( $node is $ancestor-last-break-child)
+                    )">
+      <Br/>
+    </xsl:if>
+  </xsl:function>
 
   <!-- provisional -->
   <xsl:template match="@css:*" mode="xml2idml:storify" />
@@ -573,23 +595,6 @@
     mode="xml2idml:storify_content-n-cleanup____">
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
-
-
-  <!-- Remove a Br at the end of a story, a footnote, or a table cell (with no content after it).
-       These Brs have been inserted in the previous pass, after each paragraph. 
-       Ok, the pattern's predicate looks weird. Suggestions on how to simplify it? -->
-  <xsl:template mode="xml2idml:storify_content-n-cleanup"
-    match="Br[for $scoper in ancestor::*[idml2xml:is-scope-origin(.)][1]
-              (: a let statement might come in handy here – if only for the sake of syntactic sweetness :)
-              return 
-                current() is (
-                              $scoper//*[name() = $idml2xml:idml-scope-terminal-names]
-                                [idml2xml:same-scope(., $scoper)]
-                             )[last()]
-             ]
-             (: We'll reprieve the last Br in the Document :)
-             [not(. is (//Br)[last()])]
-           " />
 
   <xsl:template match="@xml2idml:anchoring" mode="xml2idml:storify_content-n-cleanup" />
 
