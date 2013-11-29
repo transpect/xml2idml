@@ -105,7 +105,6 @@
 
        Text nodes that don’t yet have Content around them will be enclosed in Content.
        At the same time, they’ll be WS-normalized (multiple consecutive WS chars become a single space).
-       To do: honor @xml:space='preserve'. 
 
        A terminal Br in Stories, Footnotes, and Cells will be removed.
 
@@ -337,7 +336,8 @@
     <xsl:sequence select="$psr" />
   </xsl:template>
 
-  <xsl:template match="*[not(namespace-uri() = 'http://www.le-tex.de/namespace/xml2idml')]
+  <xsl:template match="*[/*/@retain-tagging eq 'true']
+                        [not(namespace-uri() = 'http://www.le-tex.de/namespace/xml2idml')]
                         [not(
                              self::*:tr[parent::*[@aid:table eq 'table']]
                           or self::*:colgroup[parent::*[@aid:table eq 'table']]
@@ -439,7 +439,7 @@
     <xsl:sequence select="$content"/>
   </xsl:function>
 
-  <xsl:template match="@*" mode="xml2idml:storify_atts">
+  <xsl:template match="@*[/*/@retain-tagging eq 'true']" mode="xml2idml:storify_atts">
     <XMLAttribute Self="att_{generate-id()}" Name="{name()}" Value="{.}" />
   </xsl:template>
 
@@ -589,14 +589,6 @@
     </Content>
   </xsl:template>
 
-  <!-- Unwrap additional ParagraphStyleRange immediately below Story if there's an indication
-       that proper ParagraphStyleRanges have been created below. -->
-  <xsl:template match="ParagraphStyleRange[XMLElement/ParagraphStyleRange]"
-    mode="xml2idml:storify_content-n-cleanup____">
-    <xsl:apply-templates mode="#current"/>
-  </xsl:template>
-
   <xsl:template match="@xml2idml:anchoring" mode="xml2idml:storify_content-n-cleanup" />
-
 
 </xsl:stylesheet>

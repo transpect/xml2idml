@@ -41,7 +41,8 @@
     xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml"
     mode="xml2idml:collect-included-instructions">
     <mapping-instructions included="true" xmlns="http://www.le-tex.de/namespace/xml2idml">
-      <xsl:apply-templates select="doc(@href)/mapping-instructions/node()" mode="#current"/>
+      <xsl:apply-templates mode="#current"
+        select="doc(@href)/mapping-instructions/@*, doc(@href)/mapping-instructions/node()" />
     </mapping-instructions>
   </xsl:template>
 
@@ -148,6 +149,10 @@
       
       <xslout:output method="xml" encoding="UTF-8" indent="no" />
       <xslout:output name="debug" method="xml" encoding="UTF-8" indent="yes" />
+
+      <xslout:variable name="retain-tagging" as="xs:boolean">
+        <xsl:attribute name="select" select="if(@retain-tagging eq 'true') then 'true()' else 'false()'"/>
+      </xslout:variable>
 
       <xsl:text>&#xa;&#xa;</xsl:text>
       <xsl:comment select="' PIPELINE '"/>
@@ -398,6 +403,15 @@
       mode="xml2idml:Discard xml2idml:Stories xml2idml:ParaStyles xml2idml:InlineStyles xml2idml:TableStyles xml2idml:CellStyles xml2idml:ObjectStyles" priority="-100">
       <xslout:copy copy-namespaces="no">
         <xslout:apply-templates select="@*, node()" mode="#current" />
+      </xslout:copy>
+    </xslout:template>
+
+    <xslout:template match="/*"
+      mode="xml2idml:Discard" priority="200">
+      <xslout:copy>
+        <xslout:attribute name="retain-tagging" 
+          select="$retain-tagging"/>
+        <xslout:apply-templates select="@*, node()" mode="#current"/>
       </xslout:copy>
     </xslout:template>
   </xsl:template>
