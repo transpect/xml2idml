@@ -191,9 +191,11 @@
                 @*[name() = $xml2idml:mapping2xsl-paragraph-attribute-names]
               ][1]"/>
     <xsl:variable name="ancestor-last-break-child" as="element(*)*"
-      select="$ancestor-scope//*[
-                @*[name() = $xml2idml:mapping2xsl-paragraph-attribute-names]
-              ][last()]"/>
+      select="(
+                $ancestor-scope//*[
+                  @*[name() = $xml2idml:mapping2xsl-paragraph-attribute-names]
+                ]
+              )[last()]"/>
     <xsl:if test="not($ancestor-scope) or
                     (
                       $ancestor-last-break-child and
