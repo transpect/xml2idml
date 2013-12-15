@@ -58,7 +58,7 @@
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current" />
       <xsl:attribute name="priority" 
-        select="xs:integer((@priority, 0)[1]) - count(ancestor::xml2idml:mapping-instructions)"/>
+        select="xs:double((@priority, 0)[1]) - count(ancestor::xml2idml:mapping-instructions)"/>
       <xsl:apply-templates select="node()" mode="#current" />
     </xsl:copy>
   </xsl:template>
