@@ -33,6 +33,7 @@
   </p:option>
   <p:option name="debug" />
   <p:option name="debug-dir-uri" required="false" select="resolve-uri('debug')" />
+  <p:option name="status-dir-uri" required="false" select="concat($debug-dir-uri, '/status')"/>
 
   <p:output port="result" primary="true" sequence="true">
     <p:pipe step="with-aid" port="result"/>
@@ -42,10 +43,25 @@
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl" />
   <p:import href="http://transpect.le-tex.de/book-conversion/converter/xpl/dynamic-transformation-pipeline.xpl"/>
   <p:import href="http://transpect.le-tex.de/book-conversion/converter/xpl/load-cascaded.xpl"/>
+  <p:import href="http://transpect.le-tex.de/book-conversion/converter/xpl/simple-progress-msg.xpl"/>
   <p:import href="http://transpect.le-tex.de/calabash-extensions/ltx-lib.xpl" />
   <p:import href="http://transpect.le-tex.de/xproc-util/store-debug/store-debug.xpl" />
   <p:import href="add-aid-attributes.xpl" />
   <p:import href="store.xpl" />
+
+  <letex:simple-progress-msg name="start-xml2idml-msg" file="xml2idml-start.txt">
+    <p:input port="msgs">
+      <p:inline>
+        <c:messages>
+          <c:message xml:lang="en">Starting XML to IDML synthesis</c:message>
+          <c:message xml:lang="de">Beginne IDML aus XML zu synthetisieren</c:message>
+        </c:messages>
+      </p:inline>
+    </p:input>
+    <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
+  </letex:simple-progress-msg>
+
+  <p:sink/>
 
   <cx:message message="xml2idml: now unzipping IDML template">
     <p:input port="source"><p:empty/></p:input>
@@ -122,6 +138,18 @@
       <p:pipe step="load-mapping" port="result" />
     </p:input>
   </xml2idml:add-aid>
+
+  <letex:simple-progress-msg name="xml2idml-mapandstorify-msg" file="xml2idml-mappingandstorify.txt">
+    <p:input port="msgs">
+      <p:inline>
+        <c:messages>
+          <c:message xml:lang="en">Mapping-Instruktionen erfolgreich angewendet, beginne mit Erstellung der IDML-Struktur</c:message>
+          <c:message xml:lang="de">Mapping instructions successfully applied, about to start IDML structure</c:message>
+        </c:messages>
+      </p:inline>
+    </p:input>
+    <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
+  </letex:simple-progress-msg>
 
   <cx:message message="xml2idml: now storifying"/>
 
@@ -348,6 +376,18 @@
 
   <cx:message message="xml2idml: stored"/>
 
-  <p:sink/>
+  <letex:simple-progress-msg name="success-xml2idml-msg" file="xml2idml-success.txt">
+    <p:input port="msgs">
+      <p:inline>
+        <c:messages>
+          <c:message xml:lang="en">Successfully synthesized IDML from XML</c:message>
+          <c:message xml:lang="de">IDML-Synthese aus XML erfolgreich beendet</c:message>
+        </c:messages>
+      </p:inline>
+    </p:input>
+    <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
+  </letex:simple-progress-msg>
   
+  <p:sink/>
+
 </p:declare-step>
