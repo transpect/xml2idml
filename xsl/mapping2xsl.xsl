@@ -40,9 +40,22 @@
   <xsl:template match="include-mapping"
     xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml"
     mode="xml2idml:collect-included-instructions">
-    <mapping-instructions included="true" xmlns="http://www.le-tex.de/namespace/xml2idml">
-      <xsl:apply-templates mode="#current"
-        select="doc(@href)/mapping-instructions/@*, doc(@href)/mapping-instructions/node()" />
+    <xsl:param name="lowest-priority-of-parent" select="0" tunnel="yes" as="xs:double"/>
+
+    <xsl:variable name="lowest-priority-of-current" as="xs:double"
+      select="min((doc(@href)/mapping-instructions//path/@priority, 0))"/>
+    <xsl:variable name="lowest-priority" as="xs:double"
+        select="(1 + abs($lowest-priority-of-parent) + abs($lowest-priority-of-current)) * -1"/>
+
+    <mapping-instructions included="true" 
+      lowest-mapping-priority="{$lowest-priority}"
+      xmlns="http://www.le-tex.de/namespace/xml2idml">
+      <xsl:apply-templates mode="#current" select="doc(@href)/mapping-instructions/@*"/>
+      <xsl:message select="concat(' including mapping (with calculated minimum priority of ', $lowest-priority, '):&#xa;', @href)"/>
+      <xsl:apply-templates mode="#current" select="doc(@href)/mapping-instructions/node()">
+        <xsl:with-param name="lowest-priority-of-parent" tunnel="yes"
+          select="$lowest-priority"/>
+      </xsl:apply-templates>
     </mapping-instructions>
   </xsl:template>
 
@@ -58,7 +71,7 @@
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current" />
       <xsl:attribute name="priority" 
-        select="xs:double((@priority, 0)[1]) - count(ancestor::xml2idml:mapping-instructions)"/>
+        select="xs:double((@priority, 0)[1]) - abs(ancestor::xml2idml:mapping-instructions[1]/@lowest-mapping-priority)"/>
       <xsl:apply-templates select="node()" mode="#current" />
     </xsl:copy>
   </xsl:template>
@@ -134,7 +147,7 @@
       <xsl:copy-of select="$included-mappings/@xpath-default-namespace,
                            @xpath-default-namespace" />
 
-      <!-- 
+      <!--
         DEBUG_included-mappings_START
         <xsl:sequence select="$included-mappings"/>
         DEBUG_included-mappings_END
