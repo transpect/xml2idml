@@ -208,12 +208,12 @@
   <define name="mapping.path">
     <element name="path">
       <optional>
-	<attribute name="priority">
-	  <data type="double" />
-	</attribute>
+        <attribute name="priority">
+          <data type="double" />
+        </attribute>
       </optional>
       <data type="string">
-        <param name="pattern">.*\S.*</param>
+        <param name="pattern">.*[\S\s]+.*</param>
       </data>
     </element>
   </define>
