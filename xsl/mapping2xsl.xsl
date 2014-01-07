@@ -51,7 +51,7 @@
       lowest-mapping-priority="{$lowest-priority}"
       xmlns="http://www.le-tex.de/namespace/xml2idml">
       <xsl:apply-templates mode="#current" select="doc(@href)/mapping-instructions/@*"/>
-      <xsl:message select="concat(' including mapping (with calculated minimum priority of ', $lowest-priority, '):&#xa;', @href)"/>
+      <xsl:message select="concat(' including mapping (with calculated highest possible priority of ', $lowest-priority, '):&#xa;', @href)"/>
       <xsl:apply-templates mode="#current" select="doc(@href)/mapping-instructions/node()">
         <xsl:with-param name="lowest-priority-of-parent" tunnel="yes"
           select="$lowest-priority"/>

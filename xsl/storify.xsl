@@ -285,6 +285,76 @@
     <xsl:attribute name="AppliedConditions" select="concat('Condition/', .)" />
   </xsl:template>
 
+  <xsl:template match="*[@aid:cstyle]/@xml:lang" mode="xml2idml:storify">
+    <xsl:sequence select="xml2idml:langAttr-to-AppliedLanguageAttr(.)"/>
+  </xsl:template>
+
+  <xsl:function name="xml2idml:langAttr-to-AppliedLanguageAttr" as="node()?">
+    <xsl:param name="lang-attr" as="attribute()"/>
+    <xsl:variable name="lang" select="lower-case($lang-attr)" as="xs:string?"/>
+    <xsl:variable name="apply" as="xs:string">
+      <xsl:value-of>
+        <xsl:choose>
+          <xsl:when test="$lang eq ''">[No Language]</xsl:when>
+          <xsl:when test="starts-with($lang, 'ar')">Arabic</xsl:when>
+          <xsl:when test="starts-with($lang, 'bn-in')">bn_IN</xsl:when>
+          <xsl:when test="starts-with($lang, 'bg')">Bulgarian</xsl:when>
+          <xsl:when test="starts-with($lang, 'ca')">Catalan</xsl:when>
+          <xsl:when test="starts-with($lang, 'hr')">Croatian</xsl:when>
+          <xsl:when test="starts-with($lang, 'cs')">Czech</xsl:when>
+          <xsl:when test="starts-with($lang, 'da')">Danish</xsl:when>
+          <xsl:when test="starts-with($lang, 'nl')">nl_NL_2005</xsl:when>
+          <!--<xsl:when test="starts-with($lang, 'nl')">Dutch</xsl:when>-->
+          <xsl:when test="starts-with($lang, 'en-ca')">English: Canadian</xsl:when>
+          <xsl:when test="starts-with($lang, 'en-us-legal')">English: USA Legal</xsl:when>
+          <xsl:when test="starts-with($lang, 'en-us-medical')">English: USA Medical</xsl:when>
+          <xsl:when test="starts-with($lang, 'en-us')">English: USA</xsl:when>
+          <xsl:when test="starts-with($lang, 'et')">Estonian</xsl:when>
+          <xsl:when test="starts-with($lang, 'fi')">Finnish</xsl:when>
+          <xsl:when test="starts-with($lang, 'fr-ca')">French: Canadian</xsl:when>
+          <xsl:when test="starts-with($lang, 'fr')">French</xsl:when>
+          <xsl:when test="starts-with($lang, 'el')">Greek</xsl:when>
+          <xsl:when test="starts-with($lang, 'de-de-1996')">German: Reformed</xsl:when>
+          <xsl:when test="starts-with($lang, 'de-de-2006')">de_DE_2006</xsl:when>
+          <xsl:when test="starts-with($lang, 'de-de-tradnl')">German: Traditional</xsl:when>
+          <xsl:when test="starts-with($lang, 'de')">de_DE_2006</xsl:when>
+          <xsl:when test="starts-with($lang, 'gu-in')">gu_IN</xsl:when>
+          <xsl:when test="starts-with($lang, 'he')">Hebrew</xsl:when>
+          <xsl:when test="starts-with($lang, 'hi-in')">hi_IN</xsl:when>
+          <xsl:when test="starts-with($lang, 'it')">Italian</xsl:when>
+          <xsl:when test="starts-with($lang, 'kn-in')">kn_IN</xsl:when>
+          <xsl:when test="starts-with($lang, 'lv')">Latvian</xsl:when>
+          <xsl:when test="starts-with($lang, 'lt')">Lithuanian</xsl:when>
+          <xsl:when test="starts-with($lang, 'ml-in')">ml_IN</xsl:when>
+          <xsl:when test="starts-with($lang, 'mr-in')">mr_IN</xsl:when>
+          <xsl:when test="starts-with($lang, 'nb')">Norwegian: Bokmal</xsl:when>
+          <xsl:when test="starts-with($lang, 'nn')">Norwegian: Nynorsk</xsl:when>
+          <xsl:when test="starts-with($lang, 'or-in')">or_IN</xsl:when>
+          <xsl:when test="starts-with($lang, 'pa-in')">pa_IN</xsl:when>
+          <xsl:when test="starts-with($lang, 'pl')">Polish</xsl:when>
+          <xsl:when test="starts-with($lang, 'pt-BR')">Portuguese: Brazilian</xsl:when>
+          <xsl:when test="starts-with($lang, 'pt-PT')">Portuguese: Orthographic Agreement</xsl:when>
+          <xsl:when test="starts-with($lang, 'pt')">Portuguese</xsl:when>
+          <xsl:when test="starts-with($lang, 'ro')">Romanian</xsl:when>
+          <xsl:when test="starts-with($lang, 'ru')">Russian</xsl:when>
+          <xsl:when test="starts-with($lang, 'sv')">Swedish</xsl:when>
+          <xsl:when test="starts-with($lang, 'sk')">Slovak</xsl:when>
+          <xsl:when test="starts-with($lang, 'sl')">Slovenian</xsl:when>
+          <xsl:when test="starts-with($lang, 'es')">Spanish: Castilian</xsl:when>
+          <xsl:when test="starts-with($lang, 'ta-in')">ta_IN</xsl:when>
+          <xsl:when test="starts-with($lang, 'te-in')">te_IN</xsl:when>
+          <xsl:when test="starts-with($lang, 'tr')">Turkish</xsl:when>
+          <xsl:when test="starts-with($lang, 'uk')">Ukrainian</xsl:when>
+          <xsl:when test="starts-with($lang, 'hu')">Hungarian</xsl:when>
+          <xsl:otherwise>[No Language]<xsl:message select="' xml2idml, Applying spelling language: Unsupported value:', xs:string($lang)"/></xsl:otherwise>
+        </xsl:choose>
+      </xsl:value-of>
+    </xsl:variable>
+    <xsl:if test="$apply ne '[No Language]'">
+      <xsl:attribute name="AppliedLanguage" select="concat('$ID/', $apply)"/>
+    </xsl:if>
+  </xsl:function>
+
   <xsl:template match="*[@aid:cstyle]" mode="xml2idml:storify" priority="2.5">
     <xsl:param name="pstyle" as="xs:string?" tunnel="yes" />
     <xsl:variable name="csr" as="element(CharacterStyleRange)+">
@@ -295,7 +365,7 @@
         <xsl:sequence select="xml2idml:insert-content-wrapper(.)"/>
       </xsl:if>
       <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/{@aid:cstyle}">
-        <xsl:apply-templates select="@xml2idml:condition" mode="#current"/>
+        <xsl:apply-templates select="@xml:lang, @xml2idml:condition" mode="#current"/>
         <xsl:choose>
           <xsl:when test="@xml2idml:insert-special-char-method eq 'replace'">
             <xsl:attribute name="AppliedCharacterStyle" 
