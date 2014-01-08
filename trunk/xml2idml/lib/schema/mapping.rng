@@ -283,6 +283,7 @@
         <choice>
           <value>tabulator</value>
           <value>line-break</value>
+          <value>page-break</value>
 <!--          <value>end-nested-style</value>--><!-- ACE 3 -->
 <!--          <value>footnote-symbol</value>--><!-- ACE 4 -->
               <value>right-indent-tab</value>
