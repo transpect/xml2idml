@@ -484,15 +484,20 @@
     </CharacterStyleRange>
   </xsl:function>
 
-  <xsl:function name="xml2idml:insert-special-char" as="node()">
+  <!-- output of this function will be wrapped with <CharacterStyleRange> -->
+  <xsl:function name="xml2idml:insert-special-char" as="node()*">
     <xsl:param name="character-name" />
-    <xsl:variable name="content" as="node()">
+    <xsl:variable name="content" as="node()*">
       <xsl:choose>
         <xsl:when test="$character-name eq 'tabulator'">
           <Content xml:space="preserve"><xsl:value-of select="'&#x9;'"/></Content>
         </xsl:when>
         <xsl:when test="$character-name eq 'line-break'">
           <Content><xsl:value-of select="'&#x2028;'"/></Content>
+        </xsl:when>
+        <xsl:when test="$character-name eq 'page-break'">
+          <xsl:attribute name="ParagraphBreakType" select="'NextPage'"/>
+          <Br/>
         </xsl:when>
         <xsl:when test="$character-name eq 'indent-to-here'">
           <xsl:processing-instruction name="ACE" select="'7'"/>
