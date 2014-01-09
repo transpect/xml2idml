@@ -15,7 +15,7 @@
   <xsl:function name="letex:contains-token" as="xs:boolean">
     <xsl:param name="string" as="xs:string?" />
     <xsl:param name="tokens" as="xs:string+" />
-    <xsl:sequence select="tokenize($string, '\s+') = $tokens" />
+    <xsl:sequence select="every $t in $tokens satisfies tokenize($string, '\s+') = $t" />
   </xsl:function>
 
 </xsl:stylesheet>
