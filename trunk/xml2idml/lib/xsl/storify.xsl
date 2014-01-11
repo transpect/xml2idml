@@ -631,7 +631,7 @@
   <xsl:template match="text()[not(normalize-space())][not(ancestor::ParagraphStyleRange)]" mode="xml2idml:storify_content-n-cleanup" priority="3"/>
  
   <!-- The next stylerange when looking upwards is a ParagraphStyleRange (i.e., CharacterStyleRange is missing yet) -->
-  <xsl:template match="node()[self::text() or self::Table or self::Footnote or self::Note or self::TextFrame]
+  <xsl:template match="node()[self::text()[not(parent::Contents)] or self::Table or self::Footnote or self::Note or self::TextFrame]
                              [(ancestor::ParagraphStyleRange | ancestor::CharacterStyleRange)[last()]/self::ParagraphStyleRange]"
     mode="xml2idml:storify_content-n-cleanup" priority="2">
     <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
@@ -646,7 +646,7 @@
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
 
-  <xsl:template match="text()[not(parent::Content)]" mode="xml2idml:storify_content-n-cleanup">
+  <xsl:template match="text()[not(parent::Content or parent::Contents)]" mode="xml2idml:storify_content-n-cleanup">
     <Content>
       <xsl:choose>
         <xsl:when test="//@xml2idml:keep-xml-space-preserve eq 'yes' and ancestor::*[@xml:space eq 'preserve']">
