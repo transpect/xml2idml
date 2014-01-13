@@ -567,6 +567,8 @@
     <xsl:apply-templates select="*:tbody/*:colgroup/*:col | *:colgroup/*:col | *:col" mode="#current" />
   </xsl:template>
 
+  <xsl:variable name="xml2idml:use-main-story-width-for-tables" select="false()" as="xs:boolean"/>
+
   <xsl:variable name="xml2idml:main-story-TextColumnFixedWidth" as="xs:string?"
     select="(
               collection()[2]
@@ -581,12 +583,13 @@
 
   <xsl:template match="*:col" mode="xml2idml:storify_table-declarations">
     <xsl:variable name="width" as="xs:string"
-      select="if (@css:width) 
+      select="if (not($xml2idml:use-main-story-width-for-tables) and @css:width) 
               then @css:width 
               else 
                 if ($xml2idml:main-story-TextColumnFixedWidth ne '') 
-                then xs:string(
-                  xs:double($xml2idml:main-story-TextColumnFixedWidth) div count(../*:col)
+                then concat(
+                  xs:double($xml2idml:main-story-TextColumnFixedWidth) div count(../*:col),
+                  'pt'
                 )
                 else '2000'"/><!-- 2000 is a default twips value (100pt) -->
     <Column Self="col_{generate-id()}_{position() - 1}" Name="{position() - 1}"
