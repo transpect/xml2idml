@@ -567,9 +567,28 @@
     <xsl:apply-templates select="*:tbody/*:colgroup/*:col | *:colgroup/*:col | *:col" mode="#current" />
   </xsl:template>
 
+  <xsl:variable name="xml2idml:main-story-TextColumnFixedWidth" as="xs:string?"
+    select="(
+              collection()[2]
+                //TextFrame[
+                  @ParentStory = collection()[2]
+                    //Story[
+                     .//CharacterStyleRange[@AppliedConditions eq 'Condition/storytitle'][. eq 'main']
+                    ]/@Self
+                ]/TextFramePreference/@TextColumnFixedWidth
+              , ''
+            )[1]"/>
+
   <xsl:template match="*:col" mode="xml2idml:storify_table-declarations">
-    <!-- 2000 is a default twips value (100pt) -->
-    <xsl:variable name="width" select="if (@css:width) then @css:width else '2000'"/>
+    <xsl:variable name="width" as="xs:string"
+      select="if (@css:width) 
+              then @css:width 
+              else 
+                if ($xml2idml:main-story-TextColumnFixedWidth ne '') 
+                then xs:string(
+                  xs:double($xml2idml:main-story-TextColumnFixedWidth) div count(../*:col)
+                )
+                else '2000'"/><!-- 2000 is a default twips value (100pt) -->
     <Column Self="col_{generate-id()}_{position() - 1}" Name="{position() - 1}"
       SingleColumnWidth="{(letex:length-to-unitless-twip($width), 2000)[1] * 0.05}" />
   </xsl:template>
