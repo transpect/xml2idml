@@ -640,7 +640,7 @@
                 <Br />
               </CharacterStyleRange>
             </ParagraphStyleRange>
-            <xsl:apply-templates select="current-group()[position() gt 2]" mode="#current"/>
+            <xsl:apply-templates select="current-group()[position() gt 1]" mode="#current"/>
           </xsl:when>
           <xsl:otherwise>
             <xsl:apply-templates select="current-group()" mode="#current"/>
