@@ -661,10 +661,29 @@
     </CharacterStyleRange>
   </xsl:template>
 
-  <!-- disassemble invalid csr in csr construct (i.e., created by nested special-char) -->
+  <!-- resolve nested inline paragraph-break -->
   <xsl:template match="CharacterStyleRange[
-                         ancestor::*[not(self::XMLElement)][1]/self::CharacterStyleRange
-                       ]" mode="xml2idml:storify_content-n-cleanup" priority="2">
+                         .//CharacterStyleRange[@ParagraphBreakType]
+                       ]" 
+    mode="xml2idml:storify_content-n-cleanup" priority="3">
+    <xsl:if test=".//node()[self::text() or self::CharacterStyleRange][1][ 
+                      . is (current()//CharacterStyleRange[@ParagraphBreakType])[1]
+                  ]">
+      <xsl:sequence select="(.//CharacterStyleRange[@ParagraphBreakType])[1]"/>
+    </xsl:if>
+    <xsl:next-match/>
+    <xsl:if test="count(.//node()[self::text() or self::CharacterStyleRange]) gt 1 and
+                  .//node()[self::text() or self::CharacterStyleRange][last()][ 
+                      . is (current()//CharacterStyleRange[@ParagraphBreakType])[last()]
+                  ]">
+      <xsl:sequence select="(.//CharacterStyleRange[@ParagraphBreakType])[last()]"/>
+    </xsl:if>
+  </xsl:template>
+
+  <!-- disassemble invalid csr in csr construct (i.e., created by nested special-char) -->
+  <xsl:template match="CharacterStyleRange
+                         [ancestor::*[not(self::XMLElement)][1]/self::CharacterStyleRange]" 
+    mode="xml2idml:storify_content-n-cleanup" priority="2">
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
 
