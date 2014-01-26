@@ -310,6 +310,7 @@
           <xsl:when test="starts-with($lang, 'en-us-legal')">English: USA Legal</xsl:when>
           <xsl:when test="starts-with($lang, 'en-us-medical')">English: USA Medical</xsl:when>
           <xsl:when test="starts-with($lang, 'en-us')">English: USA</xsl:when>
+          <xsl:when test="starts-with($lang, 'en')">English: USA</xsl:when><!-- fallback for english -->
           <xsl:when test="starts-with($lang, 'et')">Estonian</xsl:when>
           <xsl:when test="starts-with($lang, 'fi')">Finnish</xsl:when>
           <xsl:when test="starts-with($lang, 'fr-ca')">French: Canadian</xsl:when>
