@@ -661,13 +661,30 @@
   <xsl:template match="text()[not(normalize-space())][not(ancestor::ParagraphStyleRange)]" mode="xml2idml:storify_content-n-cleanup" priority="3"/>
  
   <!-- The next stylerange when looking upwards is a ParagraphStyleRange (i.e., CharacterStyleRange is missing yet) -->
-  <xsl:template match="node()[self::text()[not(parent::Contents)] or 
-                              self::Table or self::Footnote or self::Note or self::TextFrame[not(parent::Group)]]
-                             [(ancestor::ParagraphStyleRange | ancestor::CharacterStyleRange)[last()]/self::ParagraphStyleRange]"
+  <xsl:template match="node()[
+                                self::text()[not(parent::Contents)] or 
+                                self::Table or 
+                                self::Footnote or 
+                                self::Note or 
+                                self::TextFrame[not(parent::Group)]
+                             ]
+                             [
+                               (ancestor::ParagraphStyleRange | ancestor::CharacterStyleRange)[last()]/self::ParagraphStyleRange
+                               or
+                               self::Table[not(ancestor::CharacterStyleRange)]
+                             ]"
     mode="xml2idml:storify_content-n-cleanup" priority="2">
     <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
       <xsl:next-match/>
     </CharacterStyleRange>
+  </xsl:template>
+
+  <xsl:template match="Table[ not(ancestor::ParagraphStyleRange) ]" 
+    mode="xml2idml:storify_content-n-cleanup" priority="3">
+    <ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/NormalParagraphStyle">
+      <xsl:next-match/>
+      <Br/>
+    </ParagraphStyleRange>
   </xsl:template>
 
   <!-- resolve nested inline paragraph-break -->
