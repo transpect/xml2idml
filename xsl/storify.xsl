@@ -237,6 +237,7 @@
       <xsl:when test="$icon-lookup">
         <xsl:apply-templates select="$icon-lookup" mode="xml2idml:reproduce-icons">
           <xsl:with-param name="new-story-id" select="$new-story-id" tunnel="yes"/>
+          <xsl:with-param name="icon-element" select="." tunnel="yes"/>
         </xsl:apply-templates>
       </xsl:when>
       <xsl:otherwise>
