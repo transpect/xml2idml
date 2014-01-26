@@ -249,6 +249,7 @@
 
   <xsl:template match="TextFrame" mode="xml2idml:reproduce-icons">
     <xsl:param name="new-story-id" as="xs:string" tunnel="yes"/>
+    <xsl:param name="newer-story-id" select="''" as="xs:string" tunnel="no"/>
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current" />
       <xsl:attribute name="ParentStory" select="$new-story-id"/>
@@ -256,7 +257,10 @@
       <xsl:apply-templates select="*" mode="#current" />
       <!-- Let's just hope that this id is unique enough. It isn't if there's an error
            that no two docs may be written to the same URL -->
-      <xsl:variable name="newer-story-id" select="string-join(($new-story-id, string(position())), '_')" as="xs:string"/>
+      <xsl:variable name="newer-story-id" as="xs:string"
+        select="if($newer-story-id eq '') 
+                then string-join(($new-story-id, string(position())), '_') 
+                else $newer-story-id"/>
       <xsl:apply-templates select="key( 'story', current()/@ParentStory, $expanded-template )" mode="#current">
         <xsl:with-param name="new-story-id" select="$newer-story-id" tunnel="yes"/>
       </xsl:apply-templates>
@@ -265,6 +269,7 @@
 
   <xsl:template match="Group" mode="xml2idml:reproduce-icons">
     <xsl:param name="new-story-id" as="xs:string" tunnel="yes"/>
+    <xsl:param name="icon-element" tunnel="yes"/>
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current" />
       <xsl:attribute name="Self" select="concat('Group_', $new-story-id)"/>
@@ -656,7 +661,8 @@
   <xsl:template match="text()[not(normalize-space())][not(ancestor::ParagraphStyleRange)]" mode="xml2idml:storify_content-n-cleanup" priority="3"/>
  
   <!-- The next stylerange when looking upwards is a ParagraphStyleRange (i.e., CharacterStyleRange is missing yet) -->
-  <xsl:template match="node()[self::text()[not(parent::Contents)] or self::Table or self::Footnote or self::Note or self::TextFrame]
+  <xsl:template match="node()[self::text()[not(parent::Contents)] or 
+                              self::Table or self::Footnote or self::Note or self::TextFrame[not(parent::Group)]]
                              [(ancestor::ParagraphStyleRange | ancestor::CharacterStyleRange)[last()]/self::ParagraphStyleRange]"
     mode="xml2idml:storify_content-n-cleanup" priority="2">
     <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
