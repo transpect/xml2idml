@@ -707,6 +707,8 @@
   </xsl:template>
   <xsl:template match="CharacterStyleRange//CharacterStyleRange[@ParagraphBreakType]/Br" 
     mode="xml2idml:storify_content-n-cleanup"/>
+  <xsl:template match="ParagraphStyleRange/Br[preceding-sibling::*[1][self::CharacterStyleRange[@ParagraphBreakType]/Br]]" 
+    mode="xml2idml:storify_content-n-cleanup"/>
 
   <!-- disassemble invalid csr in csr construct (i.e., created by nested special-char) -->
   <xsl:template match="CharacterStyleRange
