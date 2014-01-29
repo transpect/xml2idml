@@ -507,6 +507,22 @@
           <xsl:attribute name="ParagraphBreakType" select="'NextPage'"/>
           <Br/>
         </xsl:when>
+        <xsl:when test="$character-name eq 'page-odd-break'">
+          <xsl:attribute name="ParagraphBreakType" select="'NextOddPage'"/>
+          <Br/>
+        </xsl:when>
+        <xsl:when test="$character-name eq 'page-even-break'">
+          <xsl:attribute name="ParagraphBreakType" select="'NextEvenPage'"/>
+          <Br/>
+        </xsl:when>
+        <xsl:when test="$character-name eq 'column-break'">
+          <xsl:attribute name="ParagraphBreakType" select="'NextColumn'"/>
+          <Br/>
+        </xsl:when>
+        <xsl:when test="$character-name eq 'frame-break'">
+          <xsl:attribute name="ParagraphBreakType" select="'NextFrame'"/>
+          <Br/>
+        </xsl:when>
         <xsl:when test="$character-name eq 'indent-to-here'">
           <xsl:processing-instruction name="ACE" select="'7'"/>
         </xsl:when>
