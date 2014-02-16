@@ -170,7 +170,7 @@
     </Cell>
   </xsl:template>
 
-  <xsl:template match="*[@aid:pstyle]" mode="xml2idml:storify" priority="3">
+  <xsl:template match="*[@aid:pstyle][not(xml2idml:invalid-nested-pstyle(.))]" mode="xml2idml:storify" priority="3">
     <ParagraphStyleRange>
       <xsl:apply-templates select="@xml2idml:condition" mode="#current"/>
       <xsl:apply-templates select="@css:* | @aid:pstyle" mode="#current" />
@@ -181,8 +181,33 @@
     </ParagraphStyleRange>
   </xsl:template>
 
+  <!-- invalid pstyle in pstyle: dissolve as CSR, add specific info into style name -->
+  <xsl:template match="*[@aid:pstyle][xml2idml:invalid-nested-pstyle(.)]" mode="xml2idml:storify" priority="3">
+    <CharacterStyleRange AppliedCharacterStyle="{concat('CharacterStyle/xml2idml-ParagraphInParagraph-', @aid:pstyle)}">
+      <xsl:apply-templates select="@xml2idml:condition" mode="#current"/>
+      <xsl:apply-templates select="@css:*, node()" mode="#current" />
+    </CharacterStyleRange>
+    <Br/>
+  </xsl:template>
+
   <xsl:variable name="xml2idml:mapping2xsl-paragraph-attribute-names" as="xs:string+"
     select="('aid:pstyle', 'xml2idml:ObjectStyle', 'aid5:tablestyle', 'aid5:cellstyle')"/>
+
+  <xsl:variable name="xml2idml:mapping2xsl-paragraph-attribute-names-without-pstyle" as="xs:string+"
+    select="$xml2idml:mapping2xsl-paragraph-attribute-names[ . ne 'aid:pstyle']"/>
+
+  <xsl:function name="xml2idml:invalid-nested-pstyle" as="xs:boolean">
+    <xsl:param name="p-el" as="element()"/>
+    <xsl:sequence select="boolean(
+                            $p-el/ancestor::*
+                              [@aid:pstyle][1]
+                              [
+                                not(
+                                  @*[name() = $xml2idml:mapping2xsl-paragraph-attribute-names-without-pstyle]
+                                )
+                              ]
+                          )"/>
+  </xsl:function>
 
   <xsl:function name="xml2idml:insert-Br" as="element(Br)?">
     <xsl:param name="node" as="element(*)"/>

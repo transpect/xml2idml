@@ -83,7 +83,7 @@
   <xsl:template match="Document" mode="#default">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current" />
-      <xsl:apply-templates mode="#current" />
+      <xsl:apply-templates select="*" mode="#current" />
     </xsl:copy>
   </xsl:template>
 
@@ -94,7 +94,9 @@
     <xsl:copy-of select="." copy-namespaces="no" />
   </xsl:template>
 
-  <xsl:template match="idPkg:Story[last()]" mode="#default" priority="2">
+  <xsl:template match="idPkg:Story[
+                         not(@src) (: Story in designmap.xml :)
+                       ][last()]" mode="#default" priority="2">
     <xsl:choose>
       <xsl:when test="collection()/xml2idml:stories//idPkg:Story">
         <xsl:next-match/>
@@ -103,8 +105,10 @@
       <xsl:otherwise>
         <xsl:copy>
           <xsl:apply-templates select="@*" mode="#current"/>
-          <xsl:copy-of select="collection()/xml2idml:stories/ParagraphStyleRange"/>
-          <xsl:message select="'&#xa;&#xa;WARNING: No story in converted document found! Moving all paragraphs to last story in template.&#xa;'" terminate="no"/>
+            <Story Self="{replace(tokenize(@xml:base, '/')[last()], '^Story_(.+)\.xml$', '$1')}">
+              <xsl:copy-of select="collection()/xml2idml:stories/ParagraphStyleRange" copy-namespaces="no"/>
+              <xsl:message select="'&#xa;&#xa;WARNING: No story in converted document found! Moving all paragraphs to last story in template.&#xa;'" terminate="no"/>
+          </Story>
         </xsl:copy>
       </xsl:otherwise>
     </xsl:choose>
