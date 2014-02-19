@@ -81,6 +81,7 @@
              If a parameter pstyle is passed, the created CharacterStyleRange will be wrapped
              in an appropriate ParagraphStyleRange.
              Next match.
+       2.3   Wrap element self::*[@aid:cstyle][@xml2idml:is-footnote] with Footnote element
        2:    Original tagging will be converted to piggyback tagging (XMLElement).
              Other elements in the xml2idml namespace (namely, xml2idml:ParagraphStyleRange)
              will be stripped of their namespaces.
@@ -198,7 +199,15 @@
 
   <xsl:function name="xml2idml:invalid-nested-pstyle" as="xs:boolean">
     <xsl:param name="p-el" as="element()"/>
-    <xsl:sequence select="boolean(
+    <xsl:sequence select="(: first PSR equivalent ancestor is a footnote :)
+                          not(
+                            $p-el/ancestor::*[@aid:pstyle or @xml2idml:is-footnote][1][
+                              @xml2idml:is-footnote eq 'yes'
+                            ]
+                          )
+                          and
+                          (: first ancestor with @aid:pstyle has no other PSR making attribute :)
+                          boolean(
                             $p-el/ancestor::*
                               [@aid:pstyle][1]
                               [
@@ -255,7 +264,8 @@
   </xsl:function>
 
   <xsl:template match="*:span[matches(@class, $xml2idml:icon-element-role-regex)]" mode="xml2idml:storify" priority="1">
-    <xsl:variable name="new-story-id" select="concat('st_icon_', generate-id())" as="xs:string"/>
+    <xsl:variable name="new-story-id" as="xs:string"
+      select="concat('st_icon_', generate-id())"/>
     <xsl:variable name="icon-lookup" as="element(*)?"
       select="key('icon', xml2idml:icon-reference-name(.), $expanded-template)"/>
     <xsl:choose>
@@ -280,11 +290,11 @@
       <xsl:attribute name="ParentStory" select="$new-story-id"/>
       <xsl:attribute name="Self" select="concat('TextFrame_', $new-story-id)"/>
       <xsl:apply-templates select="*" mode="#current" />
-      <!-- Let's just hope that this id is unique enough. It isn't if there's an error
-           that no two docs may be written to the same URL -->
+      <!-- Let's just hope that this id is unique enough. If it isn't there's an error
+           that two docs cannot be written to the same URI -->
       <xsl:variable name="newer-story-id" as="xs:string"
         select="if($newer-story-id eq '') 
-                then string-join(($new-story-id, string(position())), '_') 
+                then string-join(($new-story-id, string(generate-id())), '_') 
                 else $newer-story-id"/>
       <xsl:apply-templates select="key( 'story', current()/@ParentStory, $expanded-template )" mode="#current">
         <xsl:with-param name="new-story-id" select="$newer-story-id" tunnel="yes"/>
@@ -306,7 +316,7 @@
     <xsl:param name="new-story-id" as="xs:string" tunnel="yes"/>
     <idPkg:Story DOMVersion="8.0" xml:base="{concat($base-uri, '/Stories/', $new-story-id, '.xml')}">
       <xsl:copy copy-namespaces="no">
-        <xsl:attribute name="Self" select="$new-story-id"/>
+        <xsl:attribute name="Self" select="concat('Story', $new-story-id)"/>
         <xsl:apply-templates select="@* except @Self, node()" mode="#current" />
       </xsl:copy>
     </idPkg:Story>
@@ -441,6 +451,12 @@
     <xsl:sequence select="$psr" />
   </xsl:template>
 
+  <xsl:template match="*[@aid:cstyle][@xml2idml:is-footnote]" mode="xml2idml:storify" priority="2.3">
+    <Footnote>
+      <xsl:next-match/>
+    </Footnote>
+  </xsl:template>
+
   <xsl:template match="*[/*/@retain-tagging eq 'true']
                         [not(namespace-uri() = 'http://www.le-tex.de/namespace/xml2idml')]
                         [not(
@@ -547,6 +563,9 @@
         <xsl:when test="$character-name eq 'frame-break'">
           <xsl:attribute name="ParagraphBreakType" select="'NextFrame'"/>
           <Br/>
+        </xsl:when>
+        <xsl:when test="$character-name eq 'footnote-symbol'">
+          <xsl:processing-instruction name="ACE" select="'4'"/>
         </xsl:when>
         <xsl:when test="$character-name eq 'indent-to-here'">
           <xsl:processing-instruction name="ACE" select="'7'"/>
@@ -726,6 +745,16 @@
       <xsl:next-match/>
       <Br/>
     </ParagraphStyleRange>
+  </xsl:template>
+
+  <xsl:template match="Footnote[ not(ParagraphStyleRange) ]" 
+    mode="xml2idml:storify_content-n-cleanup" priority="3">
+    <xsl:copy>
+      <xsl:apply-templates select="@*" mode="#current"/>
+      <ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/NormalParagraphStyle">
+        <xsl:apply-templates select="node()" mode="#current"/>
+      </ParagraphStyleRange>
+    </xsl:copy>
   </xsl:template>
 
   <!-- resolve nested inline paragraph-break, todo: nested break in mid of a lot of cstyle ranges -->
