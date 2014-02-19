@@ -38,6 +38,7 @@
       <interleave>
         <optional><ref name="mapping.discard" /></optional>
         <optional><ref name="mapping.stories" /></optional>
+        <optional><ref name="mapping.templatedefaultoverrides" /></optional>
         <optional><ref name="mapping.styles.para" /></optional>
         <optional><ref name="mapping.styles.inline" /></optional>
         <optional><ref name="mapping.styles.table" /></optional>
@@ -64,7 +65,7 @@
     </element>
   </define>
 
-  <define name="anything">
+  <define name="mapping.anything">
     <element>  
       <anyName/>
       <zeroOrMore>
@@ -73,7 +74,7 @@
         </attribute>
       </zeroOrMore>
       <zeroOrMore>
-        <ref name="anything" />
+        <ref name="mapping.anything" />
       </zeroOrMore>
     </element>
   </define>
@@ -81,7 +82,7 @@
   <define name="mapping.inline-xsl">
     <element name="inline">
       <zeroOrMore>
-        <ref name="anything" />
+        <ref name="mapping.anything" />
       </zeroOrMore>
     </element>
   </define>
@@ -111,6 +112,7 @@
           <choice>
             <value>xml2idml:Discard</value>
             <value>xml2idml:Stories</value>
+            <value>xml2idml:TemplateDefaultOverrides</value>
             <value>xml2idml:ParaStyles</value>
             <value>xml2idml:InlineStyles</value>
             <value>xml2idml:TableStyles</value>
@@ -119,6 +121,12 @@
           </choice>
         </attribute>
       </optional>
+    </element>
+  </define>
+
+  <define name="mapping.templatedefaultoverrides">
+    <element name="TemplateDefaultOverrides">
+      <ref name="mapping.anything"/>
     </element>
   </define>
 
@@ -289,7 +297,7 @@
           <value>column-break</value>
           <value>frame-break</value>
 <!--          <value>end-nested-style</value>--><!-- ACE 3 -->
-<!--          <value>footnote-symbol</value>--><!-- ACE 4 -->
+          <value>footnote-symbol</value>
               <value>right-indent-tab</value>
 <!--          <value>page-number-next</value>--><!-- ACE 18 and ../@PageNumberType = 'NextPageNumber' -->
 <!--          <value>page-number-previous</value>--><!-- ACE 18 and ../@PageNumberType = 'PreviousPageNumber' -->
@@ -370,6 +378,9 @@
 
   <define name="mapping.inline">
     <element name="mapping-instruction">
+      <optional>
+        <ref name="mapping.att.is-footnote"/>
+      </optional>
       <interleave>
         <ref name="mapping.model.simple" />
         <optional>
@@ -442,6 +453,12 @@
       <ref name="mapping.att.select"/>
     </optional>
     <ref name="mapping.att.type"/>
+  </define>
+
+  <define name="mapping.att.is-footnote">
+    <attribute name="is-footnote">
+      <data type="string"/>
+    </attribute>
   </define>
 
   <define name="mapping.att.select">
@@ -530,6 +547,5 @@
       </attribute>
     </optional>
   </define>
-
 
 </grammar>

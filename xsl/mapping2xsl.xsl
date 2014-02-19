@@ -120,6 +120,14 @@
     </xsl:if>
   </xsl:template>
 
+
+  <xsl:template match="mapping-instructions/FootnoteOption" mode="xml2idml:set-lower-priority-and-clean"
+    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    <xsl:if test="not(ancestor::mapping-instructions[2][FootnoteOption])">
+      <xsl:copy-of select="."/>
+    </xsl:if>
+  </xsl:template>
+
   <xsl:template match="@* | node() | comment() | processing-instruction()" 
     mode="xml2idml:set-lower-priority-and-clean xml2idml:collect-included-instructions">
     <xsl:copy>
@@ -479,6 +487,9 @@
     </xsl:if>
     <xsl:if test="xml2idml:insert-content/@format[. ne '']">
       <xslout:attribute name="xml2idml:insert-content-format" select="'{insert-content/@format}'" />
+    </xsl:if>
+    <xsl:if test="@is-footnote">
+      <xslout:attribute name="xml2idml:is-footnote" select="'yes'" />
     </xsl:if>
   </xsl:template>
   <xsl:template match="ObjectStyles/mapping-instruction" mode="xml2idml:style-atts"
