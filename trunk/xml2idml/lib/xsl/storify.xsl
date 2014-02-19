@@ -222,7 +222,9 @@
     <xsl:param name="node" as="element(*)"/>
     <xsl:variable name="ancestor-scope" as="element(*)?"
       select="$node/ancestor::*[
-                @*[name() = $xml2idml:mapping2xsl-paragraph-attribute-names]
+                @*[ name() = $xml2idml:mapping2xsl-paragraph-attribute-names
+                    or name() eq 'xml2idml:is-footnote'
+                  ]
               ][1]"/>
     <xsl:variable name="ancestor-last-break-child" as="element(*)*"
       select="(
