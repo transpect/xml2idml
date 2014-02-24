@@ -286,19 +286,20 @@
 
   <xsl:template match="TextFrame" mode="xml2idml:reproduce-icons">
     <xsl:param name="new-story-id" as="xs:string" tunnel="yes"/>
+    <!-- newer-story-id: because we tunnel new-story-id we use newer-story-id to set an another id -->
     <xsl:param name="newer-story-id" select="''" as="xs:string" tunnel="no"/>
+    <xsl:variable name="newer-story-id" as="xs:string"
+      select="if($newer-story-id eq '') 
+              then string-join(($new-story-id, string(generate-id())), '_') 
+              else $newer-story-id"/>
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current" />
-      <xsl:attribute name="ParentStory" select="$new-story-id"/>
       <xsl:attribute name="Self" select="concat('TextFrame_', $new-story-id)"/>
+      <xsl:attribute name="ParentStory" select="concat('Story_', $newer-story-id)"/>
       <xsl:apply-templates select="*" mode="#current" />
-      <!-- Let's just hope that this id is unique enough. If it isn't there's an error
-           that two docs cannot be written to the same URI -->
-      <xsl:variable name="newer-story-id" as="xs:string"
-        select="if($newer-story-id eq '') 
-                then string-join(($new-story-id, string(generate-id())), '_') 
-                else $newer-story-id"/>
       <xsl:apply-templates select="key( 'story', current()/@ParentStory, $expanded-template )" mode="#current">
+        <!-- Let's just hope that this id is unique enough. If it isn't there's an error
+             that two docs (stories) cannot be written to the same URI -->
         <xsl:with-param name="new-story-id" select="$newer-story-id" tunnel="yes"/>
       </xsl:apply-templates>
     </xsl:copy>
@@ -318,7 +319,7 @@
     <xsl:param name="new-story-id" as="xs:string" tunnel="yes"/>
     <idPkg:Story DOMVersion="8.0" xml:base="{concat($base-uri, '/Stories/', $new-story-id, '.xml')}">
       <xsl:copy copy-namespaces="no">
-        <xsl:attribute name="Self" select="concat('Story', $new-story-id)"/>
+        <xsl:attribute name="Self" select="concat('Story_', $new-story-id)"/>
         <xsl:apply-templates select="@* except @Self, node()" mode="#current" />
       </xsl:copy>
     </idPkg:Story>
