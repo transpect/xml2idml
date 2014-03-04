@@ -199,22 +199,26 @@
 
   <xsl:function name="xml2idml:invalid-nested-pstyle" as="xs:boolean">
     <xsl:param name="p-el" as="element()"/>
-    <xsl:sequence select="(: first PSR equivalent ancestor is a footnote :)
+    <xsl:sequence select="(: current element has also an object mapping :)
+                          not(
+                            $p-el[@xml2idml:ObjectStyle or @aid5:tablestyle]
+                          )
+                          and
+                          (: first PSR equivalent ancestor is a footnote :)
                           not(
                             $p-el/ancestor::*[@aid:pstyle or @xml2idml:is-footnote][1][
                               @xml2idml:is-footnote eq 'yes'
                             ]
                           )
                           and
-                          (: first ancestor with @aid:pstyle has no other PSR making attribute :)
+                          (: first ancestor table/object mapping has no aid:pstyle attribute :)
                           boolean(
+                            $p-el/ancestor::*[@aid:pstyle]
+                            and
                             $p-el/ancestor::*
-                              [@aid:pstyle][1]
                               [
-                                not(
-                                  @*[name() = $xml2idml:mapping2xsl-paragraph-attribute-names-without-pstyle]
-                                )
-                              ]
+                                @*[name() = $xml2idml:mapping2xsl-paragraph-attribute-names]
+                              ][1]/@aid:pstyle
                           )"/>
   </xsl:function>
 
