@@ -22,6 +22,12 @@
 
   <xsl:param name="debug" as="xs:string?" />
 
+  <xsl:variable name="xslt-pipeline-default" as="document-node()">
+    <xsl:document>
+      <xml2idml:xslt-pipeline/>
+    </xsl:document>
+  </xsl:variable>
+
   <xsl:variable name="collect-included-instructions" as="element(xml2idml:collect-included-instructions)">
     <xsl:element name="xml2idml:collect-included-instructions">
       <xsl:apply-templates select="/xml2idml:mapping-instructions/xml2idml:include-mapping" 
@@ -178,9 +184,21 @@
       <xsl:text>&#xa;&#xa;</xsl:text>
       <xsl:comment select="' PIPELINE '"/>
       <xsl:text>&#xa;  </xsl:text>
-      <xsl:apply-templates select="if(not(xslt-pipeline)) 
-                                   then $included-mappings/xslt-pipeline
-                                   else xslt-pipeline" />
+      <xsl:choose>
+        <xsl:when test="not(xslt-pipeline)">
+          <xsl:choose>
+            <xsl:when test="$included-mappings/xslt-pipeline">
+              <xsl:apply-templates select="$included-mappings/xslt-pipeline"/>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:apply-templates select="$xslt-pipeline-default"/>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:apply-templates select="xslt-pipeline"/>
+        </xsl:otherwise>
+      </xsl:choose>
 
       <xsl:text>&#xa;&#xa;</xsl:text>
       <xsl:comment select="' GENERATED RULES '"/>
