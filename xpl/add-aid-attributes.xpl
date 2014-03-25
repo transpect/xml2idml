@@ -32,7 +32,7 @@
 
   <bc:load-cascaded name="load-mapping-rng" fallback="http://transpect.le-tex.de/xml2idml/schema/mapping.rng">
     <p:with-option name="filename" select="'xml2idml/mapping.rng'"/>
-    <p:with-option name="set-xml-base-attribute" select="'no'"/>
+    <p:with-option name="set-xml-base-attribute" select="'yes'"/>
     <p:input port="paths">
       <p:pipe port="paths" step="add-aid"/>
     </p:input>
