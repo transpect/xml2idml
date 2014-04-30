@@ -16,7 +16,9 @@
   >
 
   <!-- collection()[1]/* is the /Document (expanded IDML template).
-       collection()[2]/* is the /xml2idml:stories document (newly generated stories wrapped in idPkg:Story,
+       collection()[2]/* is the /xml2idml:document with following children:
+                       xml2idml:stories: newly generated stories wrapped in idPkg:Story,
+                       xml2idml:index (optional): newly generated Topic's wrapped in Index,
        and prolly some XMLElements around it which is later going to become an XMLStory)
        Please note that this won’t work standalone (outside XProc) since there is no default collection in plain Saxon. 
        -->
@@ -67,7 +69,7 @@
   <!-- The newly generated stories that are scheduled to flow into an existing TextFrame carry their name
        in the @StoryTitle attribute: -->
   <xsl:variable name="names-of-newly-generated-stories" as="xs:string*"
-    select="collection()/xml2idml:stories//idPkg:Story/Story/@StoryTitle" />
+    select="collection()/xml2idml:document/xml2idml:stories//idPkg:Story/Story/@StoryTitle" />
 
 
   <xsl:template match="* | @* | processing-instruction()" mode="#default xml2idml:merge_newstories_inner">
@@ -83,8 +85,56 @@
   <xsl:template match="Document" mode="#default">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current" />
-      <xsl:apply-templates select="*" mode="#current" />
-    </xsl:copy>
+      <xsl:apply-templates select="Properties" mode="#current" />
+      <xsl:apply-templates select="Language" mode="#current" />
+      <xsl:apply-templates select="idPkg:Graphic" mode="#current" />
+      <xsl:apply-templates select="idPkg:Fonts" mode="#current" />
+      <xsl:apply-templates select="KinsokuTable" mode="#current" />
+      <xsl:apply-templates select="MojikumiTable" mode="#current" />
+      <xsl:apply-templates select="idPkg:Styles" mode="#current" />
+      <xsl:apply-templates select="NumberingList" mode="#current" />
+      <xsl:apply-templates select="NamedGrid" mode="#current" />
+      <xsl:apply-templates select="MotionPreset" mode="#current" />
+      <xsl:apply-templates select="Condition" mode="#current" />
+      <xsl:apply-templates select="ConditionSet" mode="#current" />
+      <xsl:apply-templates select="idPkg:Preferences" mode="#current" />
+      <xsl:apply-templates select="LinkedStoryOption" mode="#current" />
+      <xsl:apply-templates select="LinkedPageItemOption" mode="#current" />
+      <xsl:apply-templates select="TaggedPDFPreference" mode="#current" />
+      <xsl:apply-templates select="MetadataPacketPreference" mode="#current" />
+      <xsl:apply-templates select="WatermarkPreference" mode="#current" />
+      <xsl:apply-templates select="ConditionalTextPreference" mode="#current" />
+      <xsl:apply-templates select="TextVariable" mode="#current" />
+      <xsl:apply-templates select="idPkg:Tags" mode="#current" />
+      <xsl:apply-templates select="Layer" mode="#current" />
+      <xsl:apply-templates select="idPkg:MasterSpread" mode="#current" />
+      <xsl:apply-templates select="idPkg:Spread" mode="#current" />
+      <xsl:apply-templates select="Section" mode="#current" />
+      <xsl:apply-templates select="DocumentUser" mode="#current" />
+      <xsl:apply-templates select="CrossReferenceFormat" mode="#current" />
+      <xsl:copy-of copy-namespaces="no"
+        select="collection()/xml2idml:document/xml2idml:index/node()"/>
+      <xsl:apply-templates select="idPkg:BackingStory" mode="#current" />
+      <xsl:apply-templates select="idPkg:Story" mode="#current" />
+      <xsl:apply-templates select="HyperlinkPageDestination" mode="#current" />
+      <xsl:apply-templates select="HyperlinkURLDestination" mode="#current" />
+      <xsl:apply-templates select="HyperlinkExternalPageDestination" mode="#current" />
+      <xsl:apply-templates select="HyperlinkPageItemSource" mode="#current" />
+      <xsl:apply-templates select="Hyperlink" mode="#current" />
+      <xsl:apply-templates select="idPkg:Mapping" mode="#current" />
+      <xsl:apply-templates select="Bookmark" mode="#current" />
+      <xsl:apply-templates select="PreflightProfile" mode="#current" />
+      <xsl:apply-templates select="DataMergeImagePlaceholder" mode="#current" />
+      <xsl:apply-templates select="HyphenationException" mode="#current" />
+      <xsl:apply-templates select="ParaStyleMapping" mode="#current" />
+      <xsl:apply-templates select="CharStyleMapping" mode="#current" />
+      <xsl:apply-templates select="TableStyleMapping" mode="#current" />
+      <xsl:apply-templates select="CellStyleMapping" mode="#current" />
+      <xsl:apply-templates select="IndexingSortOption" mode="#current" />
+      <xsl:apply-templates select="ABullet" mode="#current" />
+      <xsl:apply-templates select="Assignment" mode="#current" />
+      <xsl:apply-templates select="Article" mode="#current" />
+     </xsl:copy>
   </xsl:template>
 
   <xsl:template mode="#default"
@@ -98,15 +148,15 @@
                          not(@src) (: Story in designmap.xml :)
                        ][last()]" mode="#default" priority="2">
     <xsl:choose>
-      <xsl:when test="collection()/xml2idml:stories//idPkg:Story">
+      <xsl:when test="collection()/xml2idml:document/xml2idml:stories//idPkg:Story">
         <xsl:next-match/>
-        <xsl:apply-templates select="collection()/xml2idml:stories//idPkg:Story" mode="xml2idml:merge_newstories" />
+        <xsl:apply-templates select="collection()/xml2idml:document/xml2idml:stories//idPkg:Story" mode="xml2idml:merge_newstories" />
       </xsl:when>
       <xsl:otherwise>
         <xsl:copy>
           <xsl:apply-templates select="@*" mode="#current"/>
             <Story Self="{replace(tokenize(@xml:base, '/')[last()], '^Story_(.+)\.xml$', '$1')}">
-              <xsl:copy-of select="collection()/xml2idml:stories/ParagraphStyleRange" copy-namespaces="no"/>
+              <xsl:copy-of select="collection()/xml2idml:document/xml2idml:stories/ParagraphStyleRange" copy-namespaces="no"/>
               <xsl:message select="'&#xa;&#xa;WARNING: No story in converted document found! Moving all paragraphs to last story in template.&#xa;'" terminate="no"/>
           </Story>
         </xsl:copy>
@@ -132,7 +182,7 @@
 
   <xsl:template match="Document/@StoryList" mode="#default">
     <xsl:attribute name="StoryList" select="(
-                                              collection()[2]/xml2idml:stories//idPkg:Story
+                                              collection()[2]/xml2idml:document/xml2idml:stories//idPkg:Story
                                               union
                                               $idPkg-stories-to-keep
                                             )/Story/@Self" />
@@ -144,7 +194,7 @@
       select="xml2idml:story-name-from-conditional-text(
                 key('xml2idml:story-by-self', ., collection()[1])
               )" />
-    <xsl:attribute name="ParentStory" select="collection()/xml2idml:stories//idPkg:Story/Story[@StoryTitle = $storytitle]/@Self" />
+    <xsl:attribute name="ParentStory" select="collection()/xml2idml:document/xml2idml:stories//idPkg:Story/Story[@StoryTitle = $storytitle]/@Self" />
   </xsl:template>
 
 </xsl:stylesheet>

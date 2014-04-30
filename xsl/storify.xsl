@@ -41,13 +41,21 @@
     </xsl:copy>
   </xsl:template>
 
-
   <xsl:template match="/" mode="xml2idml:storify">
-    <xml2idml:stories>
-      <xsl:copy-of select="*/@xml2idml:keep-stories,
-                           */@xml2idml:keep-xml-space-preserve" />
-      <xsl:apply-templates mode="#current" />
-    </xml2idml:stories>
+    <xml2idml:document>
+      <xml2idml:stories>
+        <xsl:copy-of select="*/@xml2idml:keep-stories,
+                             */@xml2idml:keep-xml-space-preserve" />
+        <xsl:apply-templates mode="#current" />
+      </xml2idml:stories>
+      <xml2idml:index>
+        <xsl:if test="//*[@xml2idml:is-indexterm-level]">
+          <Index Self="X2I">
+            <xsl:sequence select="xml2idml:build-topic-structure($distinct-topics)"/>
+          </Index>
+        </xsl:if>
+      </xml2idml:index>
+    </xml2idml:document>
   </xsl:template>
 
   <!-- Overview of mode="xml2idml:storify" and mode="xml2idml:storify_content-n-cleanup"
@@ -260,7 +268,72 @@
       <xsl:processing-instruction name="ACE" select="'7'"/>
     </Content>
   </xsl:template>
-
+  
+  <xsl:variable name="distinct-topics" as="xs:string*"
+    select="distinct-values(for $i in //*[@xml2idml:is-indexterm-level] return xml2idml:generate-ReferencedTopic($i))"/>
+  
+  <!-- function xml2idml:build-topic-structure
+       param topics example: ('TopicnFaceTopicnEyesTopicnGreen', 'TopicnFaceTopicnNoise') (without @Self prefix!) -->
+  <xsl:function name="xml2idml:build-topic-structure" as="element(Topic)+">
+    <xsl:param name="topics" as="xs:string+"/>
+    <xsl:for-each select="$topics">
+      <xsl:sequence select="xml2idml:build-topic-element(., 1)"/>
+    </xsl:for-each>
+  </xsl:function>
+  
+  <!-- function xml2idml:build-topic-element
+       param topics example: TopicnFaceTopicnNoise (without @Self prefix!) -->
+  <xsl:function name="xml2idml:build-topic-element" as="element(Topic)">
+    <xsl:param name="topics" as="xs:string"/>
+    <xsl:param name="levels" as="xs:integer"/>
+    <xsl:variable name="splitted-topics" as="xs:string+"
+      select="tokenize($topics, 'Topicn')[ . != '']"/>
+    <Topic SortOrder="">
+      <xsl:attribute name="Name">
+        <xsl:value-of select="$splitted-topics[$levels]"/>
+      </xsl:attribute>
+      <xsl:attribute name="Self">
+        <xsl:value-of select="concat('X2ITopicn', string-join($splitted-topics[position() le $levels], 'Topicn'))"/>
+      </xsl:attribute>
+      <xsl:if test="count($splitted-topics) gt $levels">
+        <xsl:sequence select="xml2idml:build-topic-element($topics, $levels + 1)"/>
+      </xsl:if>
+    </Topic>
+  </xsl:function>
+  
+  <xsl:template match="*[@xml2idml:is-indexterm-level]" mode="xml2idml:storify" priority="2.3">
+    <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+      <PageReference Self="pr_{generate-id()}" PageReferenceType="CurrentPage" ReferencedTopic="{concat('X2I', xml2idml:generate-ReferencedTopic(.))}" />
+    </CharacterStyleRange>
+  </xsl:template>
+  
+  <xsl:function name="xml2idml:generate-ReferencedTopic" as="xs:string">
+    <xsl:param name="indexterm-child" as="element()"/>
+    <xsl:variable name="level" select="xs:integer($indexterm-child/@xml2idml:is-indexterm-level)" as="xs:integer"/>
+    <xsl:choose>
+      <xsl:when test="$level = 1">
+        <xsl:value-of select="concat('Topicn', $indexterm-child)"/>
+      </xsl:when>
+      <xsl:when test="$level = 2">
+        <xsl:value-of select="concat(
+                                'Topicn', $indexterm-child/preceding-sibling::*[1][xs:integer(@xml2idml:is-indexterm-level) = 1 ], 
+                                'Topicn', $indexterm-child
+                              )"/>
+      </xsl:when>
+      <xsl:when test="$level = 3">
+        <xsl:value-of select="concat(
+                                'Topicn', $indexterm-child/preceding-sibling::*[1][xs:integer(@xml2idml:is-indexterm-level) = 1 ], 
+                                'Topicn', $indexterm-child/preceding-sibling::*[1][xs:integer(@xml2idml:is-indexterm-level) = 2 ], 
+                                'Topicn', $indexterm-child
+                              )"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:message select="'#####  Indexlevel 4 or more not supported  #####'"></xsl:message>
+        <xsl:value-of select="'4thLevelIndexentry'"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:function>
+  
   <xsl:variable name="xml2idml:icon-element-role-regex" as="xs:string"
     select="'^icon|hru-infobox-icon$'"/>
 

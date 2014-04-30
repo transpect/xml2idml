@@ -379,18 +379,26 @@
 
   <define name="mapping.inline">
     <element name="mapping-instruction">
-      <optional>
-        <ref name="mapping.att.is-footnote"/>
-      </optional>
-      <interleave>
-        <ref name="mapping.model.simple" />
-        <optional>
-          <choice>
-            <ref name="mapping.model.insert-content" />
-            <ref name="mapping.model.insert-special-char" />
-          </choice>
-        </optional>
-      </interleave>
+      <choice>
+        <group>
+          <ref name="mapping.att.is-indexterm"/>
+          <ref name="mapping.model.simple" />
+        </group>
+        <group>
+          <optional>
+            <ref name="mapping.att.is-footnote"/>
+          </optional>
+          <interleave>
+            <ref name="mapping.model.simple" />
+            <optional>
+              <choice>
+                <ref name="mapping.model.insert-content" />
+                <ref name="mapping.model.insert-special-char" />
+              </choice>
+            </optional>
+          </interleave>
+        </group>
+      </choice>
     </element>
   </define>
 
@@ -455,10 +463,19 @@
     </optional>
     <ref name="mapping.att.type"/>
   </define>
-
+  
   <define name="mapping.att.is-footnote">
     <attribute name="is-footnote">
       <data type="string"/>
+    </attribute>
+  </define>
+  
+  <!-- define mapping.att.is-indexterm:
+       We assume a nested and flat input structure for index entries.
+       Example: <indexterm><primary>face</primary><secondary>noise</secondary></indexterm> -->
+  <define name="mapping.att.is-indexterm">
+    <attribute name="is-indexterm-level">
+      <data type="int"/>
     </attribute>
   </define>
 
