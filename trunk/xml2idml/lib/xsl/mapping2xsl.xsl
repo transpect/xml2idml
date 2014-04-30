@@ -509,6 +509,12 @@
     <xsl:if test="@is-footnote">
       <xslout:attribute name="xml2idml:is-footnote" select="'yes'" />
     </xsl:if>
+    <xsl:if test="xs:integer(@is-indexterm-level) gt 3">
+      <xsl:message select="'Warning: Indexlevel 4 or more not supported. Please check your mappings.'"></xsl:message>
+    </xsl:if>
+    <xsl:if test="@is-indexterm-level and xs:integer(@is-indexterm-level) lt 4">
+      <xslout:attribute name="xml2idml:is-indexterm-level" select="{@is-indexterm-level}" />
+    </xsl:if>
   </xsl:template>
   <xsl:template match="ObjectStyles/mapping-instruction" mode="xml2idml:style-atts"
     xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
