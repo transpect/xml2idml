@@ -712,21 +712,39 @@
     <xsl:for-each select="0 to xs:integer((@data-rowcount, count(*:tr))[1]) - 1">
       <Row Self="{concat('tb_', generate-id($context))}Row{.}" Name="{.}"/>
     </xsl:for-each>
-    <xsl:apply-templates select="*:tbody/*:colgroup/*:col | *:colgroup/*:col | *:col" mode="#current" />
+    <xsl:variable name="temporary-colgroup" as="element(colgroup)?">
+      <xsl:if test="not(*:tbody/*:colgroup/*:col | *:colgroup/*:col | *:col)">
+        <colgroup>
+          <xsl:for-each select="1 to xs:integer((@data-colcount, *:tbody/@data-colcount)[1])">
+            <col/>
+          </xsl:for-each>
+        </colgroup>
+      </xsl:if>
+    </xsl:variable>
+    <xsl:apply-templates select="*:tbody/*:colgroup/*:col | *:colgroup/*:col | *:col | $temporary-colgroup" mode="#current" />
   </xsl:template>
 
   <xsl:variable name="xml2idml:use-main-story-width-for-tables" select="false()" as="xs:boolean"/>
 
+  <xsl:variable name="xml2idml:main-story-in-template" as="element(TextFrame)?"
+    select="collection()[2]
+              //TextFrame[
+                @ParentStory = collection()[2]
+                  //Story[
+                    .//CharacterStyleRange[@AppliedConditions eq 'Condition/storytitle'][. eq 'main']
+                  ]/@Self
+              ]"/>
+
   <xsl:variable name="xml2idml:main-story-TextColumnFixedWidth" as="xs:string?"
     select="(
-              collection()[2]
-                //TextFrame[
-                  @ParentStory = collection()[2]
-                    //Story[
-                     .//CharacterStyleRange[@AppliedConditions eq 'Condition/storytitle'][. eq 'main']
-                    ]/@Self
-                ]/TextFramePreference/@TextColumnFixedWidth
-              , ''
+              $xml2idml:main-story-in-template/TextFramePreference/@TextColumnFixedWidth,
+              if ($xml2idml:main-story-in-template)
+              then xs:string(
+                idml2xml:get-shape-width(
+                  $xml2idml:main-story-in-template
+                )
+              )
+              else ''
             )[1]"/>
 
   <xsl:template match="*:col" mode="xml2idml:storify_table-declarations">
