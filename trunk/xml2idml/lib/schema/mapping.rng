@@ -370,6 +370,7 @@
     <element name="mapping-instruction">
       <interleave>
         <ref name="mapping.model.simple" />
+        <ref name="mapping.att.is-image"/>
         <optional>
           <ref name="mapping.model.nesting" />
         </optional>
@@ -381,15 +382,18 @@
     <element name="mapping-instruction">
       <choice>
         <group>
+          <ref name="mapping.model.simple"/>
           <ref name="mapping.att.is-indexterm"/>
-          <ref name="mapping.model.simple" />
         </group>
         <group>
           <optional>
-            <ref name="mapping.att.is-footnote"/>
+            <choice>
+              <ref name="mapping.att.is-footnote"/>
+              <ref name="mapping.att.is-image"/>
+            </choice>
           </optional>
           <interleave>
-            <ref name="mapping.model.simple" />
+            <ref name="mapping.model.simple"/>
             <optional>
               <choice>
                 <ref name="mapping.model.insert-content" />
@@ -477,6 +481,24 @@
     <attribute name="is-indexterm-level">
       <data type="int"/>
     </attribute>
+  </define>
+
+  <!-- define mapping.att.is-image:
+       Image build mechanism -->
+  <define name="mapping.att.is-image">
+    <optional>
+      <group>
+        <attribute name="is-image">
+          <choice>
+            <value>true</value>
+            <value>false</value>
+          </choice>
+        </attribute>
+        <attribute name="path-to-image-uri">
+          <data type="string" />
+        </attribute>
+      </group>
+    </optional>
   </define>
 
   <define name="mapping.att.select">
