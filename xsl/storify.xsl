@@ -89,7 +89,8 @@
              If a parameter pstyle is passed, the created CharacterStyleRange will be wrapped
              in an appropriate ParagraphStyleRange.
              Next match.
-       2.3   Wrap element self::*[@aid:cstyle][@xml2idml:is-footnote] with Footnote element
+       2.3:  Create images (EPS Rectangle, WMF Image, ...)
+       2.3:  Wrap element self::*[@aid:cstyle][@xml2idml:is-footnote] with Footnote element
        2:    Original tagging will be converted to piggyback tagging (XMLElement).
              Other elements in the xml2idml namespace (namely, xml2idml:ParagraphStyleRange)
              will be stripped of their namespaces.
@@ -536,6 +537,85 @@
       <xsl:next-match/>
     </Footnote>
   </xsl:template>
+
+  <xsl:template match="*[@xml2idml:is-block-image]" mode="xml2idml:storify" priority="2.3">
+    <xsl:choose>
+      <xsl:when test="not(@aid:pstyle)">
+        <ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/NormalParagraphStyle">
+          <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+            <xsl:sequence select="xml2idml:create-image-container(.)"/>
+          </CharacterStyleRange>
+        </ParagraphStyleRange>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:sequence select="xml2idml:create-image-container(.)"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <xsl:template match="*[@xml2idml:is-inline-image]" mode="xml2idml:storify" priority="2.3">
+    <xsl:sequence select="xml2idml:create-image-container(.)"/>
+  </xsl:template>
+
+  <xsl:function name="xml2idml:create-image-container" as="element()?">
+    <xsl:param name="mapped-image" as="element()"/>
+    <xsl:variable name="created-image" as="element()?">
+      <xsl:choose>
+        <xsl:when test="not(unparsed-text-available($mapped-image/@xml2idml:image-path))">
+          <!--<xsl:sequence select="xml2idml:output-warning-image-path-not-available($mapped-image)"/>-->
+        </xsl:when>
+        <xsl:otherwise>
+          <Rectangle Self="image_{generate-id($mapped-image)}"
+                       AppliedObjectStyle="ObjectStyle/$ID/[None]"
+                       ItemTransform="1 0 0 1 342.9505517914539 30.92220228300357">
+               <Properties>
+                  <PathGeometry>
+                     <GeometryPathType PathOpen="false">
+                        <PathPointArray>
+                           <PathPointType Anchor="-147.36000061035156 -97.55999755859375"
+                                          LeftDirection="-147.36000061035156 -97.55999755859375"
+                                          RightDirection="-147.36000061035156 -97.55999755859375"/>
+                           <PathPointType Anchor="-147.36000061035156 97.55999755859375"
+                                          LeftDirection="-147.36000061035156 97.55999755859375"
+                                          RightDirection="-147.36000061035156 97.55999755859375"/>
+                           <PathPointType Anchor="147.36000061035156 97.55999755859375"
+                                          LeftDirection="147.36000061035156 97.55999755859375"
+                                          RightDirection="147.36000061035156 97.55999755859375"/>
+                           <PathPointType Anchor="147.36000061035156 -97.55999755859375"
+                                          LeftDirection="147.36000061035156 -97.55999755859375"
+                                          RightDirection="147.36000061035156 -97.55999755859375"/>
+                        </PathPointArray>
+                     </GeometryPathType>
+                  </PathGeometry>
+               </Properties>
+               <EPS Self="image_eps_{generate-id($mapped-image)}"
+                    ItemTransform="1 0 0 1 -147.36000061035156 -97.55999755859375">
+                  <Link Self="image_eps_link_{generate-id($mapped-image)}"
+                        LinkResourceURI="file:/{$mapped-image/@xml2idml:image-path}"
+                        LinkResourceFormat="$ID/EPS"
+                        LinkImportModificationTime="2013-11-11T11:11:11"
+                        LinkImportTime="2013-11-11T11:11:11"
+                        LinkResourceSize="0~96f27"/>
+               </EPS>
+            </Rectangle>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    <xsl:sequence select="$created-image"/>
+  </xsl:function>
+
+  <xsl:function name="xml2idml:output-warning-image-path-not-available" as="element(CharacterStyleRange)">
+    <xsl:param name="mapped-image" as="element()"/>
+    <xsl:variable name="csr" as="element(CharacterStyleRange)">
+      <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/_ImageNotFound">
+        <Content>
+          <xsl:value-of select="'WARNING: Image', $mapped-image/@xml2idml:image-path, 'could not be found!'"/>
+        </Content>
+      </CharacterStyleRange>
+    </xsl:variable>
+    <xsl:sequence select="$csr"/>
+    <xsl:message select="'WARNING: Image', $mapped-image/@xml2idml:image-path, 'could not be found!'"/>
+  </xsl:function>
 
   <xsl:template match="*[/*/@retain-tagging eq 'true']
                         [not(namespace-uri() = 'http://www.le-tex.de/namespace/xml2idml')]
