@@ -15,6 +15,7 @@
 
   <xsl:import href="http://transpect.le-tex.de/idml2xml/xslt/common-functions.xsl" />
   <xsl:import href="http://transpect.le-tex.de/xslt-util/lengths/lengths.xsl" />
+  <xsl:import href="http://transpect.le-tex.de/xslt-util/mime-type/mime-type.xsl" />
 
   <xsl:param name="base-uri" as="xs:string" />
 
@@ -562,17 +563,23 @@
     <xsl:variable name="created-image" as="element()?">
       <xsl:choose>
         <xsl:when test="not(unparsed-text-available($mapped-image/@xml2idml:image-path))">
-          <!--<xsl:sequence select="xml2idml:output-warning-image-path-not-available($mapped-image)"/>-->
+          <xsl:sequence select="xml2idml:output-warning-image-path-not-available($mapped-image)"/>
         </xsl:when>
         <xsl:otherwise>
+          <xsl:variable name="new-image" as="element(xml2idml:image)"
+            select="xml2idml:get-image-info($mapped-image)"/>
+          <xsl:variable name="width" as="xs:double"
+            select="xs:double($new-image/@width)"/>
+          <xsl:variable name="height" as="xs:double"
+            select="xs:double($new-image/@height)"/>
           <Rectangle Self="image_{generate-id($mapped-image)}"
                        AppliedObjectStyle="ObjectStyle/$ID/[None]"
-                       ItemTransform="1 0 0 1 342.9505517914539 30.92220228300357">
+                       ItemTransform="1 0 0 1 0 0">
                <Properties>
                   <PathGeometry>
                      <GeometryPathType PathOpen="false">
                         <PathPointArray>
-                           <PathPointType Anchor="-147.36000061035156 -97.55999755859375"
+                          <PathPointType Anchor="{0 - $width / 2} {0 + $width / 2}"
                                           LeftDirection="-147.36000061035156 -97.55999755859375"
                                           RightDirection="-147.36000061035156 -97.55999755859375"/>
                            <PathPointType Anchor="-147.36000061035156 97.55999755859375"
@@ -589,13 +596,12 @@
                   </PathGeometry>
                </Properties>
                <EPS Self="image_eps_{generate-id($mapped-image)}"
-                    ItemTransform="1 0 0 1 -147.36000061035156 -97.55999755859375">
+                    ItemTransform="1 0 0 1 0 0">
                   <Link Self="image_eps_link_{generate-id($mapped-image)}"
-                        LinkResourceURI="file:/{$mapped-image/@xml2idml:image-path}"
-                        LinkResourceFormat="$ID/EPS"
-                        LinkImportModificationTime="2013-11-11T11:11:11"
-                        LinkImportTime="2013-11-11T11:11:11"
-                        LinkResourceSize="0~96f27"/>
+                    LinkResourceURI="{if(not(starts-with($mapped-image/@xml2idml:image-path, 'file:'))) 
+                                      then concat('file:/', $mapped-image/@xml2idml:image-path) 
+                                      else $mapped-image/@xml2idml:image-path}"
+                        LinkResourceFormat="$ID/EPS"/>
                </EPS>
             </Rectangle>
         </xsl:otherwise>
@@ -603,7 +609,35 @@
     </xsl:variable>
     <xsl:sequence select="$created-image"/>
   </xsl:function>
-
+  
+  <xsl:function name="xml2idml:get-image-info" as="element(xml2idml:image)">
+    <xsl:param name="mapped-image" as="element()"/>
+    <xsl:variable name="mime-type" as="xs:string"
+      select="letex:fileext-to-mime-type($mapped-image/@xml2idml:image-path)"/>
+    <xsl:variable name="new-image" as="element(xml2idml:image)">
+      <xml2idml:image>
+        <xsl:attribute name="mime-type" select="$mime-type"/>
+        <xsl:choose>
+          <xsl:when test="$mime-type eq 'image/x-eps'">
+            <xsl:variable name="boundingbox" as="xs:string"
+              select="tokenize(
+                        unparsed-text($mapped-image/@xml2idml:image-path), 
+                        '\n'
+                      )[matches(., '^%%(HiRes)?BoundingBox:')][last()]"/>
+            <xsl:attribute name="width" select="replace($boundingbox, '([\d.]+)\s[\d.]$', '$1')"/>
+            <xsl:attribute name="height" select="replace($boundingbox, '[\d.]+\s([\d.])$', '$1')"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:message select="'xml2idml, function xml2idml:get-image-info: mime-type of ', $mapped-image/@xml2idml:image-path, 'unknown!'"/>
+            <xsl:attribute name="width" select="($mapped-image/@css:width, '0')[1]"/>
+            <xsl:attribute name="height" select="($mapped-image/@css:height, '0')[1]"/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xml2idml:image>
+    </xsl:variable>
+    <xsl:sequence select="$new-image"/>
+  </xsl:function>
+  
   <xsl:function name="xml2idml:output-warning-image-path-not-available" as="element(CharacterStyleRange)">
     <xsl:param name="mapped-image" as="element()"/>
     <xsl:variable name="csr" as="element(CharacterStyleRange)">
