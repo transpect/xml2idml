@@ -542,7 +542,7 @@
   <xsl:template match="*[@xml2idml:is-block-image]" mode="xml2idml:storify" priority="2.3">
     <xsl:choose>
       <xsl:when test="not(@aid:pstyle)">
-        <ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/NormalParagraphStyle">
+        <ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/Figure">
           <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
             <xsl:sequence select="xml2idml:create-image-container(.)"/>
           </CharacterStyleRange>
@@ -568,35 +568,41 @@
         <xsl:otherwise>
           <xsl:variable name="new-image" as="element(xml2idml:image)"
             select="xml2idml:get-image-info($mapped-image)"/>
-          <xsl:variable name="width" as="xs:double"
-            select="xs:double($new-image/@width)"/>
-          <xsl:variable name="height" as="xs:double"
-            select="xs:double($new-image/@height)"/>
+          <xsl:variable name="width-in-pt" as="xs:double"
+            select="xs:double($new-image/@width) * 0.75"/>
+          <xsl:variable name="height-in-pt" as="xs:double"
+            select="xs:double($new-image/@height) * 0.75"/>
           <Rectangle Self="image_{generate-id($mapped-image)}"
                        AppliedObjectStyle="ObjectStyle/$ID/[None]"
                        ItemTransform="1 0 0 1 0 0">
                <Properties>
                   <PathGeometry>
                      <GeometryPathType PathOpen="false">
+                       <!--<PathPointArray>
+                          <PathPoint Anchor="{$left} {$top}" LeftDirection="{$left} {$top}" RightDirection="{$left} {$top}"/>
+                          <PathPoint Anchor="{$left} {$bottom}" LeftDirection="{$left} {$bottom}" RightDirection="{$left} {$bottom}"/>
+                          <PathPoint Anchor="{$right} {$bottom}" LeftDirection="{$right} {$bottom}" RightDirection="{$right} {$bottom}"/>
+                          <PathPoint Anchor="{$right} {$top}" LeftDirection="{$right} {$top}" RightDirection="{$right} {$top}"/>
+                        </PathPointArray>-->
                         <PathPointArray>
-                          <PathPointType Anchor="{0 - $width / 2} {0 + $width / 2}"
-                                          LeftDirection="-147.36000061035156 -97.55999755859375"
-                                          RightDirection="-147.36000061035156 -97.55999755859375"/>
-                           <PathPointType Anchor="-147.36000061035156 97.55999755859375"
-                                          LeftDirection="-147.36000061035156 97.55999755859375"
-                                          RightDirection="-147.36000061035156 97.55999755859375"/>
-                           <PathPointType Anchor="147.36000061035156 97.55999755859375"
-                                          LeftDirection="147.36000061035156 97.55999755859375"
-                                          RightDirection="147.36000061035156 97.55999755859375"/>
-                           <PathPointType Anchor="147.36000061035156 -97.55999755859375"
-                                          LeftDirection="147.36000061035156 -97.55999755859375"
-                                          RightDirection="147.36000061035156 -97.55999755859375"/>
+                          <PathPointType Anchor="-{$width-in-pt div 2} -{$height-in-pt div 2}"
+                            LeftDirection="-{$width-in-pt div 2} -{$height-in-pt div 2}"
+                            RightDirection="-{$width-in-pt div 2} -{$height-in-pt div 2}"/>
+                          <PathPointType Anchor="-{$width-in-pt div 2} {$height-in-pt div 2}"
+                            LeftDirection="-{$width-in-pt div 2} {$height-in-pt div 2}"
+                            RightDirection="-{$width-in-pt div 2} {$height-in-pt div 2}"/>
+                          <PathPointType Anchor="{$width-in-pt div 2} {$height-in-pt div 2}"
+                            LeftDirection="{$width-in-pt div 2} {$height-in-pt div 2}"
+                            RightDirection="{$width-in-pt div 2} {$height-in-pt div 2}"/>
+                          <PathPointType Anchor="{$width-in-pt div 2} -{$height-in-pt div 2}"
+                            LeftDirection="{$width-in-pt div 2} -{$height-in-pt div 2}"
+                            RightDirection="{$width-in-pt div 2} -{$height-in-pt div 2}"/>
                         </PathPointArray>
                      </GeometryPathType>
                   </PathGeometry>
                </Properties>
                <EPS Self="image_eps_{generate-id($mapped-image)}"
-                    ItemTransform="1 0 0 1 0 0">
+                 ItemTransform="1 0 0 1 -{$width-in-pt div 2} -{$height-in-pt div 2}">
                   <Link Self="image_eps_link_{generate-id($mapped-image)}"
                     LinkResourceURI="{if(not(starts-with($mapped-image/@xml2idml:image-path, 'file:'))) 
                                       then concat('file:/', $mapped-image/@xml2idml:image-path) 
@@ -620,12 +626,12 @@
         <xsl:choose>
           <xsl:when test="$mime-type eq 'image/x-eps'">
             <xsl:variable name="boundingbox" as="xs:string"
-              select="tokenize(
-                        unparsed-text($mapped-image/@xml2idml:image-path), 
+              select="tokenize(unparsed-text($mapped-image/@xml2idml:image-path),
                         '\n'
                       )[matches(., '^%%(HiRes)?BoundingBox:')][last()]"/>
-            <xsl:attribute name="width" select="replace($boundingbox, '([\d.]+)\s[\d.]$', '$1')"/>
-            <xsl:attribute name="height" select="replace($boundingbox, '[\d.]+\s([\d.])$', '$1')"/>
+            <xsl:attribute name="width" select="replace($boundingbox, '^[^:]+:\s[\d.]+\s[\d.]+\s([\d.]+)\s[\d.]+$', '$1')"/>
+            <xsl:attribute name="height" select="replace($boundingbox, '^[^:]+:\s[\d.]+\s[\d.]+\s[\d.]+\s([\d.]+)$', '$1')"/>
+            <xsl:attribute name="height" select="replace($boundingbox, '^[^:]+:\s[\d.]+\s[\d.]+\s[\d.]+\s([\d.]+)$', '$1')"/>
           </xsl:when>
           <xsl:otherwise>
             <xsl:message select="'xml2idml, function xml2idml:get-image-info: mime-type of ', $mapped-image/@xml2idml:image-path, 'unknown!'"/>
