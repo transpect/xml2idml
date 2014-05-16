@@ -846,22 +846,28 @@
 
   <xsl:variable name="xml2idml:use-main-story-width-for-tables" select="false()" as="xs:boolean"/>
 
-  <xsl:variable name="xml2idml:main-story-in-template" as="element(TextFrame)?"
+  <xsl:variable name="xml2idml:main-story-in-template" as="element(Story)?"
+    select="(
+              collection()[2]
+                //Story[
+                  .//CharacterStyleRange[@AppliedConditions eq 'Condition/storytitle'][. eq 'main']
+              ]
+            )[1]"/>
+
+  <xsl:variable name="xml2idml:main-story-textframes-in-template" as="element(TextFrame)*"
     select="collection()[2]
               //TextFrame[
-                @ParentStory = collection()[2]
-                  //Story[
-                    .//CharacterStyleRange[@AppliedConditions eq 'Condition/storytitle'][. eq 'main']
-                  ]/@Self
+                @ParentStory = $xml2idml:main-story-in-template/@Self
               ]"/>
 
+  <!-- get TextColumnFixedWidth from first main story TextFrame -->
   <xsl:variable name="xml2idml:main-story-TextColumnFixedWidth" as="xs:string?"
     select="(
               $xml2idml:main-story-in-template/TextFramePreference/@TextColumnFixedWidth,
               if ($xml2idml:main-story-in-template)
               then xs:string(
                 idml2xml:get-shape-width(
-                  $xml2idml:main-story-in-template
+                  ($xml2idml:main-story-textframes-in-template)[1]
                 )
               )
               else ''
