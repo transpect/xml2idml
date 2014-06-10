@@ -17,7 +17,9 @@
   <p:input port="paths"  kind="parameter"/>
 
   <p:option name="template">
-    <p:documentation>IDML Template file.</p:documentation>
+    <p:documentation>IDML Template file.
+        If the path is not an absolute uri (starts with 'file:/'), xml2idml searches for the template file in cascade paths. 
+    </p:documentation>
   </p:option>
   <p:option name="mapping">
     <p:documentation>xml2idml mapping file. Will be used to create paragraphs, tables, character style, etc.
@@ -67,14 +69,32 @@
     <p:input port="source"><p:empty/></p:input>
   </cx:message>
 
-  <bc:load-cascaded-binary name="idml-template-uri">
-    <p:with-option name="filename" select="$template"/>
-    <p:input port="paths">
-      <p:pipe port="paths" step="xml2idml"/>
-    </p:input>
-  </bc:load-cascaded-binary>
+  <p:choose>
+    <p:when test="matches($template, '^file:/+')">
+      <p:identity>
+        <p:input port="source">
+          <p:inline>
+            <bc:result></bc:result>
+          </p:inline>
+        </p:input>
+      </p:identity>
+      <p:add-attribute match="/*" attribute-name="uri">
+        <p:with-option name="attribute-value" select="replace($template, '^file:/+', '/')"/>
+      </p:add-attribute>
+    </p:when>
+    <p:otherwise>
+      <bc:load-cascaded-binary name="idml-template-uri">
+        <p:with-option name="filename" select="$template"/>
+        <p:input port="paths">
+          <p:pipe port="paths" step="xml2idml"/>
+        </p:input>
+      </bc:load-cascaded-binary>
+    </p:otherwise>
+  </p:choose>
 
-  <cx:message message="xml2idml: retrieved template path for unzipping" />
+  <cx:message>
+    <p:with-option name="message" select="'xml2idml: retrieved template path for unzipping, ', /bc:result/@uri"/>
+  </cx:message> 
 
   <letex:unzip name="expand-template">
     <p:with-option name="zip" select="/bc:result/@uri" />
@@ -84,7 +104,9 @@
     <p:with-option name="overwrite" select="'yes'" />
   </letex:unzip>
 
-  <cx:message message="xml2idml: unzipped IDML template"/>
+  <cx:message>
+    <p:with-option name="message" select="'xml2idml: unzipped IDML template'"/>
+  </cx:message>
 
   <p:sink/>
 
