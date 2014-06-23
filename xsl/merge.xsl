@@ -172,7 +172,7 @@
 
   <xsl:template match="idPkg:Story" mode="xml2idml:merge_newstories_inner" />
 
-  <xsl:template match="TextFrame[idPkg:Story]" mode="xml2idml:merge_newstories_inner" >
+  <xsl:template match="idPkg:Spread/Spread/TextFrame[idPkg:Story]" mode="xml2idml:merge_newstories_inner" >
     <xsl:copy copy-namespaces="no">
       <xsl:apply-templates select="@*" mode="#current" />
       <xsl:attribute name="ParentStory" select="idPkg:Story/Story/@Self" />
@@ -188,7 +188,7 @@
                                             )/Story/@Self" />
   </xsl:template>
 
-  <xsl:template match="TextFrame/@ParentStory[. = key('xml2idml:story-by-name', $names-of-newly-generated-stories, collection()[1])/@Self]"
+  <xsl:template match="idPkg:Spread/Spread/TextFrame/@ParentStory[. = key('xml2idml:story-by-name', $names-of-newly-generated-stories, collection()[1])/@Self]"
     mode="#default">
     <xsl:variable name="storytitle" as="xs:string?"
       select="xml2idml:story-name-from-conditional-text(
