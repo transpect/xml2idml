@@ -845,6 +845,8 @@
   </xsl:template>
 
   <xsl:variable name="xml2idml:use-main-story-width-for-tables" select="false()" as="xs:boolean"/>
+  
+  <xsl:variable name="xml2idml:use-main-story-width-for-textframes" select="false()" as="xs:boolean"/>
 
   <xsl:variable name="xml2idml:main-story-in-template" as="element(Story)?"
     select="(
@@ -891,12 +893,28 @@
 
   <xsl:template match="*[@xml2idml:ObjectStyle]" mode="xml2idml:storify" priority="5">
     <xsl:variable name="AppliedObjectStyle" select="concat('ObjectStyle/', @xml2idml:ObjectStyle)" as="xs:string" />
+    <xsl:variable name="text-width" as="xs:string"
+      select="if (not($xml2idml:use-main-story-width-for-textframes) and @css:width) 
+              then @css:width 
+              else 
+                if ($xml2idml:main-story-TextColumnFixedWidth ne '') 
+                then concat(
+                  xs:double($xml2idml:main-story-TextColumnFixedWidth),
+                  'pt'
+                )
+                else '2000'"/>
     <TextFrame Self="tf_{generate-id()}"
       PreviousTextFrame="n"
       NextTextFrame="n"
       ContentType="TextType"
       AppliedObjectStyle="{$AppliedObjectStyle}"
       xml2idml:anchoring="{@xml2idml:anchoring}">
+      <xsl:if test="$xml2idml:use-main-story-width-for-textframes">
+        <TextFramePreference TextColumnFixedWidth="{(letex:length-to-unitless-twip($text-width), 2000)[1] * 0.05}" 
+        UseFixedColumnWidth="true"
+        AutoSizingType="HeightOnly"
+        AutoSizingReferencePoint="TopCenterPoint"/>
+      </xsl:if>
       <xsl:if test="exists($expanded-template)">
         <xsl:copy-of select="key('object', $AppliedObjectStyle, $expanded-template)[1]/*" />
       </xsl:if>
