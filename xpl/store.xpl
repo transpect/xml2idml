@@ -25,6 +25,7 @@
   <p:serialization port="result" indent="true" omit-xml-declaration="false"/>
 
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl" />
+  <p:import href="http://transpect.le-tex.de/xproc-util/store-debug/store-debug.xpl" />
 
   <bc:load-cascaded name="load-serialize-compound-idml-xsl" 
     fallback="http://transpect.le-tex.de/xml2idml/xsl/serialize-compound-idml.xsl">
@@ -52,9 +53,11 @@
 
   <p:choose>
     <p:when test="$debug = 'yes'">
-      <p:store indent="true">
-        <p:with-option name="href" select="concat($debug-dir-uri, '/', 'xml2idml/zip-manifest.xml')" />
-      </p:store>
+      <letex:store-debug pipeline-step="xml2idml/zip-manifest">
+        <p:with-option name="active" select="$debug" />
+        <p:with-option name="base-uri" select="$debug-dir-uri" />
+      </letex:store-debug>
+      <p:sink/>
     </p:when>
     <p:otherwise>
       <p:sink/>
