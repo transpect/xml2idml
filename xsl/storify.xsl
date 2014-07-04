@@ -961,6 +961,10 @@
   </xsl:template>
 
   <xsl:template match="text()[not(normalize-space())][not(ancestor::ParagraphStyleRange)]" mode="xml2idml:storify_content-n-cleanup" priority="3"/>
+
+  <!-- remove any text not mapped to a textframe or story -->
+  <xsl:template match="xml2idml:stories/Content" mode="xml2idml:storify_content-n-cleanup" priority="10"/>
+  <xsl:template match="xml2idml:stories/text()" mode="xml2idml:storify_content-n-cleanup" priority="10"/>
  
   <!-- The next stylerange when looking upwards is a ParagraphStyleRange (i.e., CharacterStyleRange is missing yet) -->
   <xsl:template match="node()[
