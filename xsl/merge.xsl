@@ -40,7 +40,7 @@
                                           //Content,
                               ''
                             )
-                          )" />
+                          )"/>
   </xsl:function>
 
   <xsl:variable name="stories-to-keep" as="element(Story)*" 
@@ -69,7 +69,7 @@
   <!-- The newly generated stories that are scheduled to flow into an existing TextFrame carry their name
        in the @StoryTitle attribute: -->
   <xsl:variable name="names-of-newly-generated-stories" as="xs:string*"
-    select="collection()/xml2idml:document/xml2idml:stories//idPkg:Story/Story/@StoryTitle" />
+    select="collection()[2]/xml2idml:document/xml2idml:stories//idPkg:Story/Story/@StoryTitle" />
 
 
   <xsl:template match="* | @* | processing-instruction()" mode="#default xml2idml:merge_newstories_inner">
@@ -113,7 +113,7 @@
       <xsl:apply-templates select="DocumentUser" mode="#current" />
       <xsl:apply-templates select="CrossReferenceFormat" mode="#current" />
       <xsl:copy-of copy-namespaces="no"
-        select="collection()/xml2idml:document/xml2idml:index/node()"/>
+        select="collection()[2]/xml2idml:document/xml2idml:index/node()"/>
       <xsl:apply-templates select="idPkg:BackingStory" mode="#current" />
       <xsl:apply-templates select="idPkg:Story" mode="#current" />
       <xsl:apply-templates select="HyperlinkPageDestination" mode="#current" />
@@ -148,15 +148,15 @@
                          not(@src) (: Story in designmap.xml :)
                        ][last()]" mode="#default" priority="2">
     <xsl:choose>
-      <xsl:when test="collection()/xml2idml:document/xml2idml:stories//idPkg:Story">
+      <xsl:when test="collection()[2]/xml2idml:document/xml2idml:stories//idPkg:Story and exists(key('xml2idml:story-by-name', 'main', collection()[1]))">
         <xsl:next-match/>
-        <xsl:apply-templates select="collection()/xml2idml:document/xml2idml:stories//idPkg:Story" mode="xml2idml:merge_newstories" />
+        <xsl:apply-templates select="collection()[2]/xml2idml:document/xml2idml:stories//idPkg:Story" mode="xml2idml:merge_newstories" />
       </xsl:when>
       <xsl:otherwise>
         <xsl:copy>
           <xsl:apply-templates select="@*" mode="#current"/>
             <Story Self="{replace(tokenize(@xml:base, '/')[last()], '^Story_(.+)\.xml$', '$1')}">
-              <xsl:copy-of select="collection()/xml2idml:document/xml2idml:stories/ParagraphStyleRange" copy-namespaces="no"/>
+              <xsl:copy-of select="collection()[2]/xml2idml:document/xml2idml:stories/ParagraphStyleRange" copy-namespaces="no"/>
               <xsl:message select="'&#xa;&#xa;WARNING: No story in converted document found! Moving all paragraphs to last story in template.&#xa;'" terminate="no"/>
           </Story>
         </xsl:copy>
@@ -188,13 +188,15 @@
                                             )/Story/@Self" />
   </xsl:template>
 
-  <xsl:template match="TextFrame[not(ancestor::MasterSpread)]/@ParentStory[. = key('xml2idml:story-by-name', $names-of-newly-generated-stories, collection()[1])/@Self]"
-    mode="#default">
+  <xsl:template match="TextFrame[not(ancestor::MasterSpread)]
+                         /@ParentStory[
+                           . = key('xml2idml:story-by-name', $names-of-newly-generated-stories, collection()[1])/@Self
+                         ]" mode="#default">
     <xsl:variable name="storytitle" as="xs:string?"
       select="xml2idml:story-name-from-conditional-text(
                 key('xml2idml:story-by-self', ., collection()[1])
               )" />
-    <xsl:attribute name="ParentStory" select="collection()/xml2idml:document/xml2idml:stories//idPkg:Story/Story[@StoryTitle = $storytitle]/@Self" />
+    <xsl:attribute name="ParentStory" select="collection()[2]/xml2idml:document/xml2idml:stories//idPkg:Story/Story[@StoryTitle = $storytitle]/@Self" />
   </xsl:template>
 
 </xsl:stylesheet>
