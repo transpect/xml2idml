@@ -75,7 +75,7 @@
       <p:pipe step="split" port="secondary"/>
     </p:iteration-source>
     <p:store omit-xml-declaration="false" indent="true">
-      <p:with-option name="href" select="p:base-uri()"/>
+      <p:with-option name="href" select="base-uri()"/>
     </p:store>
   </p:for-each>
   
