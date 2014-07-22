@@ -38,7 +38,10 @@
       </optional>
       <interleave>
         <optional><ref name="mapping.discard" /></optional>
-        <optional><ref name="mapping.stories" /></optional>
+        <choice>
+          <optional><ref name="mapping.pages" /></optional>
+          <optional><ref name="mapping.stories" /></optional>
+        </choice>
         <optional><ref name="mapping.templatedefaultoverrides" /></optional>
         <optional><ref name="mapping.styles.para" /></optional>
         <optional><ref name="mapping.styles.inline" /></optional>
@@ -139,11 +142,124 @@
     </element>
   </define>
 
+  <define name="mapping.pages">
+    <element name="Pages">
+      <oneOrMore>
+        <ref name="mapping.pages.spread"/>
+      </oneOrMore>
+    </element>
+  </define>
+
+  <define name="mapping.pages.spread">
+    <element name="Spread">
+      <interleave>
+        <attribute name="MasterPageName">
+          <!-- Prefix plus '-' (&#x2d;) plus Name, example: T-Text -->
+          <data type="string">
+            <param name="minLength">3</param>
+          </data>
+        </attribute>
+        <ref name="mapping.pages.spread.atts.properties"/>
+      </interleave>
+      <choice>
+        <ref name="mapping.pages.atts.mainstory"/>
+        <group>
+          <optional>
+            <ref name="mapping.pages.atts.mainstory"/>
+          </optional>
+          <oneOrMore>
+            <ref name="mapping.stories"/>
+          </oneOrMore>
+        </group>
+      </choice>
+    </element>
+  </define>
+
+  <define name="mapping.pages.spread.atts.properties">
+    <optional>
+      <attribute name="Repeat">
+        <!-- Param to define how often a Spread with the current config should be inserted into the document.
+             Default value: 1 -->
+        <data type="integer"/>
+      </attribute>
+    </optional>
+    <optional>
+      <attribute name="PageCount">
+        <!-- default value: number of pages at the given master page (@MasterPageName) -->
+        <data type="integer"/>
+      </attribute>
+    </optional>
+    <optional>
+      <attribute name="BindingLocation">
+        <!-- From IDML Cookbook: 
+        The page-binding location is controlled by the BindingLocation attribute on the Spread element. 
+        All pages with an index less than the BindingLocation are left pages; 
+        all pages with an index greater, right pages. Both the BindingLocation and page index are zero-based.
+        
+        default value: value of @BindingLocation of the given master page -->
+        <data type="integer"/>
+      </attribute>
+    </optional>
+    <optional>
+      <attribute name="ShowMasterItems">
+        <!-- default value: value of @ShowMasterItems (true) of the given master page -->
+        <choice>
+          <value>true</value>
+          <value>false</value>
+        </choice>
+      </attribute>
+    </optional>
+  </define>
+
+  <define name="mapping.pages.spread.atts.mainstory">
+    <interleave>
+      <attribute name="MainStoryName">
+        <data type="string">
+          <param name="minLength">1</param>
+        </data>
+      </attribute>
+      <attribute name="MainStoryXPath">
+        <data type="string">
+          <param name="minLength">1</param>
+        </data>
+      </attribute>
+      <optional>
+        <attribute name="MainStoryContinued">
+          <choice>
+            <value>true</value>
+            <value>false</value>
+          </choice>
+        </attribute>
+      </optional>
+    </interleave>
+  </define>
+
+  <define name="mapping.pages.atts.mainstory">
+    <interleave>
+      <attribute name="MainStoryName">
+        <data type="string">
+          <param name="minLength">1</param>
+        </data>
+      </attribute>
+      <attribute name="MainStoryXPath">
+        <data type="string">
+          <param name="minLength">1</param>
+        </data>
+      </attribute>
+      <optional>
+        <attribute name="MainStoryContinued">
+          <!-- default value: true -->
+          <choice>
+            <value>true</value>
+            <value>false</value>
+          </choice>
+        </attribute>
+      </optional>
+    </interleave>
+  </define>
+
   <define name="mapping.stories">
     <element name="Stories">
-      <optional>
-        <ref name="mapping.att.keep-xml-space-preserve"/>
-      </optional>
       <interleave>
         <zeroOrMore>
           <ref name="keep.story"/>
@@ -359,6 +475,16 @@
 
   <define name="mapping.story">
     <element name="mapping-instruction">
+      <optional>
+        <ref name="mapping.att.keep-xml-space-preserve"/>
+      </optional>
+      <!--  attribute StoryContinued:
+              For use in context /mapping-instructions/Pages/Spread/Stories/mapping-instruction.
+              Unnecessary in context /mapping-instructions/Stories/mapping-instruction. 
+      -->
+      <optional>
+        <ref name="mapping.att.storycontinued"/>
+      </optional>
       <interleave>
         <ref name="mapping.path"/>
         <ref name="mapping.name"/>
@@ -577,15 +703,22 @@
     </optional>
   </define>
 
+  <define name="mapping.att.storycontinued">
+    <attribute name="StoryContinued">
+      <choice>
+        <value>true</value>
+        <value>false</value>
+      </choice>
+    </attribute>
+  </define>
+
   <define name="mapping.att.keep-xml-space-preserve">
-    <optional>
-      <attribute name="keep-xml-space-preserve">
-        <choice>
-          <value>true</value>
-          <value>false</value>
-        </choice>
-      </attribute>
-    </optional>
+    <attribute name="keep-xml-space-preserve">
+      <choice>
+        <value>true</value>
+        <value>false</value>
+      </choice>
+    </attribute>
   </define>
 
 </grammar>
