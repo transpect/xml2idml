@@ -22,16 +22,30 @@
 
   <xsl:param name="debug" as="xs:string?" />
 
+  <xsl:variable name="root" select="/" as="document-node()"/>
+
+  <!-- default xslt-pipeline when no pipeline is given in mapping-instructions -->
   <xsl:variable name="xslt-pipeline-default" as="document-node()">
     <xsl:document>
       <xml2idml:xslt-pipeline/>
     </xsl:document>
   </xsl:variable>
 
+  <!-- variable to save non-mapping configuration for xml2idml XProc steps storify and merge -->
+  <xsl:variable name="other-mapping-configuration" as="element(OtherMappingConfiguration)">
+    <OtherMappingConfiguration>
+      <xsl:sequence select="/xml2idml:mapping-instructions/xml2idml:Pages"/>
+      <!--<xsl:copy-of select="/xml2idml:mapping-instructions/xml2idml:TemplateDefaultOverrides"/>-->
+    </OtherMappingConfiguration>
+  </xsl:variable>
+
   <xsl:variable name="collect-included-instructions" as="element(xml2idml:collect-included-instructions)">
     <xsl:element name="xml2idml:collect-included-instructions">
       <xsl:apply-templates select="/xml2idml:mapping-instructions/xml2idml:include-mapping" 
-      mode="xml2idml:collect-included-instructions"/>
+      mode="xml2idml:collect-included-instructions">
+        <xsl:with-param name="lowest-priority-of-parent" tunnel="yes"
+          select="min((//xml2idml:mapping-instructions//xml2idml:path/@priority, 0))"/>
+      </xsl:apply-templates>
     </xsl:element>
   </xsl:variable>
 
@@ -50,11 +64,16 @@
 
     <xsl:variable name="lowest-priority-of-current" as="xs:double"
       select="min((doc(@href)/mapping-instructions//path/@priority, 0))"/>
+
+    <xsl:variable name="highest-priority-of-current" as="xs:double"
+      select="max((doc(@href)/mapping-instructions//path/@priority, 0))"/>
+
     <xsl:variable name="lowest-priority" as="xs:double"
         select="(1 + abs($lowest-priority-of-parent) + abs($lowest-priority-of-current)) * -1"/>
 
     <mapping-instructions included="true" 
-      lowest-mapping-priority="{$lowest-priority}"
+      highest-mapping-priority-of-current="{$highest-priority-of-current}"
+      lowest-mapping-priority-of-parent="{$lowest-priority-of-parent}"
       xmlns="http://www.le-tex.de/namespace/xml2idml">
       <xsl:apply-templates mode="#current" select="doc(@href)/mapping-instructions/@*"/>
       <xsl:message select="concat(' including mapping (with calculated highest possible priority of ', $lowest-priority, '):&#xa;', @href)"/>
@@ -76,8 +95,11 @@
   <xsl:template match="xsl:template[@match]" mode="xml2idml:set-lower-priority-and-clean">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current" />
+      <!-- set new priority: an included template cannot have more importance than the including one -->
       <xsl:attribute name="priority" 
-        select="xs:double((@priority, 0)[1]) - abs(ancestor::xml2idml:mapping-instructions[1]/@lowest-mapping-priority)"/>
+        select="xs:double((@priority, 0)[1]) 
+                - abs(ancestor::xml2idml:mapping-instructions[1]/@highest-mapping-priority-of-current) 
+                - abs(ancestor::xml2idml:mapping-instructions[1]/@lowest-mapping-priority-of-parent)"/>
       <xsl:apply-templates select="node()" mode="#current" />
     </xsl:copy>
   </xsl:template>
@@ -126,10 +148,9 @@
     </xsl:if>
   </xsl:template>
 
-
-  <xsl:template match="mapping-instructions/FootnoteOption" mode="xml2idml:set-lower-priority-and-clean"
+  <xsl:template match="mapping-instructions/Pages" mode="xml2idml:set-lower-priority-and-clean"
     xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
-    <xsl:if test="not(ancestor::mapping-instructions[2][FootnoteOption])">
+    <xsl:if test="not(ancestor::mapping-instructions[2][Pages])">
       <xsl:copy-of select="."/>
     </xsl:if>
   </xsl:template>
@@ -203,6 +224,7 @@
       <xsl:text>&#xa;&#xa;</xsl:text>
       <xsl:comment select="' GENERATED RULES '"/>
       <xsl:text>&#xa;  </xsl:text>
+
       <xsl:apply-templates select="if(not(Stories/mapping-instruction)) 
                                    then $included-mappings/Stories/mapping-instruction
                                    else ()" />
@@ -222,7 +244,7 @@
 
   <xsl:template match="Discard/mapping-instruction"
     xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
-    <xslout:template match="{path}" mode="xml2idml:{name(..)}" />
+    <xslout:template match="{normalize-space(path)}" mode="xml2idml:{name(..)}" />
   </xsl:template>
 
   <!-- The stories to be kept will be inserted as Attributes to /*
@@ -244,15 +266,17 @@
       <xslout:copy copy-namespaces="no">
         <xslout:copy-of select="@*" />
         <xslout:attribute name="xml2idml:keep-stories" select="'{keep/name}'" />
-        <xslout:attribute name="xml2idml:keep-xml-space-preserve" 
-          select="'{if(
-                        $included-mapping//Stories[keep/name[ . eq current()/keep/name]]/@keep-xml-space-preserve eq 'true'
-                          and 
-                        not(@keep-xml-space-preserve eq 'false')
-                        or
-                        @keep-xml-space-preserve eq 'true'
-                      ) 
-                    then 'yes' else 'no'}'" />
+        <xslout:apply-templates mode="#current" />
+      </xslout:copy>
+    </xslout:template>
+  </xsl:template>
+
+  <xsl:template match="Pages/Spread"
+    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    <xslout:template match="{@MainStoryXPath}" mode="xml2idml:Stories">
+      <xslout:copy copy-namespaces="no">
+        <xslout:copy-of select="@*" />
+        <xslout:attribute name="xml2idml:storyname" select="'{@MainStoryName}'" />
         <xslout:apply-templates mode="#current" />
       </xslout:copy>
     </xslout:template>
@@ -260,9 +284,12 @@
 
   <xsl:template match="Stories/mapping-instruction"
     xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
-    <xslout:template match="{path}" mode="xml2idml:{name(..)}">
+    <xslout:template match="{normalize-space(path)}" mode="xml2idml:{name(..)}">
       <xslout:copy copy-namespaces="no">
         <xslout:copy-of select="@*" />
+        <xsl:if test="@keep-xml-space-preserve">
+          <xslout:attribute name="xml2idml:keep-xml-space-preserve" select="'{@keep-xml-space-preserve}'" />
+        </xsl:if>
         <xsl:apply-templates select="." mode="xml2idml:style-atts" />
         <xslout:apply-templates mode="#current" />
       </xslout:copy>
@@ -271,7 +298,7 @@
 
   <xsl:template match="ParaStyles/mapping-instruction[nest]"
     xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
-    <xslout:template match="{path}" mode="xml2idml:{name(..)}">
+    <xslout:template match="{normalize-space(path)}" mode="xml2idml:{name(..)}">
       <xsl:apply-templates select="path/@priority" mode="#current" />
       <xslout:copy copy-namespaces="no">
         <xslout:copy-of select="@*" />
@@ -289,7 +316,7 @@
 
   <xsl:template match="ParaStyles/mapping-instruction[wrap]"
     xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
-    <xslout:template match="{path}" mode="xml2idml:{name(..)}">
+    <xslout:template match="{normalize-space(path)}" mode="xml2idml:{name(..)}">
       <xsl:apply-templates select="path/@priority" mode="#current" />
       <xml2idml:ParagraphStyleRange AppliedParagraphStyle="{xml2idml:escaped-style-name('ParagraphStyle', (format, '$ID/NormalParagraphStyle')[1])}">
         <xslout:next-match/>
@@ -300,7 +327,7 @@
 
   <xsl:template match="mapping-instruction"
     xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
-    <xslout:template match="{path}" mode="xml2idml:{name(..)}">
+    <xslout:template match="{normalize-space(path)}" mode="xml2idml:{name(..)}">
       <xsl:apply-templates select="path/@priority" mode="#current" />
       <xslout:copy copy-namespaces="no">
         <xslout:copy-of select="@*" />
@@ -320,7 +347,7 @@
   <xsl:template match="TableStyles/mapping-instruction/width[@type eq 'xml2idml:snap-scaled-to-grid']"
     priority="2"
     xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
-    <xslout:template match="{../path}" mode="htmltable:tables-add-atts" priority="2">
+    <xslout:template match="{normalize-space(../path)}" mode="htmltable:tables-add-atts" priority="2">
       <xsl:apply-templates select="../path/@priority" mode="#current" />
       <xsl:comment>Width / snap to grid</xsl:comment>
       <xslout:next-match>
@@ -346,7 +373,7 @@
 
   <xsl:template match="TableStyles/mapping-instruction/*[self::width or self::height][@type eq 'xml2idml:static-dimension']" 
     xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
-    <xslout:template match="{../path}" mode="htmltable:tables-add-atts" priority="2">
+    <xslout:template match="{normalize-space(../path)}" mode="htmltable:tables-add-atts" priority="2">
       <xsl:apply-templates select="../path/@priority" mode="#current" />
       <xsl:comment>Width / snap to grid</xsl:comment>
       <xslout:next-match>
@@ -358,7 +385,7 @@
 
   <xsl:template match="TableStyles/mapping-instruction/*[self::width or self::height][@type eq 'xml2idml:from-cells']" 
     xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
-    <xslout:template match="{../path}" mode="htmltable:tables-add-atts" priority="2">
+    <xslout:template match="{normalize-space(../path)}" mode="htmltable:tables-add-atts" priority="2">
       <xsl:apply-templates select="../path/@priority" mode="#current" />
       <xslout:apply-imports />
     </xslout:template>
@@ -432,6 +459,30 @@
       <xslout:sequence select="${$augmented-pipeline/step[last()]/@mode}" />
     </xslout:template>
 
+
+    <xsl:variable name="pages-config" as="element(xml2idml:Pages)?"
+      select="if(not($other-mapping-configuration/xml2idml:Pages)) 
+              then $included-mappings/Pages 
+              else $other-mapping-configuration/xml2idml:Pages"/>
+
+    <!-- save other configuration for later usage in xml2idml -->
+    <xslout:template match="/*" mode="{$augmented-pipeline/step[last()]/@mode}" priority="1000">
+      <xslout:copy>
+        <xslout:apply-templates select="@*" mode="#current" />
+        <xsl:if test="$other-mapping-configuration/xml2idml:Pages
+                      or
+                      (
+                        $included-mappings/Pages 
+                        and not($root/xml2idml:mapping-instructions/xml2idml:Stories)
+                      )">
+          <xslout:element name="xml2idml:OtherMappingConfiguration">
+            <xsl:sequence select="$pages-config"/>
+          </xslout:element>
+        </xsl:if>
+        <xslout:apply-templates select="node()" mode="#current" />
+      </xslout:copy>
+    </xslout:template>
+
     <xsl:text>&#xa;&#xa;</xsl:text>
     <xsl:comment select="' IDENTITY TEMPLATE '"/>
     <xsl:text>&#xa;  </xsl:text>
@@ -453,6 +504,15 @@
         <xslout:apply-templates select="@*, node()" mode="#current"/>
       </xslout:copy>
     </xslout:template>
+    
+    <xsl:text>&#xa;&#xa;&#xa;</xsl:text>
+    <xsl:comment>GENERATED RULES FROM PAGES CONFIG</xsl:comment>
+    <xsl:text>&#xa;  </xsl:text>
+    <!-- create/output templates here for a main story in Pages configuration -->
+    <xsl:apply-templates select="$pages-config/xml2idml:Spread"/>
+    <!-- create/output templates here for other stories in Pages configuration -->
+    <xsl:apply-templates select="$pages-config/xml2idml:Spread/xml2idml:Stories/*"/>
+
   </xsl:template>
 
   <xsl:template match="xslt-pipeline/step"

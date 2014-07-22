@@ -13,6 +13,10 @@
   exclude-result-prefixes="css letex xs xml2idml idml2xml"
   >
 
+  <!-- collection()[1]/* is the mapped document.
+       collection()[2]/* is the /Document (expanded IDML template)
+  -->
+
   <xsl:import href="http://transpect.le-tex.de/idml2xml/xslt/common-functions.xsl" />
   <xsl:import href="http://transpect.le-tex.de/xslt-util/lengths/lengths.xsl" />
   <xsl:import href="http://transpect.le-tex.de/xslt-util/mime-type/mime-type.xsl" />
@@ -44,9 +48,9 @@
 
   <xsl:template match="/" mode="xml2idml:storify">
     <xml2idml:document>
+      <xsl:copy-of select="/*/xml2idml:OtherMappingConfiguration"/>
       <xml2idml:stories>
-        <xsl:copy-of select="*/@xml2idml:keep-stories,
-                             */@xml2idml:keep-xml-space-preserve" />
+        <xsl:copy-of select="*/@xml2idml:keep-stories" />
         <xsl:apply-templates mode="#current" />
       </xml2idml:stories>
       <xml2idml:index>
@@ -58,6 +62,8 @@
       </xml2idml:index>
     </xml2idml:document>
   </xsl:template>
+
+  <xsl:template match="*:OtherMappingConfiguration" mode="xml2idml:storify"/>
 
   <!-- Overview of mode="xml2idml:storify" and mode="xml2idml:storify_content-n-cleanup"
        
@@ -125,6 +131,7 @@
     <!-- DOMVersion 8.0: CS6 -->
     <idPkg:Story DOMVersion="8.0" xml:base="{concat($base-uri, '/Stories/st_', generate-id(), '.xml')}">
       <Story Self="st_{generate-id()}" StoryTitle="{@xml2idml:storyname}">
+        <xsl:copy-of select="@xml2idml:keep-xml-space-preserve"/>
         <HiddenText>
           <ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/NormalParagraphStyle">
             <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"
@@ -665,8 +672,8 @@
                           or self::*:col[../parent::*[@aid:table eq 'table']]
                          )]" mode="xml2idml:storify" priority="2">
     <XMLElement Self="elt_{generate-id()}" MarkupTag="XMLTag/{name()}">
-      <xsl:if test="/*/@xml2idml:keep-xml-space-preserve eq 'yes'
-                    and @xml:space eq 'preserve'">
+      <xsl:if test="ancestor::*[@xml2idml:keep-xml-space-preserve eq 'true'] and
+                    @xml:space eq 'preserve'">
         <xsl:attribute name="xml:space" select="'preserve'"/>
       </xsl:if>
       <xsl:apply-templates select="@*" mode="xml2idml:storify_atts" />
@@ -965,6 +972,7 @@
   <!-- remove any text not mapped to a textframe or story -->
   <xsl:template match="xml2idml:stories/Content" mode="xml2idml:storify_content-n-cleanup" priority="10"/>
   <xsl:template match="xml2idml:stories/text()" mode="xml2idml:storify_content-n-cleanup" priority="10"/>
+  <xsl:template match="@xml2idml:keep-xml-space-preserve" mode="xml2idml:storify_content-n-cleanup"/>
  
   <!-- The next stylerange when looking upwards is a ParagraphStyleRange (i.e., CharacterStyleRange is missing yet) -->
   <xsl:template match="node()[
@@ -1036,7 +1044,8 @@
   <xsl:template match="text()[not(parent::Content or parent::Contents)]" mode="xml2idml:storify_content-n-cleanup">
     <Content>
       <xsl:choose>
-        <xsl:when test="//@xml2idml:keep-xml-space-preserve eq 'yes' and ancestor::*[@xml:space eq 'preserve']">
+        <xsl:when test="ancestor::*[@xml2idml:keep-xml-space-preserve eq 'true'] and 
+                        ancestor::*[@xml:space eq 'preserve']">
           <xsl:attribute name="xml:space" select="'preserve'"/>
           <xsl:value-of select="."/>
         </xsl:when>

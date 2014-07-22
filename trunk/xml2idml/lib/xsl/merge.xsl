@@ -199,4 +199,269 @@
     <xsl:attribute name="ParentStory" select="collection()[2]/xml2idml:document/xml2idml:stories//idPkg:Story/Story[@StoryTitle = $storytitle]/@Self" />
   </xsl:template>
 
+  
+  <!-- START: create pages and set masterpage properties -->
+
+  <xsl:variable name="xml2idml:pages-config" as="element(xml2idml:Pages)?"
+    select="collection()[2]/*/xml2idml:OtherMappingConfiguration/xml2idml:Pages"/>
+  <xsl:variable name="xml2idml:use-pages-config" as="xs:boolean"
+    select="exists($xml2idml:pages-config)"/>
+
+  <!-- xml2idml:use-pages-config=true(): select first spread to insert all new spreads -->
+  <xsl:template match="idPkg:Spread[$xml2idml:use-pages-config][not(preceding-sibling::idPkg:Spread)]" mode="#default">
+
+    <!-- process user mapping configuration and build temporary/internal configuration -->
+    <xsl:variable name="new-spreads" as="element(xml2idml:Spread)+">
+      <xsl:call-template name="xml2idml:create-spread-and-story-info"/>
+    </xsl:variable>
+
+    <xsl:variable name="spreads-base-dir" as="xs:string"
+      select="replace(@xml:base, '^(.*/)[^/]+$', '$1')"/>
+
+    <!-- insert new Spread elements -->
+    <xsl:for-each select="$new-spreads">
+      <xsl:variable name="all-story-textframes" as="xs:string*"
+        select="for $i in .//@TextFrames return tokenize($i, '\s+')"/>
+      <xsl:element name="idPkg:Spread">
+        <xsl:attribute name="xml:base" select="concat( $spreads-base-dir, @Self, '.xml' )"/>
+        <xsl:element name="Spread">
+          <xsl:apply-templates select="@*[name() != 'masterspread-self'][ . ne '']" mode="#current"/>
+          <xsl:apply-templates mode="default_copy-pages-and-story-textframes-to-new-spreads"
+            select="collection()[1]//MasterSpread[@Self eq current()/@masterspread-self]/Page,
+                    collection()[1]//MasterSpread/TextFrame[
+                      @Self = $all-story-textframes
+                    ]">
+            <xsl:with-param name="current-spread" select="." tunnel="yes"/>
+            <xsl:with-param name="all-new-spreads" select="$new-spreads" tunnel="yes"/>
+          </xsl:apply-templates>
+        </xsl:element>
+      </xsl:element>
+    </xsl:for-each>
+
+    <xsl:message select="'INFO: Number of inserted spreads:', xs:integer(sum($xml2idml:pages-config/xml2idml:Spread/@Repeat))"/>
+  </xsl:template>
+
+  <!-- xml2idml:use-pages-config = true(): remove all other spreads of the template -->
+  <xsl:template match="idPkg:Spread[$xml2idml:use-pages-config][preceding-sibling::idPkg:Spread]" mode="#default" />
+
+  <xsl:template name="xml2idml:create-spread-and-story-info">
+
+    <xsl:for-each select="$xml2idml:pages-config/xml2idml:Spread">
+      <xsl:variable name="current-spreadconfig" select="current()" as="element(xml2idml:Spread)"/>
+      <xsl:variable name="group-pos" select="position()" as="xs:integer"/>
+      <xsl:variable name="current-spreadconf" select="." as="element()"/>
+
+      <xsl:for-each select="1 to abs(xs:integer(($current-spreadconf/@Repeat, '1')[1]))">
+        <xsl:variable name="spread-pos-in-current-spreadconfig" as="xs:integer"
+          select="position()"/>
+        <xsl:variable name="spread-id" as="xs:string"
+          select="concat('sp_', $group-pos, '_', $spread-pos-in-current-spreadconfig)"/>
+        <xsl:variable name="MasterSpread" as="element(MasterSpread)"
+          select="(
+                    collection()[1]//MasterSpread[@Name eq $current-spreadconf/@MasterPageName],
+                    (collection()[1]//MasterSpread)[1]
+                  )[1]"/>
+        <xsl:if test="$MasterSpread/@Name ne $current-spreadconf/@MasterPageName">
+          <xsl:message select="'WARNING: Configured master page name not found in template:', $current-spreadconf/@MasterPageName"/>
+        </xsl:if>
+            
+        <xsl:element name="xml2idml:Spread">
+          <xsl:attribute name="Self" select="$spread-id"/>
+          <xsl:attribute name="masterspread-self" select="$MasterSpread/@Self"/>
+          <xsl:attribute name="PageCount" 
+            select="(
+                      $current-spreadconf/@PageCount,
+                      $MasterSpread/@PageCount,
+                      '2'
+                    )[1]"/>
+          <xsl:attribute name="BindingLocation" 
+            select="(
+                      $current-spreadconf/@BindingLocation,
+                      $MasterSpread/@BindingLocation,
+                      '1'
+                    )[1]"/>
+          <xsl:attribute name="ShowMasterItems" 
+            select="(
+                      $current-spreadconf/@ShowMasterItems,
+                      $MasterSpread/@ShowMasterItems,
+                      'true'
+                    )[1]"/>
+          <xsl:variable name="spread-stories" as="element(Spread-Story)*">
+            <!-- main story -->
+            <xsl:if test="$current-spreadconfig/@MainStoryName">
+              <xsl:sequence 
+                select="xml2idml:retrieve-textframe-info-for-story(
+                          $current-spreadconf/@MasterPageName,
+                          $current-spreadconfig,
+                          $spread-pos-in-current-spreadconfig
+                        )"/>
+            </xsl:if>
+            <!-- other stories -->
+            <xsl:for-each select="$current-spreadconfig/xml2idml:Stories/*">
+              <xsl:sequence 
+                select="xml2idml:retrieve-textframe-info-for-story(
+                          $current-spreadconf/@MasterPageName,
+                          .,
+                          $spread-pos-in-current-spreadconfig
+                        )"/>
+            </xsl:for-each>
+          </xsl:variable>
+
+          <!-- Warning message: configured story cannot be found in idml template -->
+          <xsl:if test="position() = last()">
+            <xsl:for-each select="distinct-values($spread-stories[@TextFrames eq '']/@StoryName)">
+              <xsl:message select="concat(
+                                     'WARNING: No textframes found for story with name &quot;', ., '&quot;',
+                                     ' on masterpage &quot;', $current-spreadconf/@MasterPageName, '&quot;'
+                                   )"/>
+            </xsl:for-each>
+          </xsl:if>
+
+          <!-- return only configured and existing stories with at least one textframe -->
+          <xsl:sequence select="$spread-stories[@TextFrames ne '']"/>
+
+        </xsl:element>
+      </xsl:for-each>
+    </xsl:for-each>
+  </xsl:template>
+
+  <!-- function xml2idml:retrieve-textframe-info-for-story
+       param masterspread-name: 
+          name of the masterpage, where the textframe(s) are searched for
+       param story-mapping: 
+          a Page/Spread element (see "mapping.pages.atts.spreadinfo" in schema/mapping.rng)
+          or a Page/Spread/Stories/mapping-instruction element (see "")
+       param spread-pos-in-current-spreadconfig:
+          for every spread-config element an @Repeat can be set. 
+          The value of this parameter is the value of iterating the @Repeat (begin with 1).
+          Used to break a @*StoryContinued='false' for $spread-pos-in-current-spreadconfig greater 1
+  -->
+  <xsl:function name="xml2idml:retrieve-textframe-info-for-story" as="element(Spread-Story)?">
+    <xsl:param name="masterspread-name" as="xs:string"/>
+    <xsl:param name="story-mapping" as="element()"/>
+    <xsl:param name="spread-pos-in-current-spreadconfig" as="xs:integer"/>
+
+    <xsl:variable name="story-name" as="xs:string"
+      select="if ($story-mapping/@MainStoryName ne '') 
+              then $story-mapping/@MainStoryName 
+              else $story-mapping/xml2idml:name"/>
+    <xsl:variable name="story-textframes" 
+      select="collection()[1]//MasterSpread[@Name eq $masterspread-name]
+                //TextFrame[
+                  @ParentStory[
+                    . = key('xml2idml:story-by-name', $story-name, collection()[1])
+                          /@Self
+                  ]
+                ]"/>
+    <!-- Spread-Story temporary/internal configuration element -->
+    <Spread-Story 
+      StoryName="{$story-name}" 
+      StoryContinued="{if ($spread-pos-in-current-spreadconfig gt 1)
+                       then 'true'
+                       else 
+                         if ($story-mapping/@*[name() = ('MainStoryContinued', 'StoryContinued')] eq 'true') 
+                         then 'true' 
+                         else 'false'
+                      }"
+      TextFrames="{for $i in $story-textframes return $i/@Self}"
+      TextFrameFirst="{$story-textframes[@PreviousTextFrame eq 'n']/@Self}" 
+      TextFrameLast="{$story-textframes[@NextTextFrame eq 'n']/@Self}"/>
+  </xsl:function>
+
+  <!-- set the based on property for the copied page -->
+  <xsl:template match="Page/@AppliedMaster" mode="default_copy-pages-and-story-textframes-to-new-spreads">
+    <xsl:param name="current-spread" tunnel="yes"/>
+    <xsl:attribute name="AppliedMaster" select="$current-spread/@masterspread-self"/>
+  </xsl:template>
+
+  <!-- context: a story textframe on the chosen MasterSpread (by name), placed in content area -->
+  <xsl:template match="TextFrame" mode="default_copy-pages-and-story-textframes-to-new-spreads">
+    <xsl:param name="current-spread" tunnel="yes"/>
+    <xsl:param name="all-new-spreads" tunnel="yes"/>
+    <!-- select the Spread-Story element for the current TextFrame -->
+    <xsl:variable name="current-spread-story" as="element(Spread-Story)"
+      select="($current-spread/Spread-Story[current()/@Self = tokenize(@TextFrames, '\s')])[1]"/>
+    <xsl:copy>
+      <xsl:apply-templates select="@*" mode="#default"/>
+      <xsl:attribute name="Self" select="concat(@Self, '_copiedto_', $current-spread/@Self)"/>
+      <xsl:attribute name="ParentStory" 
+        select="collection()[2]/xml2idml:document/xml2idml:stories
+                  //idPkg:Story/Story[@StoryTitle = $current-spread-story/@StoryName]/@Self"/>
+      <xsl:variable name="previous-spread-story" as="element(Spread-Story)?"
+        select="(
+                  $all-new-spreads[ 
+                    . &lt;&lt; $current-spread and
+                    Spread-Story[@StoryName eq $current-spread-story/@StoryName]
+                  ]/Spread-Story[@StoryName eq $current-spread-story/@StoryName]
+                )[last()]"/>
+      <xsl:attribute name="PreviousTextFrame">
+        <xsl:choose>
+          <!-- very first TextFrame for the current Story OR story starts new from here -->
+          <xsl:when test="(
+                            @PreviousTextFrame eq 'n' and
+                            not($previous-spread-story)
+                          ) 
+                          or 
+                          (
+                            $current-spread-story/@StoryContinued eq 'false' and
+                            $current-spread-story/@TextFrameFirst eq @Self
+                          )">
+            <xsl:value-of select="'n'"/>
+          </xsl:when>
+          <!-- non-first TextFrame for the current Story, but first on current spread, and continued!  -->
+          <xsl:when test="@PreviousTextFrame eq 'n' and 
+                          $previous-spread-story and 
+                          $current-spread-story/@StoryContinued eq 'true'">
+            <xsl:value-of select="concat($previous-spread-story/@TextFrameLast, '_copiedto_', $previous-spread-story/../@Self)"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:value-of select="concat(@PreviousTextFrame, '_copiedto_', $current-spread/@Self)"/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:attribute>
+
+      <xsl:variable name="next-spread-story" as="element(Spread-Story)?"
+        select="(
+                  $all-new-spreads[ 
+                    . &gt;&gt; $current-spread and
+                    Spread-Story[@StoryName eq $current-spread-story/@StoryName]
+                  ]/Spread-Story[@StoryName eq $current-spread-story/@StoryName]
+                )[1]"/>
+      <xsl:attribute name="NextTextFrame">
+        <xsl:choose>
+          <!-- very last TextFrame for the current Story OR no continuation -->
+          <xsl:when test="@NextTextFrame eq 'n' and
+                          (
+                            not($next-spread-story) or 
+                            $next-spread-story/@StoryContinued eq 'false'
+                          )">
+            <xsl:value-of select="'n'"/>
+          </xsl:when>
+          <!-- non-last TextFrame for the current Story, continued!  -->
+          <xsl:when test="@NextTextFrame eq 'n' and $next-spread-story/@StoryContinued eq 'true'">
+            <xsl:value-of select="concat($next-spread-story/@TextFrameFirst, '_copiedto_', $next-spread-story/../@Self)"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:value-of select="concat(@NextTextFrame, '_copiedto_', $current-spread/@Self)"/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:attribute>
+
+      <xsl:apply-templates select="node()" mode="#default"/>
+    </xsl:copy>
+  </xsl:template>
+  
+  <xsl:template match="node()|@*" mode="default_copy-pages-and-story-textframes-to-new-spreads">
+    <xsl:copy>
+      <xsl:apply-templates select="@*, node()" mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="@Self" mode="default_copy-pages-and-story-textframes-to-new-spreads">
+    <xsl:param name="current-spread" tunnel="yes"/>
+    <xsl:attribute name="Self" select="concat(., '_copiedto_', $current-spread/@Self)"/>
+  </xsl:template>
+
+  <!-- END: create pages and set masterpage properties -->
+
 </xsl:stylesheet>
