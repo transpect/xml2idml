@@ -72,7 +72,7 @@
     select="collection()[2]/xml2idml:document/xml2idml:stories//idPkg:Story/Story/@StoryTitle" />
 
 
-  <xsl:template match="* | @* | processing-instruction()" mode="#default xml2idml:merge_newstories_inner">
+  <xsl:template match="* | @* | processing-instruction()" mode="#default xml2idml:merge_newstories_inner" priority="-1">
     <xsl:copy copy-namespaces="no">
       <xsl:apply-templates select="@*, node()" mode="#current"/>
     </xsl:copy>
@@ -138,17 +138,23 @@
   </xsl:template>
 
   <xsl:template mode="#default"
-    match="idPkg:Story[empty(. intersect $idPkg-stories-to-keep)]" />
+    match="idPkg:Story[empty(. intersect $idPkg-stories-to-keep)]"/>
 
   <xsl:template match="idPkg:Story[exists(. intersect $idPkg-stories-to-keep)]" mode="#default">
     <xsl:copy-of select="." copy-namespaces="no" />
   </xsl:template>
 
+  <!-- save template stories -->
   <xsl:template match="idPkg:Story[
                          not(@src) (: Story in designmap.xml :)
                        ][last()]" mode="#default" priority="2">
     <xsl:choose>
-      <xsl:when test="collection()[2]/xml2idml:document/xml2idml:stories//idPkg:Story and exists(key('xml2idml:story-by-name', 'main', collection()[1]))">
+      <xsl:when test="$xml2idml:use-pages-config
+                      or
+                      (
+                        collection()[2]/xml2idml:document/xml2idml:stories//idPkg:Story and 
+                        exists(key('xml2idml:story-by-name', 'main', collection()[1]))
+                      )">
         <xsl:next-match/>
         <xsl:apply-templates select="collection()[2]/xml2idml:document/xml2idml:stories//idPkg:Story" mode="xml2idml:merge_newstories" />
       </xsl:when>

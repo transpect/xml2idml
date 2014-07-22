@@ -63,7 +63,7 @@
     </xml2idml:document>
   </xsl:template>
 
-  <xsl:template match="*:OtherMappingConfiguration" mode="xml2idml:storify"/>
+  <xsl:template match="/*/xml2idml:OtherMappingConfiguration" mode="xml2idml:storify" priority="100"/>
 
   <!-- Overview of mode="xml2idml:storify" and mode="xml2idml:storify_content-n-cleanup"
        
