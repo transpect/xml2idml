@@ -258,7 +258,7 @@
 
   <p:identity name="stories" />
 
-  <cx:message message="xml2idml: now merging generated stories into template"/>
+  <cx:message message="xml2idml: now merging generated stories into template and creating new spreads eventually"/>
 
   <bc:load-cascaded name="load-merge" fallback="http://transpect.le-tex.de/xml2idml/xsl/merge.xsl">
     <p:with-option name="filename" select="'xml2idml/merge.xsl'"/>
