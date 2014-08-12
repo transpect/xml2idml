@@ -801,8 +801,9 @@
     <xsl:variable name="base-id" select="concat('tb_', generate-id())" as="xs:string"/>
     <Table Self="{$base-id}">
       <xsl:apply-templates select="  @aid5:tablestyle 
-                                   | *:tbody/@data-colcount | @data-colcount
-                                   | *:tbody/@data-rowcount | @data-rowcount" mode="#current" />
+                                   | (@data-colcount, *:tbody/@data-colcount)[1]
+                                   | @data-rowcount
+                                   | *[local-name() = ('thead', 'tbody', 'tfoot')]/@data-rowcount" mode="#current" />
       <xsl:apply-templates select="." mode="xml2idml:storify_table-declarations" />
       <!-- default template rules (i.e., process content): -->
       <xsl:next-match/>
@@ -815,11 +816,16 @@
     <xsl:attribute name="ColumnCount" select="." />
   </xsl:template>
 
-  <!-- §§§ provisional (headers) -->
-  <xsl:template match="@data-rowcount" mode="xml2idml:storify">
+  <xsl:template match="*:thead/@data-rowcount" mode="xml2idml:storify">
+    <xsl:attribute name="HeaderRowCount" select="." />
+  </xsl:template>
+
+  <xsl:template match="*:tbody/@data-rowcount" mode="xml2idml:storify">
     <xsl:attribute name="BodyRowCount" select="." />
-    <xsl:attribute name="HeaderRowCount" select="0" />
-    <xsl:attribute name="FooterRowCount" select="0" />
+  </xsl:template>
+
+  <xsl:template match="*:tfoot/@data-rowcount" mode="xml2idml:storify">
+    <xsl:attribute name="FooterRowCount" select="." />
   </xsl:template>
 
   <xsl:template match="@aid5:tablestyle" mode="xml2idml:storify">
