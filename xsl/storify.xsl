@@ -169,8 +169,15 @@
 
   <xsl:template match="*[@aid:table eq 'cell']" mode="xml2idml:storify" priority="3.5">
     <xsl:variable name="base-id" select="concat('cl_', generate-id())" as="xs:string"/>
+    <xsl:variable name="row-start" as="xs:double"
+      select="sum(
+                ancestor::*[local-name() = ('thead', 'tbody', 'tfoot')][1]
+                  /preceding-sibling::*[local-name() = ('thead', 'tbody')]
+                    /@data-rowcount,
+                0
+              )"/>
     <Cell Self="{$base-id}" 
-      Name="{@data-colnum - 1}:{@data-rownum - 1}"
+      Name="{@data-colnum - 1}:{@data-rownum - 1 + $row-start}"
       RowSpan="{(@rowspan, 1)[1]}" ColumnSpan="{(@colspan, 1)[1]}">
       <xsl:apply-templates select="@aid5:cellstyle" mode="#current" />
       <!-- other rules (create XMLElement, presumably): -->
