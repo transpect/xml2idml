@@ -64,7 +64,7 @@
     </p:otherwise>
   </p:choose>
   
-  <cxf:delete recursive="true">
+  <cxf:delete recursive="true" cx:depends-on="debug-manifest">
     <p:with-option name="href" select="concat($zip-file-uri, '.tmp')" />
     <p:with-option name="fail-on-error" select="'false'" />
   </cxf:delete>
