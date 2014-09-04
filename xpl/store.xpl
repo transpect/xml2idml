@@ -51,7 +51,7 @@
     </p:input>
   </p:xslt>
 
-  <p:choose>
+  <p:choose name="debug-manifest">
     <p:when test="$debug = 'yes'">
       <letex:store-debug pipeline-step="xml2idml/zip-manifest">
         <p:with-option name="active" select="$debug" />
@@ -63,9 +63,8 @@
       <p:sink/>
     </p:otherwise>
   </p:choose>
-
   
-  <cxf:delete recursive="true" >
+  <cxf:delete recursive="true">
     <p:with-option name="href" select="concat($zip-file-uri, '.tmp')" />
     <p:with-option name="fail-on-error" select="'false'" />
   </cxf:delete>
