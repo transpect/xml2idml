@@ -128,8 +128,7 @@
        -->
 
   <xsl:template match="*[@xml2idml:storyname]" mode="xml2idml:storify" priority="4">
-    <!-- DOMVersion 8.0: CS6 -->
-    <idPkg:Story DOMVersion="8.0" xml:base="{concat($base-uri, '/Stories/st_', generate-id(), '.xml')}">
+    <idPkg:Story DOMVersion="{$expanded-template/Document/@DOMVersion}" xml:base="{concat($base-uri, '/Stories/st_', generate-id(), '.xml')}">
       <Story Self="st_{generate-id()}" StoryTitle="{@xml2idml:storyname}">
         <xsl:copy-of select="@xml2idml:keep-xml-space-preserve"/>
         <HiddenText>
@@ -149,7 +148,7 @@
   </xsl:template>
 
   <xsl:template match="*[@xml2idml:ObjectStyle]" mode="xml2idml:storify" priority="4">
-    <idPkg:Story DOMVersion="8.0" xml:base="{concat($base-uri, '/Stories/st_', generate-id(), '.xml')}">
+    <idPkg:Story DOMVersion="{$expanded-template/Document/@DOMVersion}" xml:base="{concat($base-uri, '/Stories/st_', generate-id(), '.xml')}">
       <Story Self="st_{generate-id()}">
         <xsl:choose>
           <xsl:when test="@aid:pstyle">
@@ -410,7 +409,7 @@
 
   <xsl:template match="Story" mode="xml2idml:reproduce-icons">
     <xsl:param name="new-story-id" as="xs:string" tunnel="yes"/>
-    <idPkg:Story DOMVersion="8.0" xml:base="{concat($base-uri, '/Stories/', $new-story-id, '.xml')}">
+    <idPkg:Story DOMVersion="{$expanded-template/Document/@DOMVersion}" xml:base="{concat($base-uri, '/Stories/', $new-story-id, '.xml')}">
       <xsl:copy copy-namespaces="no">
         <xsl:attribute name="Self" select="concat('Story_', $new-story-id)"/>
         <xsl:apply-templates select="@* except @Self, node()" mode="#current" />
@@ -987,15 +986,25 @@
   <xsl:template match="xml2idml:stories/text()" mode="xml2idml:storify_content-n-cleanup" priority="10"/>
   <xsl:template match="@xml2idml:keep-xml-space-preserve" mode="xml2idml:storify_content-n-cleanup"/>
  
+  <xsl:variable name="xml2idml:ignorable-property-elements" as="xs:string*"
+    select="('TextFramePreference', 'BaselineFrameGridOption')"/>
+
+  <xsl:function name="xml2idml:is-children-of-any-settings-element" as="xs:boolean">
+    <xsl:param name="context" as="node()"/>
+    <xsl:sequence select="exists($context/ancestor::*[local-name() = $xml2idml:ignorable-property-elements])"/>
+  </xsl:function>
+
   <!-- The next stylerange when looking upwards is a ParagraphStyleRange (i.e., CharacterStyleRange is missing yet) -->
-  <xsl:template match="node()[
+  <xsl:template match="node()
+                             [
+                                not(xml2idml:is-children-of-any-settings-element(.))
+                             ][
                                 self::text()[not(parent::Contents)] or 
                                 self::Table or 
                                 self::Footnote or 
                                 self::Note or 
                                 self::TextFrame[not(parent::Group)]
-                             ]
-                             [
+                             ][
                                (ancestor::ParagraphStyleRange | ancestor::CharacterStyleRange)[last()]/self::ParagraphStyleRange
                                or
                                self::Table[not(ancestor::CharacterStyleRange)]
@@ -1054,7 +1063,9 @@
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
 
-  <xsl:template match="text()[not(parent::Content or parent::Contents)]" mode="xml2idml:storify_content-n-cleanup">
+  <!-- text node without surrounding Content element -->
+  <xsl:template match="text()[not(xml2idml:is-children-of-any-settings-element(.))]
+                             [not(parent::Content or parent::Contents)]" mode="xml2idml:storify_content-n-cleanup">
     <Content>
       <xsl:choose>
         <xsl:when test="ancestor::*[@xml2idml:keep-xml-space-preserve eq 'true'] and 
