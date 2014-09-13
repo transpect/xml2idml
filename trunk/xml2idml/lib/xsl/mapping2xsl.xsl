@@ -68,18 +68,16 @@
     <xsl:variable name="highest-priority-of-current" as="xs:double"
       select="max((doc(@href)/mapping-instructions//path/@priority, 0))"/>
 
-    <xsl:variable name="lowest-priority" as="xs:double"
-        select="(1 + abs($lowest-priority-of-parent) + abs($lowest-priority-of-current)) * -1"/>
+    <xsl:variable name="lowhighest-possible-priority-for-current" as="xs:double"
+      select="$lowest-priority-of-parent + $lowest-priority-of-current + (-1 * abs($highest-priority-of-current)) - 1"/>
 
     <mapping-instructions included="true" 
-      highest-mapping-priority-of-current="{$highest-priority-of-current}"
-      lowest-mapping-priority-of-parent="{$lowest-priority-of-parent}"
+      lowhighest-possible-priority-for-current="{$lowhighest-possible-priority-for-current}"
       xmlns="http://www.le-tex.de/namespace/xml2idml">
       <xsl:apply-templates mode="#current" select="doc(@href)/mapping-instructions/@*"/>
-      <xsl:message select="concat(' including mapping (with calculated highest possible priority of ', $lowest-priority, '):&#xa;', @href)"/>
       <xsl:apply-templates mode="#current" select="doc(@href)/mapping-instructions/node()">
         <xsl:with-param name="lowest-priority-of-parent" tunnel="yes"
-          select="$lowest-priority"/>
+          select="$lowhighest-possible-priority-for-current"/>
       </xsl:apply-templates>
     </mapping-instructions>
   </xsl:template>
@@ -93,13 +91,12 @@
        the namespace already changed from xslout to xsl -->
 
   <xsl:template match="xsl:template[@match]" mode="xml2idml:set-lower-priority-and-clean">
+    <xsl:param name="lowhighest-possible-priority-for-current" tunnel="yes" as="xs:double"/>
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current" />
       <!-- set new priority: an included template cannot have more importance than the including one -->
-      <xsl:attribute name="priority" 
-        select="xs:double((@priority, 0)[1]) 
-                - abs(ancestor::xml2idml:mapping-instructions[1]/@highest-mapping-priority-of-current) 
-                - abs(ancestor::xml2idml:mapping-instructions[1]/@lowest-mapping-priority-of-parent)"/>
+      <xsl:attribute name="priority"
+        select="xs:double((@priority, 0)[1]) + $lowhighest-possible-priority-for-current"/>
       <xsl:apply-templates select="node()" mode="#current" />
     </xsl:copy>
   </xsl:template>
@@ -110,7 +107,10 @@
       select="@*, 
               ancestor::mapping-instructions[1]/@*,
               ancestor::mapping-instructions[1],
-              node()[not(self::mapping-instructions)]" />
+              node()[not(self::mapping-instructions)]">
+      <xsl:with-param name="lowhighest-possible-priority-for-current" as="xs:double"
+        select="@lowhighest-possible-priority-for-current" tunnel="yes"/>
+    </xsl:apply-templates>
   </xsl:template>
 
   <xsl:template match="mapping-instructions/import" mode="xml2idml:set-lower-priority-and-clean"
@@ -181,12 +181,7 @@
       
       <xsl:copy-of select="$included-mappings/@xpath-default-namespace,
                            @xpath-default-namespace" />
-
-      <!--
-        DEBUG_included-mappings_START
-        <xsl:sequence select="$included-mappings"/>
-        DEBUG_included-mappings_END
-      -->
+      
       <xslout:import href="{resolve-uri('util.xsl')}" />
       <xslout:import href="http://transpect.le-tex.de/xslt-util/lengths/lengths.xsl" />
       <xsl:apply-templates select="import[not(@href = $included-mappings/import/@href)],
