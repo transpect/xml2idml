@@ -716,7 +716,7 @@
   <xsl:function name="xml2idml:insert-special-char-wrapper" as="element(CharacterStyleRange)">
     <xsl:param name="cstyle-node" as="element(*)" />
     <xsl:sequence select="xml2idml:insert-csr-wrapper(
-                            xs:string($cstyle-node/@xml2idml:insert-special-format),
+                            (xs:string($cstyle-node/@xml2idml:insert-special-format), '')[1],
                             xml2idml:insert-special-char($cstyle-node/@xml2idml:insert-special-char)
                           )"/>
   </xsl:function>
