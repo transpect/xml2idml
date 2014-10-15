@@ -230,6 +230,7 @@
         select="for $i in .//@TextFrames return tokenize($i, '\s+')"/>
       <xsl:element name="idPkg:Spread">
         <xsl:attribute name="xml:base" select="concat( $spreads-base-dir, @Self, '.xml' )"/>
+        <xsl:attribute name="DOMVersion" select="collection()[1]/*/@DOMVersion"/>
         <xsl:element name="Spread">
           <xsl:apply-templates select="@*[name() != 'masterspread-self'][ . ne '']" mode="#current"/>
           <xsl:apply-templates mode="default_copy-pages-and-story-textframes-to-new-spreads"
