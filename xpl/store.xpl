@@ -4,7 +4,7 @@
   xmlns:cx="http://xmlcalabash.com/ns/extensions"
   xmlns:cxf="http://xmlcalabash.com/ns/extensions/fileutils"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
-  xmlns:bc="http://transpect.le-tex.de/book-conversion"
+  xmlns:transpect="http://www.le-tex.de/namespace/transpect"
   xmlns:xml2idml  = "http://www.le-tex.de/namespace/xml2idml"
   xmlns:letex="http://www.le-tex.de/namespace"
   version="1.0"
@@ -27,7 +27,7 @@
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl" />
   <p:import href="http://transpect.le-tex.de/xproc-util/store-debug/store-debug.xpl" />
 
-  <bc:load-cascaded name="load-serialize-compound-idml-xsl" 
+  <transpect:load-cascaded name="load-serialize-compound-idml-xsl" 
     fallback="http://transpect.le-tex.de/xml2idml/xsl/serialize-compound-idml.xsl">
     <p:with-option name="filename" select="'xml2idml/serialize-compound-idml.xsl'"/>
     <p:with-option name="set-xml-base-attribute" select="'no'"/>
@@ -36,7 +36,7 @@
     </p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
-  </bc:load-cascaded>
+  </transpect:load-cascaded>
 
   <p:sink/>
 

@@ -6,6 +6,7 @@
   xmlns:bc="http://transpect.le-tex.de/book-conversion"
   xmlns:idml2xml  = "http://www.le-tex.de/namespace/idml2xml"
   xmlns:xml2idml  = "http://www.le-tex.de/namespace/xml2idml"
+  xmlns:transpect="http://www.le-tex.de/namespace/transpect"
   xmlns:letex="http://www.le-tex.de/namespace"
   version="1.0"
   name="add-aid"
@@ -30,7 +31,7 @@
     <p:input port="source"><p:empty/></p:input>
   </cx:message>
 
-  <bc:load-cascaded name="load-mapping-rng" fallback="http://transpect.le-tex.de/xml2idml/schema/mapping.rng">
+  <transpect:load-cascaded name="load-mapping-rng" fallback="http://transpect.le-tex.de/xml2idml/schema/mapping.rng">
     <p:with-option name="filename" select="'xml2idml/mapping.rng'"/>
     <p:with-option name="set-xml-base-attribute" select="'yes'"/>
     <p:input port="paths">
@@ -38,11 +39,11 @@
     </p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
-  </bc:load-cascaded>
+  </transpect:load-cascaded>
 
   <p:sink/>
 
-  <bc:load-cascaded name="load-mapping-xsl" fallback="http://transpect.le-tex.de/xml2idml/xsl/mapping2xsl.xsl">
+  <transpect:load-cascaded name="load-mapping-xsl" fallback="http://transpect.le-tex.de/xml2idml/xsl/mapping2xsl.xsl">
     <p:with-option name="filename" select="'xml2idml/mapping2xsl.xsl'"/>
     <p:with-option name="set-xml-base-attribute" select="'yes'"/>
     <p:input port="paths">
@@ -50,7 +51,7 @@
     </p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
-  </bc:load-cascaded>
+  </transpect:load-cascaded>
 
   <p:sink/>
 
