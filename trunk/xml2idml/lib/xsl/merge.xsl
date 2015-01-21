@@ -235,7 +235,7 @@
           <xsl:apply-templates select="@*[name() != 'masterspread-self'][ . ne '']" mode="#current"/>
           <xsl:apply-templates mode="default_copy-pages-and-story-textframes-to-new-spreads"
             select="collection()[1]//MasterSpread[@Self eq current()/@masterspread-self]/Page,
-                    collection()[1]//MasterSpread/TextFrame[
+                    collection()[1]//MasterSpread//TextFrame[
                       @Self = $all-story-textframes
                     ]">
             <xsl:with-param name="current-spread" select="." tunnel="yes"/>
