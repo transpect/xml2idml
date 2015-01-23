@@ -29,7 +29,7 @@
       <xsl:variable name="defined-styles" as="xs:string+"
         select="*[local-name() eq $style-type]/@Self 
                 union 
-                *[local-name() eq concat( $style-type, 'Group') ]/*[local-name() eq $style-type]/@Self"/>
+                *[local-name() eq concat( $style-type, 'Group') ]//*[local-name() eq $style-type]/@Self"/>
       <xsl:variable name="elementname-to-check" as="xs:string">
         <xsl:choose>
           <xsl:when test="$style-type eq 'ObjectStyle'">
@@ -51,7 +51,7 @@
         <xsl:if test="not(current() = $defined-styles)">
           <xsl:variable name="style-name-displayed" as="xs:string?"
             select="substring-after(current(), concat($style-type, '/'))"/>
-          <xsl:message select="$style-type, ' not defined in template:', $style-name-displayed"/>
+          <xsl:message select="concat($style-type, ' not defined in template: ', $style-name-displayed)"/>
           <xsl:element name="{$style-type}">
             <xsl:attribute name="Self" select="current()" />
             <xsl:attribute name="Name" select="$style-name-displayed"/>
