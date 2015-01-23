@@ -5,6 +5,7 @@
   xmlns:s="http://purl.oclc.org/dsdl/schematron"
   xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0"
   xmlns:html="http://www.w3.org/1999/xhtml"
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:xml2idml="http://www.le-tex.de/namespace/xml2idml"
   datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"
   ns="http://www.le-tex.de/namespace/xml2idml"
@@ -14,13 +15,14 @@
   <s:ns prefix="xlink" uri="http://www.w3.org/1999/xlink"/>
   <s:ns prefix="xml2idml" uri="http://www.le-tex.de/namespace/xml2idml"/>
 
-  <html:h1>XML to IDML converter</html:h1>
+  <html:h1>Mapping schema for the le-tex XML to IDML converter</html:h1>
 
   <start>
     <ref name="mapping.instructions"/>
   </start>
 
   <define name="mapping.instructions">
+    <a:documentation>The element mapping-instructions is the root element.</a:documentation>
     <element name="mapping-instructions">
       <ref name="mapping.att.xpath-default-namespace"/>
       <ref name="mapping.att.retain-tagging"/>
@@ -526,6 +528,14 @@
             <optional>
               <ref name="mapping.model.insert-special-char"/>
             </optional>
+            <s:pattern>
+              <s:rule context="xml2idml:insert-content">
+                <s:report test="@method eq ../xml2idml:insert-special-char/@method" role="Info">
+                  If both elements insert-content and insert-special-char are using 
+                  the same method (=<xsl:value-of select="@method"/>), the special-char 
+                  will be output first and the new content of insert-content second.</s:report>
+              </s:rule>
+            </s:pattern>
           </interleave>
         </group>
       </choice>
