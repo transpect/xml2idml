@@ -521,10 +521,10 @@
           <interleave>
             <ref name="mapping.model.simple"/>
             <optional>
-              <interleave>
-                <ref name="mapping.model.insert-content"/>
-                <ref name="mapping.model.insert-special-char"/>                
-              </interleave>
+              <ref name="mapping.model.insert-content"/>
+            </optional>
+            <optional>
+              <ref name="mapping.model.insert-special-char"/>
             </optional>
           </interleave>
         </group>
