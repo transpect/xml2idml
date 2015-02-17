@@ -37,8 +37,8 @@
       <p>URI where the generated idml will be saved. Possibilities:</p>
       <ul>
         <li>leave it empty to save the idml near input source xml file (only file suffix is changed)</li>
-        <li>absolute path to an file.</li>
-        <li>absolute path to an directory (path ends with '/'). Filename taken from base-uri().</li>
+        <li>absolute path to a file.</li>
+        <li>absolute path to a directory (path ends with '/'). Filename taken from base-uri().</li>
       </ul>
     </p:documentation>
   </p:option>
