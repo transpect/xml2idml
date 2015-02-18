@@ -285,7 +285,7 @@
   </xsl:template>
   
   <xsl:variable name="distinct-topics" as="xs:string*"
-    select="distinct-values(for $i in //*[@xml2idml:is-indexterm-level] return xml2idml:generate-ReferencedTopic($i))"/>
+    select="distinct-values(for $i in //*[@xml2idml:is-indexterm-level][. != ''] return xml2idml:generate-ReferencedTopic($i))"/>
   
   <!-- function xml2idml:build-topic-structure
        param topics example: ('TopicnFaceTopicnEyesTopicnGreen', 'TopicnFaceTopicnNoise') (without @Self prefix!) -->
