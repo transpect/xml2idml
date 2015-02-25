@@ -575,7 +575,8 @@
     <xsl:param name="mapped-image" as="element()"/>
     <xsl:variable name="created-image" as="element()?">
       <xsl:choose>
-        <xsl:when test="not(unparsed-text-available($mapped-image/@xml2idml:image-path))">
+        <xsl:when test="not(unparsed-text-available($mapped-image/@xml2idml:image-path)) and
+                        not(unparsed-text-available(concat($mapped-image/@xml2idml:image-path, '.ASCII')))">
           <xsl:sequence select="xml2idml:output-warning-image-path-not-available($mapped-image)"/>
         </xsl:when>
         <xsl:otherwise>
@@ -633,18 +634,22 @@
     <xsl:param name="mapped-image" as="element()"/>
     <xsl:variable name="mime-type" as="xs:string"
       select="letex:fileext-to-mime-type($mapped-image/@xml2idml:image-path)"/>
+    <xsl:variable name="unparsed-text" as="xs:string*"
+      select="if(unparsed-text-available(concat($mapped-image/@xml2idml:image-path, '.ASCII')))
+              then unparsed-text(concat($mapped-image/@xml2idml:image-path, '.ASCII'))
+              else unparsed-text($mapped-image/@xml2idml:image-path)"/>
     <xsl:variable name="new-image" as="element(xml2idml:image)">
       <xml2idml:image>
         <xsl:attribute name="mime-type" select="$mime-type"/>
         <xsl:choose>
           <xsl:when test="$mime-type eq 'image/x-eps'">
             <xsl:variable name="boundingbox" as="xs:string"
-              select="tokenize(unparsed-text($mapped-image/@xml2idml:image-path),
+              select="tokenize($unparsed-text,
                         '\n'
                       )[matches(., '^%%(HiRes)?BoundingBox:')][last()]"/>
-            <xsl:attribute name="width" select="replace($boundingbox, '^[^:]+:\s[\d.]+\s[\d.]+\s([\d.]+)\s[\d.]+$', '$1')"/>
-            <xsl:attribute name="height" select="replace($boundingbox, '^[^:]+:\s[\d.]+\s[\d.]+\s[\d.]+\s([\d.]+)$', '$1')"/>
-            <xsl:attribute name="height" select="replace($boundingbox, '^[^:]+:\s[\d.]+\s[\d.]+\s[\d.]+\s([\d.]+)$', '$1')"/>
+            <xsl:attribute name="width" select="replace($boundingbox, '^[^:]+:\s[-]?[\d.]+\s[-]?[\d.]+\s([\d.]+)\s[\d.]+$', '$1')"/>
+            <xsl:attribute name="height" select="replace($boundingbox, '^[^:]+:\s[-]?[\d.]+\s[-]?[\d.]+\s[\d.]+\s([\d.]+)$', '$1')"/>
+            <xsl:attribute name="height" select="replace($boundingbox, '^[^:]+:\s[-]?[\d.]+\s[-]?[\d.]+\s[\d.]+\s([\d.]+)$', '$1')"/>
           </xsl:when>
           <xsl:otherwise>
             <xsl:message select="'xml2idml, function xml2idml:get-image-info: mime-type of ', $mapped-image/@xml2idml:image-path, 'unknown!'"/>
