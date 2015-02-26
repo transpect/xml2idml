@@ -170,12 +170,20 @@
     <xsl:variable name="base-id" select="concat('cl_', generate-id())" as="xs:string"/>
     <xsl:variable name="row-start" as="xs:double"
       select="sum(
-                ancestor::*[local-name() = ('thead', 'tbody', 'tfoot')][1]
-                  /preceding-sibling::*[local-name() = ('thead', 'tbody')]
-                    /@data-rowcount,
+                if(ancestor::*[local-name() = ('thead', 'tbody', 'tfoot')][1]/self::*:thead) 
+                then 0
+                else 
+                  if(ancestor::*[local-name() = ('thead', 'tbody', 'tfoot')][1]/self::*:tbody) 
+                  then ancestor::*:tbody[1]
+                      /preceding-sibling::*:thead
+                        /@data-rowcount
+                  else
+                    ancestor::*:tfoot[1]
+                      /preceding-sibling::*[local-name() = ('thead', 'tbody')]
+                        /@data-rowcount,
                 0
               )"/>
-    <Cell Self="{$base-id}" 
+    <Cell Self="{$base-id}"
       Name="{@data-colnum - 1}:{@data-rownum - 1 + $row-start}"
       RowSpan="{(@rowspan, 1)[1]}" ColumnSpan="{(@colspan, 1)[1]}">
       <xsl:apply-templates select="@aid5:cellstyle" mode="#current" />
@@ -1020,7 +1028,7 @@
     </CharacterStyleRange>
   </xsl:template>
 
-  <xsl:template match="Table[ not(ancestor::ParagraphStyleRange) ]" 
+  <xsl:template match="Table[ not(ancestor::ParagraphStyleRange) ] | Cell/Table" 
     mode="xml2idml:storify_content-n-cleanup" priority="3">
     <ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/NormalParagraphStyle">
       <xsl:next-match/>
