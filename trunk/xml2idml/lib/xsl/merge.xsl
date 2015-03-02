@@ -46,7 +46,7 @@
   <xsl:variable name="stories-to-keep" as="element(Story)*" 
     select="key('xml2idml:story-by-name', collection()[2]/*/@xml2idml:keep-stories, collection()[1])
             union (: keep all Stories in MasterSpreads :)
-            key('xml2idml:story-by-self', collection()[1]/Document/idPkg:MasterSpread/MasterSpread/TextFrame/@ParentStory, collection()[1])
+            key('xml2idml:story-by-self', collection()[1]/Document/idPkg:MasterSpread/MasterSpread//TextFrame/@ParentStory, collection()[1])
               [not(xml2idml:story-name-from-conditional-text(.) = tokenize(collection()[2]/*/@xml2idml:keep-stories, '\s+'))]" />
 
   <xsl:function name="xml2idml:resolve-dependent-stories" as="element(Story)*">
