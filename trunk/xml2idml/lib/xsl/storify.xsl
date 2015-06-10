@@ -128,7 +128,8 @@
        -->
 
   <xsl:template match="*[@xml2idml:storyname]" mode="xml2idml:storify" priority="4">
-    <idPkg:Story DOMVersion="{$expanded-template/Document/@DOMVersion}" xml:base="{concat($base-uri, '/Stories/st_', generate-id(), '.xml')}">
+    <idPkg:Story DOMVersion="{$expanded-template/Document/@DOMVersion}">
+      <xsl:attribute name="xml:base" select="concat($base-uri, '/Stories/st_', generate-id(), '.xml')"/>
       <Story Self="st_{generate-id()}" StoryTitle="{@xml2idml:storyname}">
         <xsl:copy-of select="@xml2idml:keep-xml-space-preserve"/>
         <HiddenText>
@@ -148,7 +149,8 @@
   </xsl:template>
 
   <xsl:template match="*[@xml2idml:ObjectStyle]" mode="xml2idml:storify" priority="4">
-    <idPkg:Story DOMVersion="{$expanded-template/Document/@DOMVersion}" xml:base="{concat($base-uri, '/Stories/st_', generate-id(), '.xml')}">
+    <idPkg:Story DOMVersion="{$expanded-template/Document/@DOMVersion}">
+      <xsl:attribute name="xml:base" select="concat($base-uri, '/Stories/st_', generate-id(), '.xml')"/>
       <Story Self="st_{generate-id()}">
         <xsl:choose>
           <xsl:when test="@aid:pstyle">
@@ -417,7 +419,8 @@
 
   <xsl:template match="Story" mode="xml2idml:reproduce-icons">
     <xsl:param name="new-story-id" as="xs:string" tunnel="yes"/>
-    <idPkg:Story DOMVersion="{$expanded-template/Document/@DOMVersion}" xml:base="{concat($base-uri, '/Stories/', $new-story-id, '.xml')}">
+    <idPkg:Story DOMVersion="{$expanded-template/Document/@DOMVersion}">
+      <xsl:attribute name="xml:base" select="concat($base-uri, '/Stories/', $new-story-id, '.xml')"/>
       <xsl:copy copy-namespaces="no">
         <xsl:attribute name="Self" select="concat('Story_', $new-story-id)"/>
         <xsl:apply-templates select="@* except @Self, node()" mode="#current" />
