@@ -3,9 +3,9 @@
    version="2.0" 
    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
    xmlns:xslout="bogo"
-   xmlns:xml2idml="http://www.le-tex.de/namespace/xml2idml"
-   xmlns:htmltable="http://www.le-tex.de/namespace/htmltable"
-   xmlns:letex="http://www.le-tex.de/namespace"
+   xmlns:xml2idml="http://transpect.io/xml2idml"
+   xmlns:htmltable="http://transpect.io/htmltable"
+   xmlns:tr="http://transpect.io"
    xmlns:saxon="http://saxon.sf.net/"
    xmlns:xs="http://www.w3.org/2001/XMLSchema"
    >
@@ -396,7 +396,7 @@
 
   <xsl:template match="ObjectStyles/mapping-instruction/*[self::width or self::height][@type eq 'xml2idml:static-dimension']" 
     xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml" mode="xml2idml:style-atts">
-    <xslout:attribute name="xml2idml:{name()}" select="letex:length-to-unitless-twip({@select}) * 0.05" />
+    <xslout:attribute name="xml2idml:{name()}" select="tr:length-to-unitless-twip({@select}) * 0.05" />
   </xsl:template>
   
 

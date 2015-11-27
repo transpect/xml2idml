@@ -3,11 +3,9 @@
   xmlns:c="http://www.w3.org/ns/xproc-step"  
   xmlns:cx="http://xmlcalabash.com/ns/extensions"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
-  xmlns:bc="http://transpect.le-tex.de/book-conversion"
-  xmlns:idml2xml  = "http://www.le-tex.de/namespace/idml2xml"
-  xmlns:xml2idml  = "http://www.le-tex.de/namespace/xml2idml"
-  xmlns:transpect="http://www.le-tex.de/namespace/transpect"
-  xmlns:letex="http://www.le-tex.de/namespace"
+  xmlns:idml2xml  = "http://transpect.io/idml2xml"
+  xmlns:xml2idml  = "http://transpect.io/xml2idml"
+  xmlns:tr="http://transpect.io"
   version="1.0"
   name="add-aid"
   type="xml2idml:add-aid"
@@ -24,14 +22,14 @@
   <p:output port="result" primary="true" />
 
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl" />
-  <p:import href="http://transpect.le-tex.de/calabash-extensions/ltx-validate-with-rng/rng-validate-to-PI.xpl"/>
-  <p:import href="http://transpect.le-tex.de/xproc-util/store-debug/store-debug.xpl" />
+  <p:import href="http://transpect.io/calabash-extensions/rng-extension/xpl/rng-validate-to-PI.xpl"/>
+  <p:import href="http://transpect.io/xproc-util/store-debug/xpl/store-debug.xpl" />
 
   <cx:message message="xml2idml (add-aid): validating mapping xml">
     <p:input port="source"><p:empty/></p:input>
   </cx:message>
 
-  <transpect:load-cascaded name="load-mapping-rng" fallback="http://transpect.le-tex.de/xml2idml/schema/mapping.rng">
+  <tr:load-cascaded name="load-mapping-rng" fallback="http://transpect.io/xml2idml/schema/mapping.rng">
     <p:with-option name="filename" select="'xml2idml/mapping.rng'"/>
     <p:with-option name="set-xml-base-attribute" select="'yes'"/>
     <p:input port="paths">
@@ -39,11 +37,11 @@
     </p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
-  </transpect:load-cascaded>
+  </tr:load-cascaded>
 
   <p:sink/>
 
-  <transpect:load-cascaded name="load-mapping-xsl" fallback="http://transpect.le-tex.de/xml2idml/xsl/mapping2xsl.xsl">
+  <tr:load-cascaded name="load-mapping-xsl" fallback="http://transpect.io/xml2idml/xsl/mapping2xsl.xsl">
     <p:with-option name="filename" select="'xml2idml/mapping2xsl.xsl'"/>
     <p:with-option name="set-xml-base-attribute" select="'yes'"/>
     <p:input port="paths">
@@ -51,11 +49,11 @@
     </p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
-  </transpect:load-cascaded>
+  </tr:load-cascaded>
 
   <p:sink/>
 
-  <letex:validate-with-rng-PI name="validate-mapping">
+  <tr:validate-with-rng-PI name="validate-mapping">
     <p:input port="source">
       <p:pipe step="add-aid" port="mapping-xml"/>
     </p:input>
@@ -64,7 +62,7 @@
     </p:input>
     <p:with-option name="debug" select="'yes'"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
-  </letex:validate-with-rng-PI>
+  </tr:validate-with-rng-PI>
 
   <cx:message message="xml2idml (add-aid): validated. now generating mapping"/>
 
@@ -79,11 +77,11 @@
     </p:input>
   </p:xslt>
 
-  <letex:store-debug pipeline-step="xml2idml/add-aid-attributes/map">
+  <tr:store-debug pipeline-step="xml2idml/add-aid-attributes/map">
     <p:with-option name="active" select="$debug" />
     <p:with-option name="extension" select="'xsl'" />
     <p:with-option name="base-uri" select="$debug-dir-uri" />
-  </letex:store-debug>
+  </tr:store-debug>
 
   <cx:message message="xml2idml (add-aid): generated mapping"/>
 
@@ -104,9 +102,9 @@
 
   <cx:message message="xml2idml (add-aid): mapped"/>
 
-  <letex:store-debug pipeline-step="xml2idml/add-aid-attributes/mapped">
+  <tr:store-debug pipeline-step="xml2idml/add-aid-attributes/mapped">
     <p:with-option name="active" select="$debug" />
     <p:with-option name="base-uri" select="$debug-dir-uri" />
-  </letex:store-debug>
+  </tr:store-debug>
 
 </p:declare-step>

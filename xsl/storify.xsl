@@ -5,21 +5,21 @@
   xmlns:aid="http://ns.adobe.com/AdobeInDesign/4.0/"
   xmlns:aid5="http://ns.adobe.com/AdobeInDesign/5.0/"
   xmlns:idPkg = "http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging"
-  xmlns:xml2idml="http://www.le-tex.de/namespace/xml2idml"
-  xmlns:idml2xml  = "http://www.le-tex.de/namespace/idml2xml"
-  xmlns:letex="http://www.le-tex.de/namespace"
+  xmlns:xml2idml="http://transpect.io/xml2idml"
+  xmlns:idml2xml  = "http://transpect.io/idml2xml"
+  xmlns:tr="http://transpect.io"
   xmlns:css="http://www.w3.org/1996/css"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
-  exclude-result-prefixes="css letex xs xml2idml idml2xml"
+  exclude-result-prefixes="css tr xs xml2idml idml2xml"
   >
 
   <!-- collection()[1]/* is the mapped document.
        collection()[2]/* is the /Document (expanded IDML template)
   -->
 
-  <xsl:import href="http://transpect.le-tex.de/idml2xml/xslt/common-functions.xsl" />
-  <xsl:import href="http://transpect.le-tex.de/xslt-util/lengths/lengths.xsl" />
-  <xsl:import href="http://transpect.le-tex.de/xslt-util/mime-type/mime-type.xsl" />
+  <xsl:import href="http://transpect.io/idml2xml/xsl/common-functions.xsl" />
+  <xsl:import href="http://transpect.io/xslt-util/lengths/xsl/lengths.xsl" />
+  <xsl:import href="http://transpect.io/xslt-util/mime-type/xsl/mime-type.xsl" />
 
   <xsl:param name="base-uri" as="xs:string" />
 
@@ -644,7 +644,7 @@
   <xsl:function name="xml2idml:get-image-info" as="element(xml2idml:image)">
     <xsl:param name="mapped-image" as="element()"/>
     <xsl:variable name="mime-type" as="xs:string"
-      select="letex:fileext-to-mime-type($mapped-image/@xml2idml:image-path)"/>
+      select="tr:fileext-to-mime-type($mapped-image/@xml2idml:image-path)"/>
     <xsl:variable name="unparsed-text" as="xs:string*"
       select="if(unparsed-text-available(concat($mapped-image/@xml2idml:image-path, '.ASCII')))
               then unparsed-text(concat($mapped-image/@xml2idml:image-path, '.ASCII'))
@@ -922,7 +922,7 @@
                 )
                 else '2000'"/><!-- 2000 is a default twips value (100pt) -->
     <Column Self="col_{generate-id()}_{position() - 1}" Name="{position() - 1}"
-      SingleColumnWidth="{(letex:length-to-unitless-twip($width), 2000)[1] * 0.05}" />
+      SingleColumnWidth="{(tr:length-to-unitless-twip($width), 2000)[1] * 0.05}" />
   </xsl:template>
 
 
@@ -945,10 +945,10 @@
       AppliedObjectStyle="{$AppliedObjectStyle}"
       xml2idml:anchoring="{@xml2idml:anchoring}">
       <xsl:if test="$xml2idml:use-main-story-width-for-textframes">
-        <TextFramePreference TextColumnFixedWidth="{(letex:length-to-unitless-twip($text-width), 2000)[1] * 0.05}" 
-        UseFixedColumnWidth="true"
-        AutoSizingType="HeightOnly"
-        AutoSizingReferencePoint="TopCenterPoint"/>
+        <TextFramePreference TextColumnFixedWidth="{(tr:length-to-unitless-twip($text-width), 2000)[1] * 0.05}" 
+                             UseFixedColumnWidth="true"
+                             AutoSizingType="HeightOnly"
+                             AutoSizingReferencePoint="TopCenterPoint"/>
       </xsl:if>
       <xsl:if test="exists($expanded-template)">
         <xsl:copy-of select="key('object', $AppliedObjectStyle, $expanded-template)[1]/*" />

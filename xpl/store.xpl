@@ -4,9 +4,8 @@
   xmlns:cx="http://xmlcalabash.com/ns/extensions"
   xmlns:cxf="http://xmlcalabash.com/ns/extensions/fileutils"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
-  xmlns:transpect="http://www.le-tex.de/namespace/transpect"
-  xmlns:xml2idml  = "http://www.le-tex.de/namespace/xml2idml"
-  xmlns:letex="http://www.le-tex.de/namespace"
+  xmlns:tr="http://transpect.io"
+  xmlns:xml2idml  = "http://transpect.io/xml2idml"
   version="1.0"
   name="store"
   type="xml2idml:store"
@@ -25,10 +24,10 @@
   <p:serialization port="result" indent="true" omit-xml-declaration="false"/>
 
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl" />
-  <p:import href="http://transpect.le-tex.de/xproc-util/store-debug/store-debug.xpl" />
+  <p:import href="http://transpect.io/xproc-util/store-debug/xpl/store-debug.xpl" />
 
-  <transpect:load-cascaded name="load-serialize-compound-idml-xsl" 
-    fallback="http://transpect.le-tex.de/xml2idml/xsl/serialize-compound-idml.xsl">
+  <tr:load-cascaded name="load-serialize-compound-idml-xsl" 
+    fallback="http://transpect.io/xml2idml/xsl/serialize-compound-idml.xsl">
     <p:with-option name="filename" select="'xml2idml/serialize-compound-idml.xsl'"/>
     <p:with-option name="set-xml-base-attribute" select="'no'"/>
     <p:input port="paths">
@@ -36,7 +35,7 @@
     </p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
-  </transpect:load-cascaded>
+  </tr:load-cascaded>
 
   <p:sink/>
 
@@ -53,10 +52,10 @@
 
   <p:choose name="debug-manifest">
     <p:when test="$debug = 'yes'">
-      <letex:store-debug pipeline-step="xml2idml/zip-manifest">
+      <tr:store-debug pipeline-step="xml2idml/zip-manifest">
         <p:with-option name="active" select="$debug" />
         <p:with-option name="base-uri" select="$debug-dir-uri" />
-      </letex:store-debug>
+      </tr:store-debug>
       <p:sink/>
     </p:when>
     <p:otherwise>

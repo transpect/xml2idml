@@ -6,14 +6,14 @@
   xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0"
   xmlns:html="http://www.w3.org/1999/xhtml"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-  xmlns:xml2idml="http://www.le-tex.de/namespace/xml2idml"
+  xmlns:xml2idml="http://transpect.io/xml2idml"
   datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"
   ns="http://www.le-tex.de/namespace/xml2idml"
   >
 
   <s:ns prefix="css" uri="http://www.w3.org/1996/css"/>
   <s:ns prefix="xlink" uri="http://www.w3.org/1999/xlink"/>
-  <s:ns prefix="xml2idml" uri="http://www.le-tex.de/namespace/xml2idml"/>
+  <s:ns prefix="xml2idml" uri="http://transpect.io/xml2idml"/>
 
   <html:h1>Mapping schema for the le-tex XML to IDML converter</html:h1>
 

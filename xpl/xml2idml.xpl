@@ -4,13 +4,12 @@
   xmlns:c="http://www.w3.org/ns/xproc-step"  
   xmlns:cx="http://xmlcalabash.com/ns/extensions"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
-  xmlns:transpect="http://www.le-tex.de/namespace/transpect"
-  xmlns:xml2idml="http://www.le-tex.de/namespace/xml2idml"
-  xmlns:idml2xml="http://www.le-tex.de/namespace/idml2xml"
-  xmlns:letex="http://www.le-tex.de/namespace"
+  xmlns:tr="http://transpect.io"
+  xmlns:xml2idml="http://transpect.io/xml2idml"
+  xmlns:idml2xml="http://transpect.io/idml2xml"
   version="1.0"
   name="xml2idml"
-  type="transpect:xml2idml"
+  type="tr:xml2idml"
   >
 
   <p:input port="source" primary="true">
@@ -56,15 +55,15 @@
   <p:serialization port="result" indent="true" omit-xml-declaration="false"/>
 
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl" />
-  <p:import href="http://transpect.le-tex.de/book-conversion/converter/xpl/dynamic-transformation-pipeline.xpl"/>
-  <p:import href="http://transpect.le-tex.de/book-conversion/converter/xpl/load-cascaded.xpl"/>
-  <p:import href="http://transpect.le-tex.de/book-conversion/converter/xpl/simple-progress-msg.xpl"/>
-  <p:import href="http://transpect.le-tex.de/calabash-extensions/ltx-lib.xpl" />
-  <p:import href="http://transpect.le-tex.de/xproc-util/store-debug/store-debug.xpl" />
+  <p:import href="http://transpect.io/cascade/xpl/dynamic-transformation-pipeline.xpl"/>
+  <p:import href="http://transpect.io/cascade/xpl/load-cascaded.xpl"/>
+  <p:import href="http://transpect.io/xproc-util/simple-progress-msg/xpl/simple-progress-msg.xpl"/>
+  <p:import href="http://transpect.io/calabash-extensions/transpect-lib.xpl" />
+  <p:import href="http://transpect.io/xproc-util/store-debug/xpl/store-debug.xpl" />
   <p:import href="add-aid-attributes.xpl" />
   <p:import href="store.xpl" />
 
-  <letex:simple-progress-msg name="start-xml2idml-msg" file="xml2idml-start.txt">
+  <tr:simple-progress-msg name="start-xml2idml-msg" file="xml2idml-start.txt">
     <p:input port="msgs">
       <p:inline>
         <c:messages>
@@ -74,7 +73,7 @@
       </p:inline>
     </p:input>
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
-  </letex:simple-progress-msg>
+  </tr:simple-progress-msg>
 
   <p:sink/>
 
@@ -88,7 +87,7 @@
       <p:identity>
         <p:input port="source">
           <p:inline>
-            <transpect:result></transpect:result>
+            <tr:result></tr:result>
           </p:inline>
         </p:input>
       </p:identity>
@@ -97,12 +96,12 @@
       </p:add-attribute>
     </p:when>
     <p:otherwise>
-      <transpect:load-cascaded-binary name="idml-template-uri">
+      <tr:load-cascaded-binary name="idml-template-uri">
         <p:with-option name="filename" select="$template"/>
         <p:input port="paths">
           <p:pipe port="paths" step="xml2idml"/>
         </p:input>
-      </transpect:load-cascaded-binary>
+      </tr:load-cascaded-binary>
     </p:otherwise>
   </p:choose>
 
@@ -110,14 +109,14 @@
     <p:with-option name="message" select="'xml2idml: retrieved template path for unzipping, ', /transpect:result/@uri"/>
   </cx:message> 
 
-  <letex:unzip name="expand-template">
+  <tr:unzip name="expand-template">
     <p:documentation>Unzip the IDML template to a temporary directory.</p:documentation>
     <p:with-option name="zip" select="/transpect:result/@uri" />
     <p:with-option name="dest-dir" select="concat(replace(base-uri(/*), '^file:(//)?(.+)\.\w+$', '$2'), '.idmltemplate.tmp')">
       <p:pipe step="xml2idml" port="source"/>
     </p:with-option>
     <p:with-option name="overwrite" select="'yes'" />
-  </letex:unzip>
+  </tr:unzip>
 
   <cx:message>
     <p:with-option name="message" select="'xml2idml: unzipped IDML template'"/>
@@ -149,14 +148,14 @@
 
   <cx:message message="xml2idml: created single doc"/>
 
-  <letex:store-debug pipeline-step="idml2xml/expanded-template">
+  <tr:store-debug pipeline-step="idml2xml/expanded-template">
     <p:with-option name="active" select="$debug" />
     <p:with-option name="base-uri" select="$debug-dir-uri" />
-  </letex:store-debug>
+  </tr:store-debug>
 
   <cx:message message="xml2idml: about to add aid attributes"/>
 
-  <transpect:load-cascaded name="load-mapping">
+  <tr:load-cascaded name="load-mapping">
     <p:documentation>Load the xml to idml character, paragraph, object, table, 
       cells mapping file, cascading.</p:documentation>
     <p:with-option name="filename" select="$mapping"/>
@@ -166,7 +165,7 @@
     </p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
-  </transpect:load-cascaded>
+  </tr:load-cascaded>
 
   <xml2idml:add-aid name="with-aid">
     <p:documentation>Map the XML input to aid:* attributes and values given 
@@ -184,7 +183,7 @@
     </p:input>
   </xml2idml:add-aid>
 
-  <letex:simple-progress-msg name="xml2idml-mapandstorify-msg" file="xml2idml-mappingandstorify.txt">
+  <tr:simple-progress-msg name="xml2idml-mapandstorify-msg" file="xml2idml-mappingandstorify.txt">
     <p:input port="msgs">
       <p:inline>
         <c:messages>
@@ -194,11 +193,11 @@
       </p:inline>
     </p:input>
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
-  </letex:simple-progress-msg>
+  </tr:simple-progress-msg>
 
   <cx:message message="xml2idml: now storifying"/>
 
-  <transpect:load-cascaded name="load-storify" fallback="http://transpect.le-tex.de/xml2idml/xsl/storify.xsl">
+  <tr:load-cascaded name="load-storify" fallback="http://transpect.le-tex.de/xml2idml/xsl/storify.xsl">
     <p:documentation>Load the storify.xsl.</p:documentation>
     <p:with-option name="filename" select="'xml2idml/storify.xsl'"/>
     <p:with-option name="set-xml-base-attribute" select="'no'"/>
@@ -207,9 +206,9 @@
     </p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>    
-  </transpect:load-cascaded>
+  </tr:load-cascaded>
 
-  <transpect:load-cascaded name="load-remove-tagging" fallback="http://transpect.le-tex.de/xml2idml/xsl/remove-tagging.xsl">
+  <tr:load-cascaded name="load-remove-tagging" fallback="http://transpect.le-tex.de/xml2idml/xsl/remove-tagging.xsl">
     <p:documentation>Load stylesheet for the optional step.</p:documentation>
     <p:with-option name="filename" select="'xml2idml/remove-tagging.xsl'"/>
     <p:with-option name="set-xml-base-attribute" select="'no'"/>
@@ -218,7 +217,7 @@
     </p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>    
-  </transpect:load-cascaded>
+  </tr:load-cascaded>
 
   <p:xslt name="storify-pass1" initial-mode="xml2idml:storify">
     <p:documentation>Convert/wrap content elements into IDML notation. 
@@ -238,10 +237,10 @@
 
   <cx:message message="xml2idml: storified"/>
 
-  <letex:store-debug pipeline-step="xml2idml/10.storify-pass1">
+  <tr:store-debug pipeline-step="xml2idml/10.storify-pass1">
     <p:with-option name="active" select="$debug" />
     <p:with-option name="base-uri" select="$debug-dir-uri" />
-  </letex:store-debug>
+  </tr:store-debug>
 
   <cx:message message="xml2idml: now cleaning up storifying"/>
 
@@ -256,10 +255,10 @@
 
   <cx:message message="xml2idml: cleaned up storifying"/>
 
-  <letex:store-debug pipeline-step="xml2idml/11.storify_content-n-cleanup">
+  <tr:store-debug pipeline-step="xml2idml/11.storify_content-n-cleanup">
     <p:with-option name="active" select="$debug" />
     <p:with-option name="base-uri" select="$debug-dir-uri" />
-  </letex:store-debug>
+  </tr:store-debug>
 
   <p:choose>
     <p:documentation>Wether the tagging (input xml) should be retained or removed.</p:documentation>
@@ -274,10 +273,10 @@
           <p:pipe step="load-remove-tagging" port="result" />
         </p:input>
       </p:xslt>
-      <letex:store-debug pipeline-step="xml2idml/15.remove-tagging">
+      <tr:store-debug pipeline-step="xml2idml/15.remove-tagging">
         <p:with-option name="active" select="$debug" />
         <p:with-option name="base-uri" select="$debug-dir-uri" />
-      </letex:store-debug>
+      </tr:store-debug>
     </p:when>
     <p:otherwise>
       <p:identity/>
@@ -290,7 +289,7 @@
 
   <cx:message message="xml2idml: now merging generated stories into template and creating new spreads eventually"/>
 
-  <transpect:load-cascaded name="load-merge" fallback="http://transpect.le-tex.de/xml2idml/xsl/merge.xsl">
+  <tr:load-cascaded name="load-merge" fallback="http://transpect.le-tex.de/xml2idml/xsl/merge.xsl">
     <p:documentation>Load the merge.xsl file.</p:documentation>
     <p:with-option name="filename" select="'xml2idml/merge.xsl'"/>
     <p:with-option name="set-xml-base-attribute" select="'no'"/>
@@ -299,7 +298,7 @@
     </p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>    
-  </transpect:load-cascaded>
+  </tr:load-cascaded>
 
   <p:sink/>
 
@@ -317,16 +316,16 @@
 
   <cx:message message="xml2idml: merged"/>
 
-  <letex:store-debug pipeline-step="xml2idml/30.merge">
+  <tr:store-debug pipeline-step="xml2idml/30.merge">
     <p:with-option name="active" select="$debug" />
     <p:with-option name="base-uri" select="$debug-dir-uri" />
-  </letex:store-debug>
+  </tr:store-debug>
 
   <p:identity name="merged-document" />
 
   <cx:message message="xml2idml: now checking for styles not defined in template"/>
 
-  <transpect:load-cascaded name="load-add-nonexisting-styles" fallback="http://transpect.le-tex.de/xml2idml/xsl/add-nonexisting-styles.xsl">
+  <tr:load-cascaded name="load-add-nonexisting-styles" fallback="http://transpect.le-tex.de/xml2idml/xsl/add-nonexisting-styles.xsl">
     <p:documentation>Load stylesheet add-nonexisting-styles.xsl.</p:documentation>
     <p:with-option name="filename" select="'xml2idml/add-nonexisting-styles.xsl'"/>
     <p:with-option name="set-xml-base-attribute" select="'no'"/>
@@ -335,7 +334,7 @@
     </p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>    
-  </transpect:load-cascaded>
+  </tr:load-cascaded>
 
   <p:sink/>
 
@@ -352,10 +351,10 @@
 
   <cx:message message="xml2idml: checked styles"/>
 
-  <letex:store-debug pipeline-step="xml2idml/35.add-nonexisting-styles">
+  <tr:store-debug pipeline-step="xml2idml/35.add-nonexisting-styles">
     <p:with-option name="active" select="$debug" />
     <p:with-option name="base-uri" select="$debug-dir-uri" />
-  </letex:store-debug>
+  </tr:store-debug>
 
   <p:delete name="delete-xml-space-attr" match="@xml:space">
     <p:documentation>Another important cleanup step to remove the xml:space attribute, 
@@ -390,17 +389,17 @@
                 <xsl:choose>
                   <!-- no path (empty string) given -->
                   <xsl:when test="$idml-uri eq ''">
-                    <xsl:value-of select="letex:resolve-system-from-uri(
+                    <xsl:value-of select="tr:resolve-system-from-uri(
                                             replace($base-uri, '\.\w+$', '.idml')
                                           )"/>
                   </xsl:when>
                   <!-- full path given -->
                   <xsl:when test="matches($idml-uri, '^.+\.\w+$')">
-                    <xsl:value-of select="letex:resolve-system-from-uri($idml-uri)"/>
+                    <xsl:value-of select="tr:resolve-system-from-uri($idml-uri)"/>
                   </xsl:when>
                   <!-- path ends with '/' -->
                   <xsl:when test="matches($idml-uri, '^.+/$')">
-                    <xsl:value-of select="letex:resolve-system-from-uri(
+                    <xsl:value-of select="tr:resolve-system-from-uri(
                                             concat(
                                               $idml-uri, 
                                               replace(
@@ -413,7 +412,7 @@
                   </xsl:when>
                   <!-- hm? -->
                   <xsl:otherwise>
-                    <xsl:value-of select="letex:resolve-system-from-uri(
+                    <xsl:value-of select="tr:resolve-system-from-uri(
                                             replace($base-uri, '\.\w+$', '.idml')
                                           )"/>
                   </xsl:otherwise>
@@ -443,7 +442,7 @@
 
   <cx:message message="xml2idml: stored"/>
 
-  <letex:simple-progress-msg name="success-xml2idml-msg" file="xml2idml-success.txt">
+  <tr:simple-progress-msg name="success-xml2idml-msg" file="xml2idml-success.txt">
     <p:input port="msgs">
       <p:inline>
         <c:messages>
@@ -453,7 +452,7 @@
       </p:inline>
     </p:input>
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
-  </letex:simple-progress-msg>
+  </tr:simple-progress-msg>
   
   <p:sink/>
 
