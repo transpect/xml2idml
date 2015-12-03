@@ -687,7 +687,7 @@
   </xsl:function>
 
   <xsl:template match="*[/*/@retain-tagging eq 'true']
-                        [not(namespace-uri() = 'http://www.le-tex.de/namespace/xml2idml')]
+                        [not(namespace-uri() = 'http://transpect.io/xml2idml')]
                         [not(
                              self::*:tr[parent::*[@aid:table eq 'table']]
                           or self::*:colgroup[parent::*[@aid:table eq 'table']]

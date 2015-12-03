@@ -58,7 +58,7 @@
   </xsl:variable>
 
   <xsl:template match="include-mapping"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml"
+    xpath-default-namespace="http://transpect.io/xml2idml"
     mode="xml2idml:collect-included-instructions">
     <xsl:param name="lowest-priority-of-parent" select="0" tunnel="yes" as="xs:double"/>
 
@@ -73,7 +73,7 @@
 
     <mapping-instructions included="true" 
       lowhighest-possible-priority-for-current="{$lowhighest-possible-priority-for-current}"
-      xmlns="http://www.le-tex.de/namespace/xml2idml">
+      xmlns="http://transpect.io/xml2idml">
       <xsl:apply-templates mode="#current" select="doc(@href)/mapping-instructions/@*"/>
       <xsl:apply-templates mode="#current" select="doc(@href)/mapping-instructions/node()">
         <xsl:with-param name="lowest-priority-of-parent" tunnel="yes"
@@ -102,7 +102,7 @@
   </xsl:template>
 
   <xsl:template match="mapping-instructions" mode="xml2idml:set-lower-priority-and-clean"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xsl:apply-templates mode="#current"
       select="@*, 
               ancestor::mapping-instructions[1]/@*,
@@ -114,42 +114,42 @@
   </xsl:template>
 
   <xsl:template match="mapping-instructions/import" mode="xml2idml:set-lower-priority-and-clean"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xsl:if test="not(@href = ancestor::mapping-instructions[2]/import/@href)">
       <xsl:copy-of select="." />
     </xsl:if>
   </xsl:template>
 
   <xsl:template match="mapping-instructions/xslt-pipeline" mode="xml2idml:set-lower-priority-and-clean"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xsl:if test="not(ancestor::mapping-instructions[2][xslt-pipeline])">
       <xsl:copy-of select="."/>
     </xsl:if>
   </xsl:template>
 
   <xsl:template match="mapping-instructions/inline" mode="xml2idml:set-lower-priority-and-clean"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xsl:if test="not(ancestor::mapping-instructions[2][inline])">
       <xsl:copy-of select="."/>
     </xsl:if>
   </xsl:template>
 
   <xsl:template match="mapping-instructions/Discard" mode="xml2idml:set-lower-priority-and-clean"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xsl:if test="not(ancestor::mapping-instructions[2][Discard])">
       <xsl:copy-of select="."/>
     </xsl:if>
   </xsl:template>
 
   <xsl:template match="mapping-instructions/Stories" mode="xml2idml:set-lower-priority-and-clean"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xsl:if test="not(ancestor::mapping-instructions[2][Stories])">
       <xsl:copy-of select="."/>
     </xsl:if>
   </xsl:template>
 
   <xsl:template match="mapping-instructions/Pages" mode="xml2idml:set-lower-priority-and-clean"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xsl:if test="not(ancestor::mapping-instructions[2][Pages])">
       <xsl:copy-of select="."/>
     </xsl:if>
@@ -164,14 +164,14 @@
 
 
   <xsl:template match="/mapping-instructions"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xslout:stylesheet 
       version="2.0" 
       xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
       xmlns:aid="http://ns.adobe.com/AdobeInDesign/4.0/"
       xmlns:aid5="http://ns.adobe.com/AdobeInDesign/5.0/"
       xmlns:letex="http://www.le-tex.de/namespace"	
-      xmlns:xml2idml="http://www.le-tex.de/namespace/xml2idml"
+      xmlns:xml2idml="http://transpect.io/xml2idml"
       xmlns:saxon="http://saxon.sf.net/"
       xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging"
       xmlns:xs="http://www.w3.org/2001/XMLSchema"
@@ -238,7 +238,7 @@
   </xsl:template>
 
   <xsl:template match="Discard/mapping-instruction"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xslout:template match="{normalize-space(path)}" mode="xml2idml:{name(..)}" />
   </xsl:template>
 
@@ -255,7 +255,7 @@
                            else false()
                          ]
                        ]"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+                       xpath-default-namespace="http://transpect.io/xml2idml">
     <xsl:param name="included-mapping" tunnel="yes"/>
     <xslout:template match="/*" mode="xml2idml:Discard">
       <xslout:copy copy-namespaces="no">
@@ -267,7 +267,7 @@
   </xsl:template>
 
   <xsl:template match="Pages/Spread"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xslout:template match="{@MainStoryXPath}" mode="xml2idml:Stories">
       <xslout:copy copy-namespaces="no">
         <xslout:copy-of select="@*" />
@@ -278,7 +278,7 @@
   </xsl:template>
 
   <xsl:template match="Stories/mapping-instruction"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xslout:template match="{normalize-space(path)}" mode="xml2idml:{name(..)}">
       <xslout:copy copy-namespaces="no">
         <xslout:copy-of select="@*" />
@@ -292,7 +292,7 @@
   </xsl:template>
 
   <xsl:template match="ParaStyles/mapping-instruction[nest]"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xslout:template match="{normalize-space(path)}" mode="xml2idml:{name(..)}">
       <xsl:apply-templates select="path/@priority" mode="#current" />
       <xslout:copy copy-namespaces="no">
@@ -305,12 +305,12 @@
     </xslout:template>
   </xsl:template>
 
-  <xsl:template match="path/@priority" xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+  <xsl:template match="path/@priority" xpath-default-namespace="http://transpect.io/xml2idml">
     <xsl:attribute name="priority" select="." />
   </xsl:template>
 
   <xsl:template match="ParaStyles/mapping-instruction[wrap]"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xslout:template match="{normalize-space(path)}" mode="xml2idml:{name(..)}">
       <xsl:apply-templates select="path/@priority" mode="#current" />
       <xml2idml:ParagraphStyleRange AppliedParagraphStyle="{xml2idml:escaped-style-name('ParagraphStyle', (format, '$ID/NormalParagraphStyle')[1])}">
@@ -321,7 +321,7 @@
   </xsl:template>
 
   <xsl:template match="mapping-instruction"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xslout:template match="{normalize-space(path)}" mode="xml2idml:{name(..)}">
       <xsl:apply-templates select="path/@priority" mode="#current" />
       <xslout:copy copy-namespaces="no">
@@ -341,7 +341,7 @@
        -->
   <xsl:template match="TableStyles/mapping-instruction/width[@type eq 'xml2idml:snap-scaled-to-grid']"
     priority="2"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xslout:template match="{normalize-space(../path)}" mode="htmltable:tables-add-atts" priority="2">
       <xsl:apply-templates select="../path/@priority" mode="#current" />
       <xsl:comment>Width / snap to grid</xsl:comment>
@@ -352,14 +352,14 @@
   </xsl:template>
 
   <xsl:template match="param"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xslout:with-param tunnel="yes">
       <xsl:copy-of select="@*" />
     </xslout:with-param>
   </xsl:template>
 
   <xsl:template match="TableStyles/mapping-instruction/width" priority="-0.5"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xsl:message>
       Non-implemented width processing:
       <xsl:copy-of select="."/>
@@ -367,7 +367,7 @@
   </xsl:template>
 
   <xsl:template match="TableStyles/mapping-instruction/*[self::width or self::height][@type eq 'xml2idml:static-dimension']" 
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xslout:template match="{normalize-space(../path)}" mode="htmltable:tables-add-atts" priority="2">
       <xsl:apply-templates select="../path/@priority" mode="#current" />
       <xsl:comment>Width / snap to grid</xsl:comment>
@@ -379,7 +379,7 @@
   </xsl:template>
 
   <xsl:template match="TableStyles/mapping-instruction/*[self::width or self::height][@type eq 'xml2idml:from-cells']" 
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xslout:template match="{normalize-space(../path)}" mode="htmltable:tables-add-atts" priority="2">
       <xsl:apply-templates select="../path/@priority" mode="#current" />
       <xslout:apply-imports />
@@ -392,30 +392,30 @@
        in mode xml2idml:style-atts.
        It's difference from tables because of the table size calculations / scalings /
        snap to grid that need to take place in separate modes. -->
-  <xsl:template match="ObjectStyles/mapping-instruction/width" xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml"/>
+  <xsl:template match="ObjectStyles/mapping-instruction/width" xpath-default-namespace="http://transpect.io/xml2idml"/>
 
   <xsl:template match="ObjectStyles/mapping-instruction/*[self::width or self::height][@type eq 'xml2idml:static-dimension']" 
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml" mode="xml2idml:style-atts">
+    xpath-default-namespace="http://transpect.io/xml2idml" mode="xml2idml:style-atts">
     <xslout:attribute name="xml2idml:{name()}" select="tr:length-to-unitless-twip({@select}) * 0.05" />
   </xsl:template>
   
 
   <xsl:template match="import"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xslout:import href="{if (not (matches(@href, '^(file|https?):')))
                           then resolve-uri(@href)
                           else @href}" />
   </xsl:template>
 
   <xsl:template match="inline"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xsl:copy-of select="node()" />
   </xsl:template>
 
   <xsl:template match="xslt-pipeline"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xsl:variable name="augmented-pipeline" as="element(xslt-pipeline)">
-      <xsl:copy xmlns="http://www.le-tex.de/namespace/xml2idml">
+      <xsl:copy xmlns="http://transpect.io/xml2idml">
         <xsl:copy-of select="*[@before eq 'xml2idml:Discard']" />
         <step mode="xml2idml:Discard"/>
         <xsl:copy-of select="*[@before eq 'xml2idml:Stories']" />
@@ -511,7 +511,7 @@
   </xsl:template>
 
   <xsl:template match="xslt-pipeline/step"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xsl:param name="input-xpath-expr" as="xs:string" />
     <xslout:variable name="{@mode}">
       <xslout:apply-templates select="{$input-xpath-expr}" mode="{@mode}"/>
@@ -523,12 +523,12 @@
   </xsl:template>
 
   <xsl:template match="Stories/mapping-instruction" mode="xml2idml:style-atts"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xslout:attribute name="xml2idml:storyname" select="'{name}'" />
   </xsl:template>
 
   <xsl:template match="ParaStyles/mapping-instruction" mode="xml2idml:style-atts"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xslout:attribute name="aid:pstyle" select="'{(xml2idml:escape-style-name(format), '$ID/NormalParagraphStyle')[. ne ''][1]}'" />
     <xsl:if test="condition">
       <xslout:attribute name="xml2idml:condition" select="'{condition}'" />
@@ -543,7 +543,7 @@
   </xsl:template>
 
   <xsl:template match="InlineStyles/mapping-instruction" mode="xml2idml:style-atts"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xslout:attribute name="aid:cstyle" select="'{(xml2idml:escape-style-name(format), '$ID/[No character style]')[. ne ''][1]}'" />
     <xsl:if test="condition">
       <xslout:attribute name="xml2idml:condition" select="'{condition}'" />
@@ -580,25 +580,25 @@
     </xsl:if>
   </xsl:template>
   <xsl:template match="ObjectStyles/mapping-instruction" mode="xml2idml:style-atts"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xslout:attribute name="xml2idml:ObjectStyle" select="'{(xml2idml:escape-style-name(format), '$ID/[None]')[. ne ''][1]}'" />
     <xslout:attribute name="xml2idml:anchoring" select="'{xml2idml:anchoring/@type}'" />
     <xsl:apply-templates select="width | height" mode="#current" />
   </xsl:template>
   <xsl:template match="TableStyles/mapping-instruction" mode="xml2idml:style-atts"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xslout:attribute name="aid5:tablestyle" select="'{(xml2idml:escape-style-name(format), '$ID/[No table style]')[. ne ''][1]}'" />
     <xslout:attribute name="aid:table" select="'table'" />
   </xsl:template>
   <xsl:template match="CellStyles/mapping-instruction" mode="xml2idml:style-atts"
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml">
+    xpath-default-namespace="http://transpect.io/xml2idml">
     <xslout:attribute name="aid5:cellstyle" select="'{(xml2idml:escape-style-name(format), '$ID/[None]')[. ne ''][1]}'" />
     <xslout:attribute name="aid:table" select="'cell'" />
     <xsl:apply-templates select="format/@priority" mode="#current" />
   </xsl:template>
 
   <xsl:template match="CellStyles/mapping-instruction/format/@priority" 
-    xpath-default-namespace="http://www.le-tex.de/namespace/xml2idml" mode="xml2idml:style-atts">
+    xpath-default-namespace="http://transpect.io/xml2idml" mode="xml2idml:style-atts">
     <xslout:attribute name="xml2idml:cellStylePriority" select="'{.}'" />
   </xsl:template>
 
