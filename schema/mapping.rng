@@ -518,6 +518,8 @@
             <choice>
               <ref name="mapping.att.is-footnote"/>
               <ref name="mapping.att.is-image"/>
+              <ref name="mapping.att.is-hyperlink-source"/>
+              <ref name="mapping.att.is-hyperlink-dest"/>
             </choice>
           </optional>
           <interleave>
@@ -607,6 +609,18 @@
   <define name="mapping.att.is-footnote">
     <attribute name="is-footnote">
       <data type="string"/>
+    </attribute>
+  </define>
+  
+  <define name="mapping.att.is-hyperlink-source">
+    <attribute name="hyperlink-dest">
+      <data type="string" />
+    </attribute>
+  </define>
+  
+  <define name="mapping.att.is-hyperlink-dest">
+    <attribute name="hyperlink-source">
+      <data type="string" />
     </attribute>
   </define>
   

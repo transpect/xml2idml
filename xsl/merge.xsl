@@ -118,9 +118,13 @@
       <xsl:apply-templates select="idPkg:Story" mode="#current" />
       <xsl:apply-templates select="HyperlinkPageDestination" mode="#current" />
       <xsl:apply-templates select="HyperlinkURLDestination" mode="#current" />
+      <xsl:copy-of copy-namespaces="no" 
+        select="collection()[2]/xml2idml:document/xml2idml:hyperlinks/HyperlinkURLDestination"/>
       <xsl:apply-templates select="HyperlinkExternalPageDestination" mode="#current" />
       <xsl:apply-templates select="HyperlinkPageItemSource" mode="#current" />
       <xsl:apply-templates select="Hyperlink" mode="#current" />
+      <xsl:copy-of copy-namespaces="no"
+        select="collection()[2]/xml2idml:document/xml2idml:hyperlinks/Hyperlink"/>
       <xsl:apply-templates select="idPkg:Mapping" mode="#current" />
       <xsl:apply-templates select="Bookmark" mode="#current" />
       <xsl:apply-templates select="PreflightProfile" mode="#current" />

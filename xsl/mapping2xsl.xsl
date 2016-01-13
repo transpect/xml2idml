@@ -568,6 +568,12 @@
     <xsl:if test="@is-footnote">
       <xslout:attribute name="xml2idml:is-footnote" select="'yes'" />
     </xsl:if>
+    <xsl:if test="@hyperlink-source">
+      <xslout:attribute name="xml2idml:hyperlink-source" select="{@hyperlink-source}" />
+    </xsl:if>
+    <xsl:if test="@hyperlink-dest">
+      <xslout:attribute name="xml2idml:hyperlink-dest" select="{@hyperlink-dest}" />
+    </xsl:if>
     <xsl:if test="xs:integer(@is-indexterm-level) gt 3">
       <xsl:message select="'Warning: Indexlevel 4 or more not supported. Please check your mappings.'"></xsl:message>
     </xsl:if>

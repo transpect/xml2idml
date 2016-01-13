@@ -60,6 +60,10 @@
           </Index>
         </xsl:if>
       </xml2idml:index>
+      <xml2idml:hyperlinks>
+        <xsl:sequence select="xml2idml:create-hyperlinks(//*[@xml2idml:hyperlink-source])"/>
+        <xsl:sequence select="xml2idml:create-hyperlink-url-destinations(//*[matches(@xml2idml:hyperlink-source, '^www|ftp|http')])"/>
+      </xml2idml:hyperlinks>
     </xml2idml:document>
   </xsl:template>
 
@@ -98,6 +102,7 @@
              Next match.
        2.3:  Create images (EPS Rectangle, WMF Image, ...)
        2.3:  Wrap element self::*[@aid:cstyle][@xml2idml:is-footnote] with Footnote element
+       2.2:  Create hyperlinks from elements self::*@xml2idml:hyperlink-source] and self::*[@xml2idml:hyperlink-dest]
        2:    Original tagging will be converted to piggyback tagging (XMLElement).
              Other elements in the xml2idml namespace (namely, xml2idml:ParagraphStyleRange)
              will be stripped of their namespaces.
@@ -294,6 +299,61 @@
     </Content>
   </xsl:template>
   
+  <xsl:attribute-set name="hyperlink-style">
+    <xsl:attribute name="Visible" select="'false'"/>
+    <xsl:attribute name="Highlight" select="'None'"/>
+    <xsl:attribute name="Width" select="'Thin'"/>
+    <xsl:attribute name="BorderStyle" select="'Solid'"/>
+    <xsl:attribute name="Hidden" select="'false'"/>
+  </xsl:attribute-set>
+  
+  <xsl:function name="xml2idml:create-hyperlinks" as="element(Hyperlink)*">
+    <xsl:param name="link-source" as="element(*)*"/>
+    <xsl:for-each select="$link-source">
+      <xsl:variable name="source" select="current()/@xml2idml:hyperlink-source" as="attribute(xml2idml:hyperlink-source)"/>
+      <xsl:choose>
+        <xsl:when test="key('linking-item-by-dest', $source) or matches($source, '^www|ftp|http')">
+          <Hyperlink xsl:use-attribute-sets="hyperlink-style"
+            Self="{concat('link_', generate-id())}"
+            Name="{$source}"
+            Source="{$source}"
+            DestinationUniqueKey="{concat('00', count(preceding::node()))}">
+            <Properties>
+              <BorderColor type="enumeration">Black</BorderColor>
+              <Destination type="object">
+                <xsl:choose>
+                  <xsl:when test="matches($source, '^(www|ftp|http)')">
+                    <xsl:value-of select="concat('HyperlinkURLDestination/', $source)"/>
+                  </xsl:when>
+                  <xsl:otherwise>
+                    <xsl:value-of select="concat('HyperlinkTextDestination/', $source)"/>
+                  </xsl:otherwise>
+                </xsl:choose>
+              </Destination>
+            </Properties>
+          </Hyperlink>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:message select="concat('############# can not create hyperlink: missing destination for link ', current()/@xml2idml:hyperlink-source)"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:for-each>
+  </xsl:function>
+  
+  <xsl:function name="xml2idml:create-hyperlink-url-destinations" as="element(HyperlinkURLDestination)*">
+    <xsl:param name="link-source" as="element(*)*"/>
+    <xsl:for-each select="$link-source">
+      <xsl:variable name="link-dest" select="current()/@xml2idml:hyperlink-source" as="attribute(xml2idml:hyperlink-source)"/>
+      <HyperlinkURLDestination 
+        Self="{concat('HyperlinkURLDestination/', $link-dest)}"
+        DestinationUniqueKey="{concat('00', count(preceding::node()))}"
+        DestinationURL="{$link-dest}"
+        Name="{$link-dest}"
+        Hidden="false"/>
+    </xsl:for-each>
+  </xsl:function>
+  
+
   <xsl:variable name="distinct-topics" as="xs:string*"
     select="distinct-values(for $i in //*[@xml2idml:is-indexterm-level][. != ''] return xml2idml:generate-ReferencedTopic($i))"/>
   
@@ -561,6 +621,40 @@
     <Footnote>
       <xsl:next-match/>
     </Footnote>
+  </xsl:template>
+
+  <!-- for finding source to a given destination: -->
+  <xsl:key name="linking-item-by-source" match="*[@xml2idml:hyperlink-source]" use="@xml2idml:hyperlink-source" />
+  <!-- for finding destination to a given source: -->
+  <xsl:key name="linking-item-by-dest" match="*[@xml2idml:hyperlink-dest]" use="@xml2idml:hyperlink-dest" />
+  
+  <xsl:template match="*[@aid:cstyle][@xml2idml:hyperlink-source]" mode="xml2idml:storify" priority="2.2">
+    <xsl:variable name="destination" as="element(*)?" select="key('linking-item-by-dest', @xml2idml:hyperlink-source)"/>
+    <xsl:choose>
+      <xsl:when test="$destination or matches(@xml2idml:hyperlink-source, '^(www|http|ftp)')">
+        <HyperlinkTextSource Hidden="false" AppliedCharacterStyle="n" Name="{concat('Hyperlink ', generate-id())}" Self="{@xml2idml:hyperlink-source}">
+          <xsl:next-match/>
+        </HyperlinkTextSource>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:next-match/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+  
+  <xsl:template match="*[@aid:cstyle][@xml2idml:hyperlink-dest]" mode="xml2idml:storify" priority="2.2">
+    <xsl:variable name="source" as="element(*)?" select="key('linking-item-by-source', @xml2idml:hyperlink-dest)"/>
+    <xsl:choose>
+      <xsl:when test="$source">
+        <HyperlinkTextDestination Hidden="false" Name="{@xml2idml:hyperlink-dest}" DestinationUniqueKey="{concat('00', count($source/preceding::node()))}" Self="{concat('HyperlinkTextDestination/', @xml2idml:hyperlink-dest)}">
+          <xsl:next-match/>
+        </HyperlinkTextDestination>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:next-match/>
+        <xsl:message select="'############# could not find link source for destination: ', @xml2idml:hyperlink-dest"/>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
   <xsl:template match="*[@xml2idml:is-block-image]" mode="xml2idml:storify" priority="2.3">
@@ -1003,7 +1097,7 @@
   <xsl:template match="@xml2idml:keep-xml-space-preserve" mode="xml2idml:storify_content-n-cleanup"/>
  
   <xsl:variable name="xml2idml:ignorable-property-elements" as="xs:string*"
-    select="('TextFramePreference', 'BaselineFrameGridOption')"/>
+    select="('TextFramePreference', 'BaselineFrameGridOption', 'Hyperlink')"/>
 
   <xsl:function name="xml2idml:is-children-of-any-settings-element" as="xs:boolean">
     <xsl:param name="context" as="node()"/>
