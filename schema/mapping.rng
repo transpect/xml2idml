@@ -8,7 +8,7 @@
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:xml2idml="http://transpect.io/xml2idml"
   datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"
-  ns="http://www.le-tex.de/namespace/xml2idml"
+  ns="http://transpect.io/xml2idml"
   >
 
   <s:ns prefix="css" uri="http://www.w3.org/1996/css"/>
