@@ -183,7 +183,7 @@
                            @xpath-default-namespace" />
       
       <xslout:import href="{resolve-uri('util.xsl')}" />
-      <xslout:import href="http://transpect.le-tex.de/xslt-util/lengths/lengths.xsl" />
+      <xslout:import href="http://transpect.io/xslt-util/lengths/xsl/lengths.xsl" />
       <xsl:apply-templates select="import[not(@href = $included-mappings/import/@href)],
                                    $included-mappings/import"/>
       <xsl:apply-templates select="if(not(inline)) 

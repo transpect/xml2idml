@@ -106,12 +106,12 @@
   </p:choose>
 
   <cx:message>
-    <p:with-option name="message" select="'xml2idml: retrieved template path for unzipping, ', /transpect:result/@uri"/>
+    <p:with-option name="message" select="'xml2idml: retrieved template path for unzipping, ', /*:result/@uri"/>
   </cx:message> 
 
   <tr:unzip name="expand-template">
     <p:documentation>Unzip the IDML template to a temporary directory.</p:documentation>
-    <p:with-option name="zip" select="/transpect:result/@uri" />
+    <p:with-option name="zip" select="/*:result/@uri" />
     <p:with-option name="dest-dir" select="concat(replace(base-uri(/*), '^file:(//)?(.+)\.\w+$', '$2'), '.idmltemplate.tmp')">
       <p:pipe step="xml2idml" port="source"/>
     </p:with-option>
@@ -142,7 +142,7 @@
     </p:with-param>
     <p:input port="parameters"><p:empty/></p:input>
     <p:input port="stylesheet">
-      <p:document href="http://transpect.le-tex.de/idml2xml/xslt/idml2xml.xsl" />
+      <p:document href="http://transpect.io/idml2xml/xsl/idml2xml.xsl" />
     </p:input>
   </p:xslt>
 
@@ -197,7 +197,7 @@
 
   <cx:message message="xml2idml: now storifying"/>
 
-  <tr:load-cascaded name="load-storify" fallback="http://transpect.le-tex.de/xml2idml/xsl/storify.xsl">
+  <tr:load-cascaded name="load-storify" fallback="http://transpect.io/xml2idml/xsl/storify.xsl">
     <p:documentation>Load the storify.xsl.</p:documentation>
     <p:with-option name="filename" select="'xml2idml/storify.xsl'"/>
     <p:with-option name="set-xml-base-attribute" select="'no'"/>
@@ -208,7 +208,7 @@
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>    
   </tr:load-cascaded>
 
-  <tr:load-cascaded name="load-remove-tagging" fallback="http://transpect.le-tex.de/xml2idml/xsl/remove-tagging.xsl">
+  <tr:load-cascaded name="load-remove-tagging" fallback="http://transpect.io/xml2idml/xsl/remove-tagging.xsl">
     <p:documentation>Load stylesheet for the optional step.</p:documentation>
     <p:with-option name="filename" select="'xml2idml/remove-tagging.xsl'"/>
     <p:with-option name="set-xml-base-attribute" select="'no'"/>
@@ -289,7 +289,7 @@
 
   <cx:message message="xml2idml: now merging generated stories into template and creating new spreads eventually"/>
 
-  <tr:load-cascaded name="load-merge" fallback="http://transpect.le-tex.de/xml2idml/xsl/merge.xsl">
+  <tr:load-cascaded name="load-merge" fallback="http://transpect.io/xml2idml/xsl/merge.xsl">
     <p:documentation>Load the merge.xsl file.</p:documentation>
     <p:with-option name="filename" select="'xml2idml/merge.xsl'"/>
     <p:with-option name="set-xml-base-attribute" select="'no'"/>
@@ -325,7 +325,7 @@
 
   <cx:message message="xml2idml: now checking for styles not defined in template"/>
 
-  <tr:load-cascaded name="load-add-nonexisting-styles" fallback="http://transpect.le-tex.de/xml2idml/xsl/add-nonexisting-styles.xsl">
+  <tr:load-cascaded name="load-add-nonexisting-styles" fallback="http://transpect.io/xml2idml/xsl/add-nonexisting-styles.xsl">
     <p:documentation>Load stylesheet add-nonexisting-styles.xsl.</p:documentation>
     <p:with-option name="filename" select="'xml2idml/add-nonexisting-styles.xsl'"/>
     <p:with-option name="set-xml-base-attribute" select="'no'"/>
@@ -379,10 +379,10 @@
         <xsl:stylesheet version="2.0" 
           xmlns:c="http://www.w3.org/ns/xproc-step" 
           xmlns:xs="http://www.w3.org/2001/XMLSchema"
-          xmlns:letex="http://www.le-tex.de/namespace">
+          xmlns:tr="http://transpect.io">
           <xsl:param name="idml-uri" required="yes" as="xs:string" />
           <xsl:param name="base-uri" required="yes" as="xs:string" />
-          <xsl:include href="http://transpect.le-tex.de/xslt-util/resolve-uri/resolve-uri.xsl"/>
+          <xsl:include href="http://transpect.io/xslt-util/resolve-uri/xsl/resolve-uri.xsl"/>
           <xsl:template name="main">
             <xsl:variable name="result" as="element(c:result)">
               <c:result>
