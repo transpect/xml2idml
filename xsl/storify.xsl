@@ -371,14 +371,19 @@
   <xsl:function name="xml2idml:build-topic-element" as="element(Topic)">
     <xsl:param name="topics" as="xs:string"/>
     <xsl:param name="levels" as="xs:integer"/>
+    <!-- : needs to be replaced for @Self value or InDesign will chrash -->
+    <xsl:variable name="normalized-topics" as="xs:string" 
+      select="replace($topics, ':', '-')"/>
     <xsl:variable name="splitted-topics" as="xs:string+"
       select="tokenize($topics, 'Topicn')[ . != '']"/>
+    <xsl:variable name="normalized-splitted-topics" as="xs:string+"
+      select="tokenize($normalized-topics, 'Topicn')[ . != '']"/>
     <Topic SortOrder="">
       <xsl:attribute name="Name">
         <xsl:value-of select="$splitted-topics[$levels]"/>
       </xsl:attribute>
       <xsl:attribute name="Self">
-        <xsl:value-of select="concat('X2ITopicn', string-join($splitted-topics[position() le $levels], 'Topicn'))"/>
+        <xsl:value-of select="concat('X2ITopicn', string-join($normalized-splitted-topics[position() le $levels], 'Topicn'))"/>
       </xsl:attribute>
       <xsl:if test="count($splitted-topics) gt $levels">
         <xsl:sequence select="xml2idml:build-topic-element($topics, $levels + 1)"/>
@@ -388,7 +393,7 @@
   
   <xsl:template match="*[@xml2idml:is-indexterm-level]" mode="xml2idml:storify" priority="2.3">
     <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
-      <PageReference Self="pr_{generate-id()}" PageReferenceType="CurrentPage" ReferencedTopic="{concat('X2I', xml2idml:generate-ReferencedTopic(.))}" />
+      <PageReference Self="pr_{generate-id()}" PageReferenceType="CurrentPage" ReferencedTopic="{concat('X2I', replace(xml2idml:generate-ReferencedTopic(.), ':', '-'))}" />
     </CharacterStyleRange>
   </xsl:template>
   
