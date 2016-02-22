@@ -310,14 +310,15 @@
   <xsl:function name="xml2idml:create-hyperlinks" as="element(Hyperlink)*">
     <xsl:param name="link-source" as="element(*)*"/>
     <xsl:for-each select="$link-source">
+      <xsl:variable name="destination" as="element(*)?" select="key('linking-item-by-dest', @xml2idml:hyperlink-source)"/>
       <xsl:variable name="source" select="current()/@xml2idml:hyperlink-source" as="attribute(xml2idml:hyperlink-source)"/>
       <xsl:choose>
-        <xsl:when test="key('linking-item-by-dest', $source) or matches($source, '^www|ftp|http')">
+        <xsl:when test="$destination or matches($source, '^www|ftp|http')">
           <Hyperlink xsl:use-attribute-sets="hyperlink-style"
             Self="{concat('link_', generate-id())}"
-            Name="{$source}"
-            Source="{$source}"
-            DestinationUniqueKey="{concat('00', count(preceding::node()))}">
+            Name="{concat($source, '_', generate-id())}"
+            Source="{generate-id()}"
+            DestinationUniqueKey="{concat('00', count($destination/preceding::node()))}">
             <Properties>
               <BorderColor type="enumeration">Black</BorderColor>
               <Destination type="object">
@@ -637,7 +638,7 @@
     <xsl:variable name="destination" as="element(*)?" select="key('linking-item-by-dest', @xml2idml:hyperlink-source)"/>
     <xsl:choose>
       <xsl:when test="$destination or matches(@xml2idml:hyperlink-source, '^(www|http|ftp)')">
-        <HyperlinkTextSource Hidden="false" AppliedCharacterStyle="n" Name="{concat('Hyperlink ', generate-id())}" Self="{@xml2idml:hyperlink-source}">
+        <HyperlinkTextSource Hidden="false" AppliedCharacterStyle="n" Name="{concat('Hyperlink ', generate-id())}" Self="{generate-id()}">
           <xsl:next-match/>
         </HyperlinkTextSource>
       </xsl:when>
@@ -648,10 +649,10 @@
   </xsl:template>
   
   <xsl:template match="*[@aid:cstyle][@xml2idml:hyperlink-dest]" mode="xml2idml:storify" priority="2.2">
-    <xsl:variable name="source" as="element(*)?" select="key('linking-item-by-source', @xml2idml:hyperlink-dest)"/>
+    <xsl:variable name="source" as="element(*)*" select="key('linking-item-by-source', @xml2idml:hyperlink-dest)"/>
     <xsl:choose>
       <xsl:when test="$source">
-        <HyperlinkTextDestination Hidden="false" Name="{@xml2idml:hyperlink-dest}" DestinationUniqueKey="{concat('00', count($source/preceding::node()))}" Self="{concat('HyperlinkTextDestination/', @xml2idml:hyperlink-dest)}">
+        <HyperlinkTextDestination Hidden="false" Name="{@xml2idml:hyperlink-dest}" DestinationUniqueKey="{concat('00', count(preceding::node()))}" Self="{concat('HyperlinkTextDestination/', @xml2idml:hyperlink-dest)}">
           <xsl:next-match/>
         </HyperlinkTextDestination>
       </xsl:when>
