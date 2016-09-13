@@ -631,8 +631,24 @@
     <attribute name="is-indexterm-level">
       <data type="int"/>
     </attribute>
+    <optional>
+      <group>
+        <attribute name="is-indexterm-crossref">
+          <choice>
+            <value>true</value>
+            <value>false</value>
+          </choice>
+        </attribute>
+        <attribute name="crossref-type">
+          <choice>
+            <value>see</value>
+            <value>seealso</value>
+          </choice>
+        </attribute>
+      </group>
+    </optional>
   </define>
-
+  
   <!-- define mapping.att.is-image:
        Image build mechanism -->
   <define name="mapping.att.is-image">

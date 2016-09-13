@@ -577,8 +577,13 @@
     <xsl:if test="xs:integer(@is-indexterm-level) gt 3">
       <xsl:message select="'Warning: Indexlevel 4 or more not supported. Please check your mappings.'"></xsl:message>
     </xsl:if>
-    <xsl:if test="@is-indexterm-level and xs:integer(@is-indexterm-level) lt 4">
+    <xsl:if test="@is-indexterm-level and xs:integer(@is-indexterm-level) lt 4 and not(@is-indexterm-crossref eq 'true')">
       <xslout:attribute name="xml2idml:is-indexterm-level" select="{@is-indexterm-level}" />
+    </xsl:if>
+    <xsl:if test="@is-indexterm-crossref eq 'true'">
+      <xslout:attribute name="xml2idml:is-indexterm-level" select="{@is-indexterm-level}" />
+      <xslout:attribute name="xml2idml:is-indexterm-crossref" select="'true'" />
+      <xslout:attribute name="xml2idml:crossref-type" select="'{@crossref-type}'" />
     </xsl:if>
     <xsl:if test="@is-image eq 'true'">
       <xslout:attribute name="xml2idml:is-inline-image" select="'true'" />

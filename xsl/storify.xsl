@@ -357,6 +357,8 @@
 
   <xsl:variable name="distinct-topics" as="xs:string*"
     select="distinct-values(for $i in //*[@xml2idml:is-indexterm-level][. != ''] return xml2idml:generate-ReferencedTopic($i))"/>
+  <xsl:variable name="indexterm-crossrefs" as="element(CrossReference)*"
+    select="for $i in //*[@xml2idml:is-indexterm-crossref][. != ''] return xml2idml:generate-crossrefs($i)"/>
   
   <!-- function xml2idml:build-topic-structure
        param topics example: ('TopicnFaceTopicnEyesTopicnGreen', 'TopicnFaceTopicnNoise') (without @Self prefix!) -->
@@ -372,7 +374,7 @@
   <xsl:function name="xml2idml:build-topic-element" as="element(Topic)">
     <xsl:param name="topics" as="xs:string"/>
     <xsl:param name="levels" as="xs:integer"/>
-    <!-- : needs to be replaced for @Self value or InDesign will chrash -->
+    <!-- : needs to be replaced for @Self value or InDesign will crash -->
     <xsl:variable name="normalized-topics" as="xs:string" 
       select="replace($topics, ':', '-')"/>
     <xsl:variable name="splitted-topics" as="xs:string+"
@@ -389,14 +391,44 @@
       <xsl:if test="count($splitted-topics) gt $levels">
         <xsl:sequence select="xml2idml:build-topic-element($topics, $levels + 1)"/>
       </xsl:if>
+      <xsl:if test="some $i in $indexterm-crossrefs/@Self satisfies $i eq $topics">
+        <xsl:sequence select="$indexterm-crossrefs[@Self eq $topics]"/>
+      </xsl:if>
     </Topic>
   </xsl:function>
   
-  <xsl:template match="*[@xml2idml:is-indexterm-level]" mode="xml2idml:storify" priority="2.3">
+  <xsl:template match="*[@xml2idml:is-indexterm-level][not(@xml2idml:is-indexterm-crossref)]" mode="xml2idml:storify" priority="2.3">
     <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
       <PageReference Self="pr_{generate-id()}" PageReferenceType="CurrentPage" ReferencedTopic="{concat('X2I', replace(xml2idml:generate-ReferencedTopic(.), ':', '-'))}" />
     </CharacterStyleRange>
   </xsl:template>
+  <xsl:template match="*[@xml2idml:is-indexterm-crossref]" mode="xml2idml:storify" priority="2.3"/>
+  
+  <xsl:function name="xml2idml:generate-crossrefs" as="element(CrossReference)">
+    <xsl:param name="indexterm-crossref" as="element()"/>
+    <xsl:variable name="indexterm-child" select="$indexterm-crossref/preceding-sibling::*[@xml2idml:is-indexterm-level][1]"/>
+    <CrossReference>
+      <!-- @Self will be replaced by random string in mode storify_content-n-cleanup -->
+      <!-- now it serves as identifier to find matching topic -->
+      <xsl:attribute name="Self" select="xml2idml:generate-ReferencedTopic($indexterm-child)"/>
+      <xsl:attribute name="ReferencedTopic" select="concat('X2ITopicn', $indexterm-crossref)"/>
+      <xsl:attribute name="CrossReferenceType">
+        <xsl:choose>
+          <xsl:when test="$indexterm-crossref/@xml2idml:crossref-type eq 'see'">
+            <xsl:value-of select="'See'"/>
+          </xsl:when>
+          <xsl:when test="$indexterm-crossref/@xml2idml:crossref-type eq 'seealso'">
+            <xsl:value-of select="'SeeAlso'"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:message select="'#####  CrossReferenceType not supported; #####'"/>
+            <xsl:value-of select="'See'"/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:attribute>
+      <xsl:attribute name="CustomTypeString" select="''"/>
+    </CrossReference>
+  </xsl:function>
   
   <xsl:function name="xml2idml:generate-ReferencedTopic" as="xs:string">
     <xsl:param name="indexterm-child" as="element()"/>
@@ -1211,5 +1243,9 @@
   </xsl:template>
 
   <xsl:template match="@xml2idml:anchoring" mode="xml2idml:storify_content-n-cleanup" />
+  
+  <xsl:template match="CrossReference[matches(@Self, 'Topicn')]/@Self" mode="xml2idml:storify_content-n-cleanup">
+    <xsl:attribute name="Self" select="generate-id()"/>
+  </xsl:template>
 
 </xsl:stylesheet>
