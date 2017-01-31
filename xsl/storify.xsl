@@ -925,6 +925,9 @@
           <xsl:attribute name="ParagraphBreakType" select="'NextFrame'"/>
           <Br/>
         </xsl:when>
+        <xsl:when test="$character-name eq 'stop-nested-style'">
+          <xsl:processing-instruction name="ACE" select="'3'"/>
+        </xsl:when>
         <xsl:when test="$character-name eq 'footnote-symbol'">
           <xsl:processing-instruction name="ACE" select="'4'"/>
         </xsl:when>
