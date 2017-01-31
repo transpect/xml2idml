@@ -970,6 +970,10 @@
     <xsl:attribute name="ColumnCount" select="." />
   </xsl:template>
 
+   <xsl:template match="*:table/@data-rowcount" mode="xml2idml:storify">
+      <xsl:attribute name="BodyRowCount" select="."/>
+   </xsl:template>
+
   <xsl:template match="*:thead/@data-rowcount" mode="xml2idml:storify">
     <xsl:attribute name="HeaderRowCount" select="." />
   </xsl:template>
