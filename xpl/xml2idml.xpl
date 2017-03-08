@@ -5,6 +5,7 @@
   xmlns:cx="http://xmlcalabash.com/ns/extensions"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
   xmlns:tr="http://transpect.io"
+  xmlns:tr-internal="http://transpect.io/internal"
   xmlns:xml2idml="http://transpect.io/xml2idml"
   xmlns:idml2xml="http://transpect.io/idml2xml"
   version="1.0"
@@ -109,14 +110,14 @@
     <p:with-option name="message" select="'xml2idml: retrieved template path for unzipping, ', /*:result/@uri"/>
   </cx:message> 
 
-  <tr:unzip name="expand-template">
+  <tr-internal:unzip name="expand-template">
     <p:documentation>Unzip the IDML template to a temporary directory.</p:documentation>
     <p:with-option name="zip" select="/*:result/@uri" />
     <p:with-option name="dest-dir" select="concat(replace(base-uri(/*), '^file:(//)?(.+)\.\w+$', '$2'), '.idmltemplate.tmp')">
       <p:pipe step="xml2idml" port="source"/>
     </p:with-option>
     <p:with-option name="overwrite" select="'yes'" />
-  </tr:unzip>
+  </tr-internal:unzip>
 
   <cx:message>
     <p:with-option name="message" select="'xml2idml: unzipped IDML template'"/>
