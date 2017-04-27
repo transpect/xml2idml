@@ -62,6 +62,7 @@
   <p:import href="http://transpect.io/xproc-util/store-debug/xpl/store-debug.xpl" />
   <p:import href="add-aid-attributes.xpl" />
   <p:import href="store.xpl" />
+  <p:import href="http://transpect.io/calabash-extensions/unzip-extension/internal-unzip-declaration.xpl" />
 
   <tr:simple-progress-msg name="start-xml2idml-msg" file="xml2idml-start.txt">
     <p:input port="msgs">
