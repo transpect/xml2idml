@@ -59,7 +59,6 @@
   <p:import href="http://transpect.io/cascade/xpl/dynamic-transformation-pipeline.xpl"/>
   <p:import href="http://transpect.io/cascade/xpl/load-cascaded.xpl"/>
   <p:import href="http://transpect.io/xproc-util/simple-progress-msg/xpl/simple-progress-msg.xpl"/>
-  <p:import href="http://transpect.io/calabash-extensions/transpect-lib.xpl" />
   <p:import href="http://transpect.io/xproc-util/store-debug/xpl/store-debug.xpl" />
   <p:import href="add-aid-attributes.xpl" />
   <p:import href="store.xpl" />
@@ -78,9 +77,10 @@
 
   <p:sink/>
 
-  <cx:message message="xml2idml: now unzipping IDML template">
-    <p:input port="source"><p:empty/></p:input>
-  </cx:message>
+  <cx:message>
+  	<p:input port="source"><p:empty/></p:input>
+    <p:with-option name="message" select="'### xml2idml: now unzipping IDML template: ', $template"/>
+  </cx:message> 
 
   <p:choose>
     <p:documentation>Retrieve the path of IDML template.</p:documentation>
@@ -107,7 +107,7 @@
   </p:choose>
 
   <cx:message>
-    <p:with-option name="message" select="'xml2idml: retrieved template path for unzipping, ', /*:result/@uri"/>
+    <p:with-option name="message" select="'#### xml2idml: retrieved template path for unzipping, ', /*:result/@uri"/>
   </cx:message> 
 
   <tr-internal:unzip name="expand-template">
@@ -120,7 +120,7 @@
   </tr-internal:unzip>
 
   <cx:message>
-    <p:with-option name="message" select="'xml2idml: unzipped IDML template'"/>
+    <p:with-option name="message" select="'### xml2idml: unzipped IDML template' "/>
   </cx:message>
 
   <p:sink/>
