@@ -356,7 +356,10 @@
   
 
   <xsl:variable name="distinct-topics" as="xs:string*"
-    select="distinct-values(for $i in //*[@xml2idml:is-indexterm-level][. != ''] return xml2idml:generate-ReferencedTopic($i))"/>
+    select="distinct-values(for $i in 
+              //*[xs:integer(@xml2idml:is-indexterm-level) = max(@xml2idml:is-indexterm-level union following-sibling::*/@xml2idml:is-indexterm-level)][. != ''] 
+              return xml2idml:generate-ReferencedTopic($i)
+            )"/>
   <xsl:variable name="indexterm-crossrefs" as="element(CrossReference)*"
     select="for $i in //*[@xml2idml:is-indexterm-crossref][. != ''] return xml2idml:generate-crossrefs($i)"/>
   
@@ -397,7 +400,7 @@
     </Topic>
   </xsl:function>
   
-  <xsl:template match="*[@xml2idml:is-indexterm-level][not(@xml2idml:is-indexterm-crossref)]" mode="xml2idml:storify" priority="2.3">
+  <xsl:template match="*[xs:integer(@xml2idml:is-indexterm-level) = max(@xml2idml:is-indexterm-level union following-sibling::*/@xml2idml:is-indexterm-level)][not(@xml2idml:is-indexterm-crossref)]" mode="xml2idml:storify" priority="2.3">
     <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
       <PageReference Self="pr_{generate-id()}" PageReferenceType="CurrentPage" ReferencedTopic="{concat('X2I', replace(xml2idml:generate-ReferencedTopic(.), ':', '-'))}" />
     </CharacterStyleRange>
