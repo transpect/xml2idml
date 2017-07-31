@@ -405,6 +405,7 @@
       <PageReference Self="pr_{generate-id()}" PageReferenceType="CurrentPage" ReferencedTopic="{concat('X2I', replace(xml2idml:generate-ReferencedTopic(.), ':', '-'))}" />
     </CharacterStyleRange>
   </xsl:template>
+  <xsl:template match="*[xs:integer(@xml2idml:is-indexterm-level) &lt; max(@xml2idml:is-indexterm-level union following-sibling::*/@xml2idml:is-indexterm-level)][not(@xml2idml:is-indexterm-crossref)]" mode="xml2idml:storify" priority="2.3"/>
   <xsl:template match="*[@xml2idml:is-indexterm-crossref]" mode="xml2idml:storify" priority="2.3"/>
   
   <xsl:function name="xml2idml:generate-crossrefs" as="element(CrossReference)">
