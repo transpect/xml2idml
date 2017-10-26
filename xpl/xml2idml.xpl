@@ -227,7 +227,9 @@
     <p:with-param name="base-uri" select="replace(base-uri(/*), '\.\w+$', '.idml.tmp')">
       <p:pipe step="xml2idml" port="source"/>
     </p:with-param>
-    <p:input port="parameters"><p:empty/></p:input>
+    <p:input port="parameters">
+      <p:pipe port="paths" step="xml2idml"/>
+    </p:input>
     <p:input port="source">
       <p:pipe step="with-aid" port="result"/>
       <p:pipe step="template-as-single-doc" port="result"/>
