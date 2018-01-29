@@ -40,6 +40,7 @@
       </optional>
       <interleave>
         <optional><ref name="mapping.discard" /></optional>
+        <optional><ref name="mapping.dissolve" /></optional>
         <choice>
           <optional><ref name="mapping.pages" /></optional>
           <optional><ref name="mapping.stories" /></optional>
@@ -140,6 +141,19 @@
     <element name="Discard">
       <zeroOrMore>
         <ref name="mapping.discard-instruction"/>
+      </zeroOrMore>
+    </element>
+  </define>
+
+  <define name="mapping.dissolve">
+    <a:documentation>While element Discard is for deletion, the element Dissolve can be used 
+      to liquidate the element start- and end-tag itself (the children nodes will be processed).
+      When there is an Dissolve element in the mapping config, a special message 
+      will be printed on the standard-out for each unmapped element.
+      This is helpful during the creation phase of a new xml2idml mapping.</a:documentation>
+    <element name="Dissolve">
+      <zeroOrMore>
+        <ref name="mapping.dissolve-instruction"/>
       </zeroOrMore>
     </element>
   </define>
@@ -456,6 +470,12 @@
   </define>
 
   <define name="mapping.discard-instruction">
+    <element name="mapping-instruction">
+      <ref name="mapping.path"/>
+    </element>
+  </define>
+
+  <define name="mapping.dissolve-instruction">
     <element name="mapping-instruction">
       <ref name="mapping.path"/>
     </element>

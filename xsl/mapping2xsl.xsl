@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet 
-   version="2.0" 
-   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-   xmlns:xslout="bogo"
-   xmlns:xml2idml="http://transpect.io/xml2idml"
-   xmlns:htmltable="http://transpect.io/htmltable"
-   xmlns:tr="http://transpect.io"
-   xmlns:saxon="http://saxon.sf.net/"
-   xmlns:xs="http://www.w3.org/2001/XMLSchema"
-   >
+<xsl:stylesheet version="2.0" 
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:xslout="bogo"
+  xmlns:xml2idml="http://transpect.io/xml2idml"
+  xmlns:htmltable="http://transpect.io/htmltable"
+  xmlns:aid="http://ns.adobe.com/AdobeInDesign/4.0/"
+  xmlns:aid5="http://ns.adobe.com/AdobeInDesign/5.0/"
+  xmlns:tr="http://transpect.io"
+  xmlns:saxon="http://saxon.sf.net/"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  >
 
   <xsl:namespace-alias 
      stylesheet-prefix="xslout" 
@@ -333,6 +334,22 @@
     <!-- Scaling, snap to grid for table and object styles -->
     <xsl:apply-templates select="width" />
   </xsl:template>
+  
+  <xsl:template match="Dissolve/mapping-instruction"
+    xpath-default-namespace="http://transpect.io/xml2idml">
+    <xslout:template match="{normalize-space(path)}" mode="xml2idml:Dissolve">
+      <xslout:choose>
+        <xslout:when test="@aid:* or @aid5:*">
+          <xslout:message select="'Info: cannot dissolve mapped element:', name()"/>
+          <xslout:next-match/>
+        </xslout:when>
+        <xslout:otherwise>
+          <xsl:apply-templates select="path/@priority" mode="#current"/>
+          <xslout:apply-templates select="@*, node()" mode="#current"/>
+        </xslout:otherwise>
+      </xslout:choose>
+    </xslout:template>
+  </xsl:template>
 
   <!-- Width / snap to grid 
        By virtue of xsl:next-match, will invoke the standard templates for the aid5:tablestyle / aid5:cellstyle
@@ -430,6 +447,9 @@
         <step mode="xml2idml:CellStyles"/>
         <xsl:copy-of select="*[@before eq 'xml2idml:ObjectStyles']" />
         <step mode="xml2idml:ObjectStyles"/>
+        <xsl:if test="//Dissolve">
+          <step mode="xml2idml:Dissolve"/>
+        </xsl:if>
         <xsl:copy-of select="*[not(@before)]" />
       </xsl:copy>
     </xsl:variable>
@@ -485,7 +505,7 @@
          (can't generate them here because they'd have higher import precedence
          than any of the imported templates) -->
     <xslout:template match="* | @* | processing-instruction()"
-      mode="xml2idml:Discard xml2idml:Stories xml2idml:ParaStyles xml2idml:InlineStyles xml2idml:TableStyles xml2idml:CellStyles xml2idml:ObjectStyles" priority="-100">
+      mode="xml2idml:Discard xml2idml:Stories xml2idml:ParaStyles xml2idml:InlineStyles xml2idml:TableStyles xml2idml:CellStyles xml2idml:ObjectStyles xml2idml:Dissolve" priority="-100">
       <xslout:copy copy-namespaces="no">
         <xslout:apply-templates select="@*, node()" mode="#current" />
       </xslout:copy>
@@ -498,6 +518,15 @@
           select="$retain-tagging"/>
         <xslout:apply-templates select="@*, node()" mode="#current"/>
       </xslout:copy>
+    </xslout:template>
+    
+    <xslout:template match="*[ancestor::*][not(@aid:* or @aid5:*)]" mode="xml2idml:Dissolve" priority="-50">
+      <xslout:message select="'Unmapped element:', name()"/>
+      <xslout:next-match/>
+    </xslout:template>
+    
+    <xslout:template match="*[ancestor::*][not(@aid:* or @aid5:*)]/@*" mode="xml2idml:Dissolve" priority="-50">
+      <xslout:message select="' - with unmapped attribute, not in output now:', name()"/>
     </xslout:template>
     
     <xsl:text>&#xa;&#xa;&#xa;</xsl:text>
