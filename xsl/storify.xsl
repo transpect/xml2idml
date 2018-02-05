@@ -449,7 +449,7 @@
       </xsl:when>
       <xsl:when test="$level = 3">
         <xsl:value-of select="concat(
-                                'Topicn', $indexterm-child/preceding-sibling::*[1][xs:integer(@xml2idml:is-indexterm-level) = 1 ], 
+                                'Topicn', $indexterm-child/preceding-sibling::*[2][xs:integer(@xml2idml:is-indexterm-level) = 1 ], 
                                 'Topicn', $indexterm-child/preceding-sibling::*[1][xs:integer(@xml2idml:is-indexterm-level) = 2 ], 
                                 'Topicn', $indexterm-child
                               )"/>
