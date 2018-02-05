@@ -339,6 +339,7 @@
     xpath-default-namespace="http://transpect.io/xml2idml">
     <xslout:template match="{normalize-space(path)}" mode="xml2idml:Dissolve">
       <xslout:choose>
+        <xslout:when test=". instance of attribute()"/>
         <xslout:when test="@aid:* or @aid5:*">
           <xslout:message select="'Info: cannot dissolve mapped element:', name()"/>
           <xslout:next-match/>
