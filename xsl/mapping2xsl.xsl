@@ -448,7 +448,7 @@
         <step mode="xml2idml:CellStyles"/>
         <xsl:copy-of select="*[@before eq 'xml2idml:ObjectStyles']" />
         <step mode="xml2idml:ObjectStyles"/>
-        <xsl:if test="//Dissolve">
+        <xsl:if test="$root//Dissolve">
           <step mode="xml2idml:Dissolve"/>
         </xsl:if>
         <xsl:copy-of select="*[not(@before)]" />
