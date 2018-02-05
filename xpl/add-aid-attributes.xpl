@@ -22,6 +22,7 @@
   <p:output port="result" primary="true" />
 
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl" />
+  <p:import href="http://transpect.io/cascade/xpl/load-cascaded.xpl"/>
   <p:import href="http://transpect.io/calabash-extensions/rng-extension/xpl/rng-validate-to-PI.xpl"/>
   <p:import href="http://transpect.io/xproc-util/store-debug/xpl/store-debug.xpl" />
 
