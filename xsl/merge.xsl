@@ -151,6 +151,9 @@
   <!-- save template stories -->
   <xsl:template match="idPkg:Story[
                          not(@src) (: Story in designmap.xml :)
+                         and
+                         (: exclude stories on masterspread :)
+                         not(Story/@Self = //MasterSpread/TextFrame/@ParentStory)
                        ][last()]" mode="#default" priority="2">
     <xsl:choose>
       <xsl:when test="$xml2idml:use-pages-config
@@ -167,7 +170,7 @@
           <xsl:apply-templates select="@*" mode="#current"/>
             <Story Self="{replace(tokenize(@xml:base, '/')[last()], '^Story_(.+)\.xml$', '$1')}">
               <xsl:copy-of select="collection()[2]/xml2idml:document/xml2idml:stories/ParagraphStyleRange" copy-namespaces="no"/>
-              <xsl:message select="'&#xa;&#xa;WARNING: No story in converted document found! Moving all paragraphs to last story in template.&#xa;'" terminate="no"/>
+              <xsl:message select="'&#xa;&#xa;WARNING: No story/page configuration found for the converted document! Moving all paragraphs to last story in template.&#xa;'" terminate="no"/>
           </Story>
         </xsl:copy>
       </xsl:otherwise>
