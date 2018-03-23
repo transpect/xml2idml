@@ -523,7 +523,10 @@
     
     <xslout:template match="*[ancestor::*][not(@aid:* or @aid5:*)]" mode="xml2idml:Dissolve" priority="-50">
       <xslout:message select="'Unmapped element:', name()"/>
-      <xslout:next-match/>
+      <xslout:copy>
+        <xslout:attribute name="xml2idml:unmapped" select="'true'"/>
+        <xslout:apply-templates select="@*, node()" mode="#current"/>
+      </xslout:copy>
     </xslout:template>
     
     <xslout:template match="*[ancestor::*][not(@aid:* or @aid5:*)]/@*" mode="xml2idml:Dissolve" priority="-50">
