@@ -448,6 +448,8 @@
         <step mode="xml2idml:CellStyles"/>
         <xsl:copy-of select="*[@before eq 'xml2idml:ObjectStyles']" />
         <step mode="xml2idml:ObjectStyles"/>
+        <xsl:copy-of select="*[@before eq 'xml2idml:PullUpNestedInlines']" />
+        <step mode="xml2idml:PullUpNestedInlines"/>
         <xsl:if test="$root//Dissolve">
           <step mode="xml2idml:Dissolve"/>
         </xsl:if>
@@ -475,6 +477,34 @@
       <xslout:sequence select="${$augmented-pipeline/step[last()]/@mode}" />
     </xslout:template>
 
+    <xslout:function name="xml2idml:is-mapped-block-element" as="xs:boolean">
+      <xslout:param name="node" as="node()"/>
+      <xslout:sequence select="boolean($node/self::*[@aid:pstyle or @aid:table or @xml2idml:is-footnote = 'yes'])"/>
+    </xslout:function>
+
+    <xslout:template match="*[@aid:cstyle]
+                             [*[@aid:cstyle]]
+                             [not(xml2idml:is-mapped-block-element(.))]" mode="xml2idml:PullUpNestedInlines">
+      <xslout:variable name="context" select="." as="element(*)"/>
+      <xslout:for-each select="node()">
+        <xslout:choose>
+          <xslout:when test=". instance of text()">
+            <xslout:element name="{{$context/name()}}">
+              <xslout:sequence select="$context/@*"/>
+              <xslout:value-of select="."/>
+            </xslout:element>
+          </xslout:when>
+          <xslout:when test="@aid:cstyle and not(xml2idml:is-mapped-block-element(.))">
+            <xslout:apply-templates select="." mode="#current"/>
+          </xslout:when>
+          <xslout:otherwise>
+            <xslout:copy>
+              <xslout:apply-templates select="@*, node()" mode="#current"/>
+            </xslout:copy>
+          </xslout:otherwise>
+        </xslout:choose>
+      </xslout:for-each>
+    </xslout:template>
 
     <xsl:variable name="pages-config" as="element(xml2idml:Pages)?"
       select="if(not($other-mapping-configuration/xml2idml:Pages)) 
@@ -506,7 +536,7 @@
          (can't generate them here because they'd have higher import precedence
          than any of the imported templates) -->
     <xslout:template match="* | @* | processing-instruction()"
-      mode="xml2idml:Discard xml2idml:Stories xml2idml:ParaStyles xml2idml:InlineStyles xml2idml:TableStyles xml2idml:CellStyles xml2idml:ObjectStyles xml2idml:Dissolve" priority="-100">
+      mode="xml2idml:Discard xml2idml:Stories xml2idml:ParaStyles xml2idml:InlineStyles xml2idml:TableStyles xml2idml:CellStyles xml2idml:ObjectStyles xml2idml:PullUpNestedInlines xml2idml:Dissolve" priority="-100">
       <xslout:copy copy-namespaces="no">
         <xslout:apply-templates select="@*, node()" mode="#current" />
       </xslout:copy>
@@ -645,7 +675,6 @@
     xpath-default-namespace="http://transpect.io/xml2idml" mode="xml2idml:style-atts">
     <xslout:attribute name="xml2idml:cellStylePriority" select="'{.}'" />
   </xsl:template>
-
 
   <xsl:function name="xml2idml:escaped-style-name" as="xs:string">
     <xsl:param name="style-type" as="xs:string" />
