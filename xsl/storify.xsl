@@ -612,8 +612,8 @@
       <xsl:if test="@xml2idml:insert-special-char-method eq 'before'">
         <xsl:sequence select="xml2idml:insert-special-char-wrapper(.)"/>
       </xsl:if>
-      <xsl:if test="@xml2idml:insert-content-method eq 'before'">
-        <xsl:sequence select="xml2idml:insert-content-wrapper(.)"/>
+      <xsl:if test="@xml2idml:insert-content-before">
+        <xsl:sequence select="xml2idml:insert-content-wrapper(., 'before')"/>
       </xsl:if>
       <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/{@aid:cstyle}">
         <xsl:apply-templates select="@xml:lang, @xml2idml:condition" mode="#current"/>
@@ -623,12 +623,8 @@
               select="concat('CharacterStyle/', (@xml2idml:insert-special-char-format, @aid:cstyle,'$ID/[No character style]')[1])"/>
             <xsl:sequence select="xml2idml:insert-special-char(@xml2idml:insert-special-char)"/>
           </xsl:when>
-          <xsl:when test="@xml2idml:insert-content-method eq 'replace'">
-            <xsl:attribute name="AppliedCharacterStyle" 
-              select="concat('CharacterStyle/', (@xml2idml:insert-content-format, @aid:cstyle, '$ID/[No character style]')[1])"/>
-            <Content>
-              <xsl:value-of select="@xml2idml:insert-content"/>
-            </Content>
+          <xsl:when test="@xml2idml:insert-content-replace">
+            <xsl:sequence select="xml2idml:insert-content-wrapper(., 'replace')"/>
           </xsl:when>
           <xsl:otherwise>
             <xsl:next-match>
@@ -640,8 +636,8 @@
       <xsl:if test="@xml2idml:insert-special-char-method eq 'after'">
         <xsl:sequence select="xml2idml:insert-special-char-wrapper(.)"/>
       </xsl:if>
-      <xsl:if test="@xml2idml:insert-content-method eq 'after'">
-        <xsl:sequence select="xml2idml:insert-content-wrapper(.)"/>
+      <xsl:if test="@xml2idml:insert-content-after">
+        <xsl:sequence select="xml2idml:insert-content-wrapper(., 'after')"/>
       </xsl:if>
     </xsl:variable>
     <xsl:variable name="psr" as="element(*)+">
@@ -875,13 +871,14 @@
 
   <xsl:function name="xml2idml:insert-content-wrapper" as="element(CharacterStyleRange)">
     <xsl:param name="cstyle-node" as="element(*)" />
+    <xsl:param name="method" as="xs:string" />
     <xsl:variable name="content" as="element(Content)">
       <Content>
-        <xsl:value-of select="$cstyle-node/@xml2idml:insert-content"/>
+        <xsl:value-of select="$cstyle-node/@xml2idml:*[local-name() = concat('insert-content-', $method)]"/>
       </Content>
     </xsl:variable>
     <xsl:sequence select="xml2idml:insert-csr-wrapper(
-                            ($cstyle-node/@xml2idml:insert-content-format, $cstyle-node/@aid:cstyle)[1],
+                            ($cstyle-node/@xml2idml:*[local-name() = concat('insert-content-', $method, '-format')], $cstyle-node/@aid:cstyle)[1],
                             $content
                           )"/>
   </xsl:function>

@@ -415,6 +415,12 @@
         <data type="string"/>
       </attribute>
       <empty/>
+      <s:pattern>
+        <s:rule context="xml2idml:insert-content[@method]">
+          <s:report test="preceding-sibling::xml2idml:insert-content/@method eq current()/@method" role="error">
+            There is already an insert-content element with method=<xsl:value-of select="@method"/>!</s:report>
+        </s:rule>
+      </s:pattern>
     </element>
   </define>
 
@@ -544,9 +550,9 @@
           </optional>
           <interleave>
             <ref name="mapping.model.simple"/>
-            <optional>
+            <zeroOrMore>
               <ref name="mapping.model.insert-content"/>
-            </optional>
+            </zeroOrMore>
             <optional>
               <ref name="mapping.model.insert-special-char"/>
             </optional>

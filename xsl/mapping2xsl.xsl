@@ -607,6 +607,7 @@
 
   <xsl:template match="InlineStyles/mapping-instruction" mode="xml2idml:style-atts"
     xpath-default-namespace="http://transpect.io/xml2idml">
+    <xsl:variable name="context" select="." as="element(xml2idml:mapping-instruction)"/>
     <xslout:attribute name="aid:cstyle" select="'{(xml2idml:escape-style-name(format), '$ID/[No character style]')[. ne ''][1]}'" />
     <xsl:if test="condition">
       <xslout:attribute name="xml2idml:condition" select="'{condition}'" />
@@ -621,13 +622,14 @@
     <xsl:if test="xml2idml:insert-special-char/@format[. ne '']">
       <xslout:attribute name="xml2idml:insert-special-char-format" select="'{insert-special-char/@format}'" />
     </xsl:if>
-    <xsl:if test="xml2idml:insert-content">
-      <xslout:attribute name="xml2idml:insert-content" select="'{insert-content/@content}'" />
-      <xslout:attribute name="xml2idml:insert-content-method" select="'{insert-content/@method}'" />
-    </xsl:if>
-    <xsl:if test="xml2idml:insert-content/@format[. ne '']">
-      <xslout:attribute name="xml2idml:insert-content-format" select="'{insert-content/@format}'" />
-    </xsl:if>
+    <xsl:for-each select="('before', 'replace', 'after')">
+      <xsl:if test="$context/xml2idml:insert-content[@method eq current()]">
+        <xslout:attribute name="{concat('xml2idml:insert-content-', current())}" select="'{$context/insert-content[@method eq current()]/@content}'" />
+        <xsl:if test="$context/xml2idml:insert-content[@method eq current()]/@format[. ne '']">
+          <xslout:attribute name="{concat('xml2idml:insert-content-', current(), '-format')}" select="'{$context/insert-content[@method eq current()]/@format}'" />
+        </xsl:if>
+      </xsl:if>
+    </xsl:for-each>
     <xsl:if test="@is-footnote">
       <xslout:attribute name="xml2idml:is-footnote" select="'yes'" />
     </xsl:if>
