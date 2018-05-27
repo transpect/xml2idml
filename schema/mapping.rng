@@ -73,7 +73,7 @@
   </define>
 
   <define name="mapping.anything">
-    <element>  
+    <element>
       <anyName/>
       <zeroOrMore>
         <attribute>
@@ -81,7 +81,10 @@
         </attribute>
       </zeroOrMore>
       <zeroOrMore>
-        <ref name="mapping.anything" />
+        <choice>
+          <text/>
+          <ref name="mapping.anything"/>
+        </choice>
       </zeroOrMore>
     </element>
   </define>
