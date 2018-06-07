@@ -47,7 +47,7 @@
 
       <!-- look at all used styles of style-type -->
       <xsl:for-each select="distinct-values(//*[local-name() eq $elementname-to-check]
-			                       /@*[local-name() eq concat('Applied', $style-type)])">
+			                       /@*[local-name() eq concat('Applied', $style-type)][. != 'n'])">
         <xsl:if test="not(current() = $defined-styles)">
           <xsl:variable name="style-name-displayed" as="xs:string?"
             select="substring-after(current(), concat($style-type, '/'))"/>
