@@ -163,18 +163,18 @@
                         exists(key('xml2idml:story-by-name', 'main', collection()[1]))
                       )">
         <xsl:next-match/>
-        <xsl:apply-templates select="collection()[2]/xml2idml:document/xml2idml:stories//idPkg:Story" mode="xml2idml:merge_newstories" />
       </xsl:when>
       <xsl:otherwise>
         <xsl:copy>
           <xsl:apply-templates select="@*" mode="#current"/>
             <Story Self="{replace(tokenize(@xml:base, '/')[last()], '^Story_(.+)\.xml$', '$1')}">
-              <xsl:copy-of select="collection()[2]/xml2idml:document/xml2idml:stories/ParagraphStyleRange" copy-namespaces="no"/>
+              <xsl:apply-templates select="collection()[2]/xml2idml:document/xml2idml:stories/ParagraphStyleRange" mode="xml2idml:merge_last_story"/>
               <xsl:message select="'&#xa;&#xa;WARNING: No story/page configuration found for the converted document! Moving all paragraphs to last story in template.&#xa;'" terminate="no"/>
           </Story>
         </xsl:copy>
       </xsl:otherwise>
     </xsl:choose>
+    <xsl:apply-templates select="collection()[2]/xml2idml:document/xml2idml:stories//idPkg:Story" mode="xml2idml:merge_newstories" />
   </xsl:template>
 
   <xsl:template match="idPkg:Story" mode="xml2idml:merge_newstories">
@@ -183,12 +183,12 @@
     </xsl:copy>
   </xsl:template>
 
-  <xsl:template match="idPkg:Story" mode="xml2idml:merge_newstories_inner" />
+  <xsl:template match="idPkg:Story" mode="xml2idml:merge_newstories_inner xml2idml:merge_last_story"/>
 
-  <xsl:template match="TextFrame[idPkg:Story]" mode="xml2idml:merge_newstories_inner" >
+  <xsl:template match="TextFrame[idPkg:Story]" mode="xml2idml:merge_newstories_inner xml2idml:merge_last_story">
     <xsl:copy copy-namespaces="no">
+      <xsl:attribute name="ParentStory" select="idPkg:Story/Story/@Self"/>
       <xsl:apply-templates select="@*" mode="#current" />
-      <xsl:attribute name="ParentStory" select="idPkg:Story/Story/@Self" />
       <xsl:apply-templates mode="#current" />
     </xsl:copy>
   </xsl:template>
@@ -467,6 +467,12 @@
   
   <xsl:template match="node()|@*" mode="default_copy-pages-and-story-textframes-to-new-spreads">
     <xsl:copy>
+      <xsl:apply-templates select="@*, node()" mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="node() | @*" mode="xml2idml:merge_last_story">
+    <xsl:copy copy-namespaces="no">
       <xsl:apply-templates select="@*, node()" mode="#current"/>
     </xsl:copy>
   </xsl:template>
