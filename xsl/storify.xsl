@@ -615,6 +615,9 @@
       <xsl:if test="@xml2idml:insert-content-before">
         <xsl:sequence select="xml2idml:insert-content-wrapper(., 'before')"/>
       </xsl:if>
+      <xsl:if test="@xml2idml:insert-textvariable-instance-method eq 'before'">
+        <xsl:sequence select="xml2idml:insert-textvariable-instance-wrapper(.)"/>
+      </xsl:if>
       <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/{@aid:cstyle}">
         <xsl:apply-templates select="@xml:lang, @xml2idml:condition" mode="#current"/>
         <xsl:choose>
@@ -625,6 +628,9 @@
           </xsl:when>
           <xsl:when test="@xml2idml:insert-content-replace">
             <xsl:sequence select="xml2idml:insert-content-wrapper(., 'replace')"/>
+          </xsl:when>
+          <xsl:when test="@xml2idml:insert-textvariable-instance-method eq 'replace'">
+            <xsl:sequence select="xml2idml:insert-textvariable-instance(@xml2idml:insert-textvariable-instance)"/>
           </xsl:when>
           <xsl:otherwise>
             <xsl:next-match>
@@ -638,6 +644,9 @@
       </xsl:if>
       <xsl:if test="@xml2idml:insert-content-after">
         <xsl:sequence select="xml2idml:insert-content-wrapper(., 'after')"/>
+      </xsl:if>
+      <xsl:if test="@xml2idml:insert-textvariable-instance-method eq 'after'">
+        <xsl:sequence select="xml2idml:insert-textvariable-instance-wrapper(.)"/>
       </xsl:if>
     </xsl:variable>
     <xsl:variable name="psr" as="element(*)+">
@@ -868,6 +877,14 @@
                             xml2idml:insert-special-char($cstyle-node/@xml2idml:insert-special-char)
                           )"/>
   </xsl:function>
+  
+  <xsl:function name="xml2idml:insert-textvariable-instance-wrapper" as="element(CharacterStyleRange)">
+    <xsl:param name="cstyle-node" as="element(*)" />
+    <xsl:sequence select="xml2idml:insert-csr-wrapper(
+      (xs:string($cstyle-node/@xml2idml:insert-textvariable-instance-format), '')[1],
+      xml2idml:insert-textvariable-instance($cstyle-node/@xml2idml:insert-textvariable-instance)
+      )"/>
+  </xsl:function>
 
   <xsl:function name="xml2idml:insert-content-wrapper" as="element(CharacterStyleRange)">
     <xsl:param name="cstyle-node" as="element(*)" />
@@ -945,6 +962,15 @@
           <xsl:message terminate="no" select="'WARNING: Unknown special char: ', $character-name" />
         </xsl:otherwise>
       </xsl:choose>
+    </xsl:variable>
+    <xsl:sequence select="$content"/>
+  </xsl:function>
+  
+  <!-- output of this function will be wrapped with <CharacterStyleRange> -->
+  <xsl:function name="xml2idml:insert-textvariable-instance" as="node()*">
+    <xsl:param name="textvar-name" />
+    <xsl:variable name="content" as="node()*">
+      <TextVariableInstance Name="{$textvar-name}" ResultText="{concat('&lt;', $textvar-name, '&gt;')}" AssociatedTextVariable="{concat('dTextVariablen', $textvar-name)}" />
     </xsl:variable>
     <xsl:sequence select="$content"/>
   </xsl:function>
@@ -1254,6 +1280,13 @@
   
   <xsl:template match="CrossReference[matches(@Self, 'Topicn')]/@Self" mode="xml2idml:storify_content-n-cleanup">
     <xsl:attribute name="Self" select="generate-id()"/>
+  </xsl:template>
+  
+  <xsl:template match="TextVariableInstance" mode="xml2idml:storify_content-n-cleanup">
+    <xsl:copy>
+      <xsl:apply-templates select="@*" mode="#current"/>
+      <xsl:attribute name="Self" select="concat('tv_', generate-id())"/>
+    </xsl:copy>
   </xsl:template>
 
 </xsl:stylesheet>

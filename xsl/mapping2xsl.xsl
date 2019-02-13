@@ -615,6 +615,13 @@
         <xslout:attribute name="xml2idml:hidden" select="'true'" />
       </xsl:if>
     </xsl:if>
+    <xsl:if test="xml2idml:insert-textvariable-instance/@name">
+      <xslout:attribute name="xml2idml:insert-textvariable-instance" select="'{insert-textvariable-instance/@name}'" />
+      <xslout:attribute name="xml2idml:insert-textvariable-instance-method" select="'{insert-textvariable-instance/@method}'" />
+    </xsl:if>
+    <xsl:if test="xml2idml:insert-textvariable-instance/@format[. ne '']">
+      <xslout:attribute name="xml2idml:insert-textvariable-instance-format" select="'{insert-textvariable-instance/@format}'" />
+    </xsl:if>
     <xsl:if test="xml2idml:insert-special-char/@name">
       <xslout:attribute name="xml2idml:insert-special-char" select="'{insert-special-char/@name}'" />
       <xslout:attribute name="xml2idml:insert-special-char-method" select="'{insert-special-char/@method}'" />

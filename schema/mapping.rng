@@ -457,6 +457,24 @@
       </optional>
     </element>
   </define>
+  
+  <define name="mapping.model.insert-textvariable-instance">
+    <element name="insert-textvariable-instance">
+      <attribute name="name">
+        <data type="string">
+          <param name="pattern">.*\S.*</param>
+        </data>
+      </attribute>
+      <ref name="mapping.att.method"/>
+      <optional>
+        <attribute name="format">
+          <data type="string">
+            <param name="pattern">.*\S.*</param>
+          </data>
+        </attribute>
+      </optional>
+    </element>
+  </define>
 
   <define name="mapping.name">
     <element name="name">
@@ -557,6 +575,9 @@
               <ref name="mapping.model.insert-content"/>
             </zeroOrMore>
             <optional>
+              <ref name="mapping.model.insert-textvariable-instance"/>
+            </optional>
+            <optional>
               <ref name="mapping.model.insert-special-char"/>
             </optional>
             <s:pattern>
@@ -564,7 +585,8 @@
                 <s:report test="@method eq ../xml2idml:insert-special-char/@method" role="Info">
                   If both elements insert-content and insert-special-char are using 
                   the same method (=<xsl:value-of select="@method"/>), the special-char 
-                  will be output first and the new content of insert-content second.</s:report>
+                  will be output first and the new content of insert-content second. 
+                  textvariable-instance is always the last content to be created.</s:report>
               </s:rule>
             </s:pattern>
           </interleave>

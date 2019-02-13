@@ -60,6 +60,17 @@
       </xsl:for-each>
     </xsl:copy>
   </xsl:template>
+  
+  <!-- check instances of text variables -->
+  <xsl:template match="TextVariableInstance" mode="#default">
+    <xsl:copy>
+      <xsl:apply-templates select="@*" mode="#current" />
+      <xsl:apply-templates mode="#current" />            
+      <xsl:if test="not(some $i in //TextVariable/@Name satisfies $i = @Name)">
+        <xsl:message select="concat('text variable not defined in template: ', @Name)"/>
+      </xsl:if>
+    </xsl:copy>
+  </xsl:template>
 
   <!-- catch and copy all -->
   <xsl:template match="@* | * | processing-instruction() | comment()"
