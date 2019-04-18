@@ -223,6 +223,12 @@
   <!-- xml2idml:use-pages-config=true(): select first spread to insert all new spreads -->
   <xsl:template match="idPkg:Spread[$xml2idml:use-pages-config][not(preceding-sibling::idPkg:Spread)]" mode="#default">
 
+    <xsl:if test="count($xml2idml:pages-config/xml2idml:Spread) = 0">
+      <xsl:message>&#xa;&#xa;
+        Warning: there are no Spread elements in the current Pages configuration of element xml2idml:OtherMappingConfiguration&#xa;
+      </xsl:message>
+    </xsl:if>
+
     <!-- process user mapping configuration and build temporary/internal configuration -->
     <xsl:variable name="new-spreads" as="element(xml2idml:Spread)+">
       <xsl:call-template name="xml2idml:create-spread-and-story-info"/>
