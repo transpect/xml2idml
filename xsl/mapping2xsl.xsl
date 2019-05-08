@@ -327,6 +327,9 @@
       <xsl:apply-templates select="path/@priority" mode="#current" />
       <xslout:copy copy-namespaces="no">
         <xslout:copy-of select="@*" />
+        <xsl:if test="@keep-xml-space-preserve">
+          <xslout:attribute name="xml2idml:keep-xml-space-preserve" select="'{@keep-xml-space-preserve}'" />
+        </xsl:if>
         <xsl:apply-templates select="." mode="xml2idml:style-atts" />
         <xslout:apply-templates mode="#current" />
       </xslout:copy>

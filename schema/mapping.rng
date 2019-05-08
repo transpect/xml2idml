@@ -549,6 +549,9 @@
         <optional>
           <ref name="mapping.model.nesting" />
         </optional>
+        <optional>
+          <ref name="mapping.att.keep-xml-space-preserve"/>
+        </optional>
       </interleave>
     </element>
   </define>

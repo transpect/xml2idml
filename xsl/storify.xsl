@@ -211,6 +211,7 @@
 
   <xsl:template match="*[@aid:pstyle][not(xml2idml:invalid-nested-pstyle(.))]" mode="xml2idml:storify" priority="3">
     <ParagraphStyleRange>
+      <xsl:copy-of select="@xml2idml:keep-xml-space-preserve"/>
       <xsl:apply-templates select="@xml2idml:condition" mode="#current"/>
       <xsl:apply-templates select="@css:* | @aid:pstyle" mode="#current" />
       <xsl:next-match>
@@ -223,6 +224,7 @@
   <!-- invalid pstyle in pstyle: dissolve as CSR, add specific info into style name -->
   <xsl:template match="*[@aid:pstyle][xml2idml:invalid-nested-pstyle(.)]" mode="xml2idml:storify" priority="3">
     <CharacterStyleRange AppliedCharacterStyle="{concat('CharacterStyle/xml2idml-ParagraphInParagraph-', @aid:pstyle)}">
+      <xsl:copy-of select="@xml2idml:keep-xml-space-preserve"/>
       <xsl:apply-templates select="@xml2idml:condition" mode="#current"/>
       <xsl:apply-templates select="@css:*, node()" mode="#current" />
     </CharacterStyleRange>
@@ -1258,7 +1260,7 @@
                              [not(parent::Content or parent::Contents)]" mode="xml2idml:storify_content-n-cleanup">
     <Content>
       <xsl:choose>
-        <xsl:when test="ancestor::*[@xml2idml:keep-xml-space-preserve eq 'true'] and 
+        <xsl:when test="ancestor::*[@xml2idml:keep-xml-space-preserve eq 'true'] or 
                         ancestor::*[@xml:space eq 'preserve']">
           <xsl:attribute name="xml:space" select="'preserve'"/>
           <xsl:value-of select="."/>
