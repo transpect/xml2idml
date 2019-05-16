@@ -42,6 +42,12 @@
       </ul>
     </p:documentation>
   </p:option>
+  <p:option name="idmltemplate-expanded-dir-uri" required="false" select="''">
+    <p:documentation>
+      <p>When no value for the current option is set the idmltemplate will be temporary expanded to disk into 
+        the following directory: 'template' option value plus '.idmltemplate.tmp' instead of suffix '.idml'.</p>
+    </p:documentation>
+  </p:option>
   <p:option name="debug">
     <p:documentation>Debug option - values: yes or no.</p:documentation>
   </p:option>
@@ -114,14 +120,16 @@
   <tr-internal:unzip name="expand-template">
     <p:documentation>Unzip the IDML template to a temporary directory.</p:documentation>
     <p:with-option name="zip" select="/*:result/@uri" />
-    <p:with-option name="dest-dir" select="concat(replace(base-uri(/*), '^file:(//)?(.+)\.\w+$', '$2'), '.idmltemplate.tmp')">
+    <p:with-option name="dest-dir" select="if(not($idmltemplate-expanded-dir-uri = '')) 
+                                           then replace($idmltemplate-expanded-dir-uri, 'file:', '') 
+                                           else concat(replace(base-uri(/*), '^file:(//)?(.+)\.\w+$', '$2'), '.idmltemplate.tmp')">
       <p:pipe step="xml2idml" port="source"/>
     </p:with-option>
     <p:with-option name="overwrite" select="'yes'" />
   </tr-internal:unzip>
 
   <cx:message>
-    <p:with-option name="message" select="'### xml2idml: unzipped IDML template' "/>
+    <p:with-option name="message" select="'### xml2idml: unzipped IDML template into directory ', replace(/*/@xml:base, '^file:/+', '/')"/>
   </cx:message>
 
   <p:sink/>
@@ -207,7 +215,7 @@
       <p:pipe port="paths" step="xml2idml"/>
     </p:input>
     <p:with-option name="debug" select="$debug"/>
-    <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>    
+    <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
   </tr:load-cascaded>
 
   <tr:load-cascaded name="load-remove-tagging" fallback="http://transpect.io/xml2idml/xsl/remove-tagging.xsl">
