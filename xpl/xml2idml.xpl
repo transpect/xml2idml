@@ -136,7 +136,7 @@
 
   <p:load name="template-designmap">
     <p:documentation>Load the designmap.xml: the key in each IDML file 
-      to all it´s included files.</p:documentation>
+      to all its included files.</p:documentation>
     <p:with-option name="href" select="concat(/c:files/@xml:base, '/designmap.xml')">
       <p:pipe step="expand-template" port="result"/>
     </p:with-option>
