@@ -231,7 +231,7 @@
 
   <p:xslt name="storify-pass1" initial-mode="xml2idml:storify">
     <p:documentation>Convert/wrap content elements into IDML notation. 
-      Creating Character-, ParagraphStyleRange`s and so on.</p:documentation>
+      Creating Character, ParagraphStyleRanges and so on.</p:documentation>
     <p:with-param name="base-uri" select="replace(base-uri(/*), '\.\w+$', '.idml.tmp')">
       <p:pipe step="xml2idml" port="source"/>
     </p:with-param>
@@ -258,7 +258,7 @@
 
   <p:xslt name="storify-pass2" initial-mode="xml2idml:storify_content-n-cleanup">
     <p:documentation>Cleanup mode in storify.xsl, i.e. remove unecessary 
-      line-break commands. See also the included stylesheet documentation.</p:documentation>
+      line break commands. See also the included stylesheet documentation.</p:documentation>
     <p:input port="parameters"><p:empty/></p:input>
     <p:input port="stylesheet">
       <p:pipe step="load-storify" port="result"/>
