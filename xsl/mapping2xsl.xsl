@@ -595,7 +595,14 @@
 
   <xsl:template match="ParaStyles/mapping-instruction" mode="xml2idml:style-atts"
     xpath-default-namespace="http://transpect.io/xml2idml">
-    <xslout:attribute name="aid:pstyle" select="'{(xml2idml:escape-style-name(format), '$ID/NormalParagraphStyle')[. ne ''][1]}'" />
+    <xsl:choose>
+      <xsl:when test="xpath">
+        <xslout:attribute name="aid:pstyle" select="{concat('if (', xpath, '[. ne '''']) then ', xpath, ' else ''$ID/NormalParagraphStyle''')}"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xslout:attribute name="aid:pstyle" select="'{(xml2idml:escape-style-name(format), '$ID/NormalParagraphStyle')[. ne ''][1]}'"/>
+      </xsl:otherwise>
+    </xsl:choose>
     <xsl:if test="condition">
       <xslout:attribute name="xml2idml:condition" select="'{condition}'" />
       <xsl:if test="condition/@hidden = 'true'">
@@ -611,8 +618,15 @@
   <xsl:template match="InlineStyles/mapping-instruction" mode="xml2idml:style-atts"
     xpath-default-namespace="http://transpect.io/xml2idml">
     <xsl:variable name="context" select="." as="element(xml2idml:mapping-instruction)"/>
-    <xslout:attribute name="aid:cstyle" select="'{(xml2idml:escape-style-name(format), '$ID/[No character style]')[. ne ''][1]}'" />
-    <xsl:if test="condition">
+    <xsl:choose>
+      <xsl:when test="xpath">
+        <xslout:attribute name="aid:cstyle" select="{concat('if (', xpath, '[. ne '''']) then ', xpath, ' else ''$ID/[No character style]''')}"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xslout:attribute name="aid:cstyle" select="'{(xml2idml:escape-style-name(format), '$ID/[No character style]')[. ne ''][1]}'" />
+      </xsl:otherwise>
+    </xsl:choose>
+        <xsl:if test="condition">
       <xslout:attribute name="xml2idml:condition" select="'{condition}'" />
       <xsl:if test="condition/@hidden = 'true'">
         <xslout:attribute name="xml2idml:hidden" select="'true'" />
@@ -667,18 +681,39 @@
   </xsl:template>
   <xsl:template match="ObjectStyles/mapping-instruction" mode="xml2idml:style-atts"
     xpath-default-namespace="http://transpect.io/xml2idml">
-    <xslout:attribute name="xml2idml:ObjectStyle" select="'{(xml2idml:escape-style-name(format), '$ID/[None]')[. ne ''][1]}'" />
+    <xsl:choose>
+      <xsl:when test="xpath">
+        <xslout:attribute name="xml2idml:ObjectStyle" select="{concat('if (', xpath, '[. ne '''']) then ', xpath, ' else ''$ID/[None]''')}"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xslout:attribute name="xml2idml:ObjectStyle" select="'{(xml2idml:escape-style-name(format), '$ID/[None]')[. ne ''][1]}'" />
+      </xsl:otherwise>
+    </xsl:choose>    
     <xslout:attribute name="xml2idml:anchoring" select="'{xml2idml:anchoring/@type}'" />
     <xsl:apply-templates select="width | height" mode="#current" />
   </xsl:template>
   <xsl:template match="TableStyles/mapping-instruction" mode="xml2idml:style-atts"
     xpath-default-namespace="http://transpect.io/xml2idml">
-    <xslout:attribute name="aid5:tablestyle" select="'{(xml2idml:escape-style-name(format), '$ID/[No table style]')[. ne ''][1]}'" />
+    <xsl:choose>
+      <xsl:when test="xpath">
+        <xslout:attribute name="aid5:tablestyle" select="{concat('if (', xpath, '[. ne '''']) then ', xpath, ' else ''$ID/[No table style]''')}"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xslout:attribute name="aid5:tablestyle" select="'{(xml2idml:escape-style-name(format), '$ID/[No table style]')[. ne ''][1]}'" />
+      </xsl:otherwise>
+    </xsl:choose>
     <xslout:attribute name="aid:table" select="'table'" />
   </xsl:template>
   <xsl:template match="CellStyles/mapping-instruction" mode="xml2idml:style-atts"
     xpath-default-namespace="http://transpect.io/xml2idml">
-    <xslout:attribute name="aid5:cellstyle" select="'{(xml2idml:escape-style-name(format), '$ID/[None]')[. ne ''][1]}'" />
+    <xsl:choose>
+      <xsl:when test="xpath">
+        <xslout:attribute name="aid5:cellstyle" select="{concat('if (', xpath, '[. ne '''']) then ', xpath, ' else ''$ID/[None]''')}"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xslout:attribute name="aid5:cellstyle" select="'{(xml2idml:escape-style-name(format), '$ID/[None]')[. ne ''][1]}'" />
+      </xsl:otherwise>
+    </xsl:choose>
     <xslout:attribute name="aid:table" select="'cell'" />
     <xsl:apply-templates select="format/@priority" mode="#current" />
   </xsl:template>
