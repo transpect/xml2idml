@@ -320,7 +320,7 @@
             Self="{concat('link_', generate-id())}"
             Name="{concat($source, '_', generate-id())}"
             Source="{generate-id()}"
-            DestinationUniqueKey="{concat('00', count($destination/preceding::node()))}">
+            DestinationUniqueKey="{concat('00', count(preceding::node()))}">
             <Properties>
               <BorderColor type="enumeration">Black</BorderColor>
               <Destination type="object">
@@ -695,7 +695,7 @@
     <xsl:variable name="source" as="element(*)*" select="key('linking-item-by-source', @xml2idml:hyperlink-dest)"/>
     <xsl:choose>
       <xsl:when test="$source">
-        <HyperlinkTextDestination Hidden="false" Name="{@xml2idml:hyperlink-dest}" DestinationUniqueKey="{concat('00', count(preceding::node()))}" Self="{concat('HyperlinkTextDestination/', @xml2idml:hyperlink-dest)}">
+        <HyperlinkTextDestination Hidden="false" Name="{@xml2idml:hyperlink-dest}" DestinationUniqueKey="{concat('00', count($source/preceding::node()))}" Self="{concat('HyperlinkTextDestination/', @xml2idml:hyperlink-dest)}">
           <xsl:next-match/>
         </HyperlinkTextDestination>
       </xsl:when>
