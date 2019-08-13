@@ -581,8 +581,17 @@
               <ref name="mapping.att.is-hyperlink-dest"/>
             </choice>
           </optional>
-          <interleave>
-            <ref name="mapping.model.simple"/>
+          <interleave>            
+            <ref name="mapping.path"/>
+            <optional>
+              <ref name="mapping.format"/>
+            </optional>
+            <optional>
+              <ref name="mapping.xpath"/>
+            </optional>
+            <optional>
+              <ref name="mapping.condition"/>
+            </optional>            
             <zeroOrMore>
               <ref name="mapping.model.insert-content"/>
             </zeroOrMore>

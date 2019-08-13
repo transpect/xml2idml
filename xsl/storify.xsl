@@ -326,7 +326,7 @@
               <Destination type="object">
                 <xsl:choose>
                   <xsl:when test="matches($source, '^(www|ftp|http)')">
-                    <xsl:value-of select="concat('HyperlinkURLDestination/', $source)"/>
+                    <xsl:value-of select="concat('HyperlinkURLDestination/', replace($source, ':', '%3a'))"/>
                   </xsl:when>
                   <xsl:otherwise>
                     <xsl:value-of select="concat('HyperlinkTextDestination/', $source)"/>
@@ -348,7 +348,7 @@
     <xsl:for-each select="$link-source">
       <xsl:variable name="link-dest" select="current()/@xml2idml:hyperlink-source" as="attribute(xml2idml:hyperlink-source)"/>
       <HyperlinkURLDestination 
-        Self="{concat('HyperlinkURLDestination/', $link-dest)}"
+        Self="{concat('HyperlinkURLDestination/', replace($link-dest, ':', '%3a'))}"
         DestinationUniqueKey="{concat('00', count(preceding::node()))}"
         DestinationURL="{$link-dest}"
         Name="{$link-dest}"
