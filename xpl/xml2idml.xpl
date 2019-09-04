@@ -197,8 +197,8 @@
     <p:input port="msgs">
       <p:inline>
         <c:messages>
-          <c:message xml:lang="en">Mapping-Instruktionen erfolgreich angewendet, beginne mit Erstellung der IDML-Struktur</c:message>
-          <c:message xml:lang="de">Mapping instructions successfully applied, about to start IDML structure</c:message>
+          <c:message xml:lang="de">Mapping-Instruktionen erfolgreich angewendet, beginne mit Erstellung der IDML-Struktur</c:message>
+          <c:message xml:lang="en">Mapping instructions successfully applied, about to start IDML structure</c:message>
         </c:messages>
       </p:inline>
     </p:input>
