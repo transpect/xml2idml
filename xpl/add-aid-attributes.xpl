@@ -92,7 +92,9 @@
 
   <p:xslt name="mapped" template-name="main">
     <p:with-param name="debug" select="$debug" />
-    <p:input port="parameters"><p:empty/></p:input>
+    <p:input port="parameters">
+      <p:pipe port="paths" step="add-aid"/>
+    </p:input>
     <p:input port="source">
       <p:pipe step="add-aid" port="source" />
     </p:input>
