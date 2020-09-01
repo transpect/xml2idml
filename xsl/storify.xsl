@@ -381,14 +381,16 @@
     <xsl:param name="levels" as="xs:integer"/>
     <!-- : needs to be replaced for @Self value or InDesign will crash -->
     <xsl:variable name="normalized-topics" as="xs:string" 
-      select="replace($topics, ':', '-')"/>
+      select="replace(replace($topics, ':', '-'), 'SortAs.+', '')"/>
     <xsl:variable name="splitted-topics" as="xs:string+"
       select="tokenize($topics, 'Topicn')[ . != '']"/>
     <xsl:variable name="normalized-splitted-topics" as="xs:string+"
       select="tokenize($normalized-topics, 'Topicn')[ . != '']"/>
-    <Topic SortOrder="">
+    <xsl:variable name="sort" as="xs:string?"
+      select="replace($splitted-topics[$levels], '^.+?(SortAs(.+))?$', '$2')"/>
+    <Topic SortOrder="{$sort}">
       <xsl:attribute name="Name">
-        <xsl:value-of select="$splitted-topics[$levels]"/>
+        <xsl:value-of select="replace($splitted-topics[$levels], 'SortAs.+', '')"/>
       </xsl:attribute>
       <xsl:attribute name="Self">
         <xsl:value-of select="concat('X2ITopicn', string-join($normalized-splitted-topics[position() le $levels], 'Topicn'))"/>
@@ -404,7 +406,7 @@
   
   <xsl:template match="*[xs:integer(@xml2idml:is-indexterm-level) = max(@xml2idml:is-indexterm-level union following-sibling::*/@xml2idml:is-indexterm-level)][not(@xml2idml:is-indexterm-crossref)]" mode="xml2idml:storify" priority="2.3">
     <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
-      <PageReference Self="pr_{generate-id()}" PageReferenceType="CurrentPage" ReferencedTopic="{concat('X2I', replace(xml2idml:generate-ReferencedTopic(.), ':', '-'))}" />
+      <PageReference Self="pr_{generate-id()}" PageReferenceType="CurrentPage" ReferencedTopic="{concat('X2I', replace(replace(xml2idml:generate-ReferencedTopic(.), ':', '-'), 'SortAs.+', ''))}" />
     </CharacterStyleRange>
   </xsl:template>
   <xsl:template match="*[xs:integer(@xml2idml:is-indexterm-level) &lt; max(@xml2idml:is-indexterm-level union following-sibling::*/@xml2idml:is-indexterm-level)][not(@xml2idml:is-indexterm-crossref)]" mode="xml2idml:storify" priority="2.3"/>
@@ -439,21 +441,24 @@
   <xsl:function name="xml2idml:generate-ReferencedTopic" as="xs:string">
     <xsl:param name="indexterm-child" as="element()"/>
     <xsl:variable name="level" select="xs:integer($indexterm-child/@xml2idml:is-indexterm-level)" as="xs:integer"/>
+    <xsl:variable name="sortkey" select="$indexterm-child/@xml2idml:sortkey" as="xs:string?"/>
     <xsl:choose>
       <xsl:when test="$level = 1">
-        <xsl:value-of select="concat('Topicn', $indexterm-child)"/>
+        <xsl:value-of select="concat('Topicn', $indexterm-child, if ($sortkey) then concat('SortAs', $sortkey) else '')"/>
       </xsl:when>
       <xsl:when test="$level = 2">
         <xsl:value-of select="concat(
                                 'Topicn', $indexterm-child/preceding-sibling::*[1][xs:integer(@xml2idml:is-indexterm-level) = 1 ], 
-                                'Topicn', $indexterm-child
+                                'Topicn', $indexterm-child,
+                                if ($sortkey) then concat('SortAs', $sortkey) else ''
                               )"/>
       </xsl:when>
       <xsl:when test="$level = 3">
         <xsl:value-of select="concat(
                                 'Topicn', $indexterm-child/preceding-sibling::*[2][xs:integer(@xml2idml:is-indexterm-level) = 1 ], 
                                 'Topicn', $indexterm-child/preceding-sibling::*[1][xs:integer(@xml2idml:is-indexterm-level) = 2 ], 
-                                'Topicn', $indexterm-child
+                                'Topicn', $indexterm-child,
+                                if ($sortkey) then concat('SortAs', $sortkey) else ''
                               )"/>
       </xsl:when>
       <xsl:otherwise>

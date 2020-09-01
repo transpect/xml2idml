@@ -668,6 +668,9 @@
     </xsl:if>
     <xsl:if test="@is-indexterm-level and xs:integer(@is-indexterm-level) lt 4 and not(@is-indexterm-crossref eq 'true')">
       <xslout:attribute name="xml2idml:is-indexterm-level" select="{@is-indexterm-level}" />
+      <xsl:if test="@sortkey">
+        <xslout:attribute name="xml2idml:sortkey" select="{@sortkey}" />
+      </xsl:if>
     </xsl:if>
     <xsl:if test="@is-indexterm-crossref eq 'true'">
       <xslout:attribute name="xml2idml:is-indexterm-level" select="{@is-indexterm-level}" />

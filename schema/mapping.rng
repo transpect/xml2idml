@@ -707,6 +707,11 @@
       <data type="int"/>
     </attribute>
     <optional>
+      <attribute name="sortkey">
+        <data type="string" />
+      </attribute>
+    </optional>
+    <optional>
       <group>
         <attribute name="is-indexterm-crossref">
           <choice>
