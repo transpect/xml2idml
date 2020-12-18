@@ -202,7 +202,7 @@
       </p:input>
     </xml2idml:add-aid>
   
-    <tr:simple-progress-msg name="xßml2idml-mapandstorify-msg" file="xml2idml-mappingandstorify.txt">
+    <tr:simple-progress-msg name="xml2idml-mapandstorify-msg" file="xml2idml-mappingandstorify.txt">
       <p:input port="msgs">
         <p:inline>
           <c:messages>
