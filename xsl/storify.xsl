@@ -1073,7 +1073,7 @@
   <!-- get TextColumnFixedWidth from first main story TextFrame -->
   <xsl:variable name="xml2idml:main-story-TextColumnFixedWidth" as="xs:string?"
     select="(
-              $xml2idml:main-story-in-template/TextFramePreference/@TextColumnFixedWidth,
+              $xml2idml:main-story-textframes-in-template/TextFramePreference/@TextColumnFixedWidth,
               if ($xml2idml:main-story-in-template)
               then xs:string(
                 idml2xml:get-shape-width(
