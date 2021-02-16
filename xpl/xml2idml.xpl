@@ -358,6 +358,17 @@
     </tr:load-cascaded>
   
     <p:sink/>
+
+    <tr:file-uri name="absolute-path">
+      <p:with-option name="filename" select="$idml-target-uri"/>
+    </tr:file-uri>
+
+    <tr:store-debug pipeline-step="xml2idml/file-uri-target-idml">
+      <p:with-option name="active" select="$debug" />
+      <p:with-option name="base-uri" select="$debug-dir-uri" />
+    </tr:store-debug>
+
+    <p:sink/>
   
     <p:xslt name="add-nonexisting-styles">
       <p:documentation>Used styles not included in the idml file will be created here, so the mapping information cannot be lost.</p:documentation>
@@ -381,7 +392,7 @@
       <p:documentation>Another important cleanup step to remove the xml:space attribute, 
         otherwise the result won't be valid.</p:documentation>
     </p:delete>
-  
+
     <p:xslt name="zip-file-uri" template-name="main">
       <p:documentation xmlns="http://www.w3.org/1999/xhtml">
         <p>Compute the save file path of the created IDML file. The result of this step will be, in dependency of param idml-target-uri:</p>
@@ -391,7 +402,9 @@
           <li>full path given: resolve and use this path</li>
           <li>idml-target-uri is a directory (ends with '/'): use this param, concat it with the basename of the XML input base-uri and add 'idml' file extension.</li>
         </ul></p:documentation>
-      <p:with-param name="idml-uri" select="$idml-target-uri"/>
+      <p:with-param name="idml-uri" select="if ($idml-target-uri = '') then '' else /c:result/@local-href">
+        <p:pipe port="result" step="absolute-path"/>
+      </p:with-param>
       <p:with-param name="base-uri" select="resolve-uri(base-uri(/*))">
         <p:pipe step="xml2idml" port="source"/>
       </p:with-param>
