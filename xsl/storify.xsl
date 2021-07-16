@@ -700,9 +700,8 @@
     <xsl:variable name="source" as="element(*)*" select="key('linking-item-by-source', @xml2idml:hyperlink-dest)"/>
     <xsl:choose>
       <xsl:when test="$source">
-        <HyperlinkTextDestination Hidden="false" Name="{@xml2idml:hyperlink-dest}" DestinationUniqueKey="{concat('00', count($source/preceding::node()))}" Self="{concat('HyperlinkTextDestination/', @xml2idml:hyperlink-dest)}">
-          <xsl:next-match/>
-        </HyperlinkTextDestination>
+        <HyperlinkTextDestination Hidden="false" Name="{@xml2idml:hyperlink-dest}" DestinationUniqueKey="{concat('00', count($source/preceding::node()))}" Self="{concat('HyperlinkTextDestination/', @xml2idml:hyperlink-dest)}"/>
+        <xsl:next-match/>
       </xsl:when>
       <xsl:otherwise>
         <xsl:next-match/>
@@ -1055,7 +1054,7 @@
   <xsl:variable name="xml2idml:use-main-story-width-for-tables" select="false()" as="xs:boolean"/>
   
   <xsl:variable name="xml2idml:use-main-story-width-for-textframes" select="false()" as="xs:boolean"/>
-
+  
   <xsl:variable name="xml2idml:main-story-in-template" as="element(Story)?"
     select="(
               collection()[2]
@@ -1073,7 +1072,7 @@
   <!-- get TextColumnFixedWidth from first main story TextFrame -->
   <xsl:variable name="xml2idml:main-story-TextColumnFixedWidth" as="xs:string?"
     select="(
-              $xml2idml:main-story-textframes-in-template/TextFramePreference/@TextColumnFixedWidth,
+              $xml2idml:main-story-in-template/TextFramePreference/@TextColumnFixedWidth,
               if ($xml2idml:main-story-in-template)
               then xs:string(
                 idml2xml:get-shape-width(
@@ -1082,6 +1081,7 @@
               )
               else ''
             )[1]"/>
+  
 
   <xsl:template match="*:col" mode="xml2idml:storify_table-declarations">
     <xsl:variable name="width" as="xs:string"
@@ -1103,14 +1103,14 @@
     <xsl:variable name="AppliedObjectStyle" select="concat('ObjectStyle/', @xml2idml:ObjectStyle)" as="xs:string" />
     <xsl:variable name="text-width" as="xs:string"
       select="if (not($xml2idml:use-main-story-width-for-textframes) and @css:width) 
-              then @css:width 
-              else 
-                if ($xml2idml:main-story-TextColumnFixedWidth ne '') 
-                then concat(
-                  xs:double($xml2idml:main-story-TextColumnFixedWidth),
-                  'pt'
-                )
-                else '2000'"/>
+                  then @css:width 
+                  else 
+                    if ($xml2idml:main-story-TextColumnFixedWidth ne '') 
+                    then concat(
+                      xs:double($xml2idml:main-story-TextColumnFixedWidth),
+                      'pt'
+                    )
+                    else '2000'"/>
     <TextFrame Self="tf_{generate-id()}"
       PreviousTextFrame="n"
       NextTextFrame="n"
