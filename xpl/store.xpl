@@ -25,6 +25,7 @@
 
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl" />
   <p:import href="http://transpect.io/xproc-util/store-debug/xpl/store-debug.xpl" />
+  <p:import href="http://transpect.io/cascade/xpl/load-cascaded.xpl" />
 
   <tr:load-cascaded name="load-serialize-compound-idml-xsl" 
     fallback="http://transpect.io/xml2idml/xsl/serialize-compound-idml.xsl">
