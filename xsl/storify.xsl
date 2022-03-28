@@ -1059,7 +1059,7 @@
     select="(
               collection()[2]
                 //Story[
-                  .//CharacterStyleRange[@AppliedConditions eq 'Condition/storytitle'][. eq 'main']
+                  .//CharacterStyleRange[@AppliedConditions eq 'Condition/storytitle'][matches(Content/text(), 'main')]
               ]
             )[1]"/>
 
