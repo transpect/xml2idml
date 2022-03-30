@@ -20,6 +20,7 @@
   <xsl:import href="http://transpect.io/idml2xml/xsl/common-functions.xsl" />
   <xsl:import href="http://transpect.io/xslt-util/lengths/xsl/lengths.xsl" />
   <xsl:import href="http://transpect.io/xslt-util/mime-type/xsl/mime-type.xsl" />
+  <xsl:import href="http://transpect.io/xslt-util/colors/xsl/colors.xsl" />
 
   <xsl:param name="base-uri" as="xs:string" />
 
@@ -193,7 +194,7 @@
     <Cell Self="{$base-id}"
       Name="{@data-colnum - 1}:{@data-rownum - 1 + $row-start}"
       RowSpan="{(@rowspan, 1)[1]}" ColumnSpan="{(@colspan, 1)[1]}">
-      <xsl:apply-templates select="@aid5:cellstyle" mode="#current" />
+      <xsl:apply-templates select="@aid5:cellstyle, @css:background-color" mode="#current" />
       <!-- other rules (create XMLElement, presumably): -->
       <xsl:next-match>
         <xsl:with-param name="pstyle" select="key(
@@ -1020,6 +1021,13 @@
 
   <xsl:template match="*:tfoot/@data-rowcount" mode="xml2idml:storify">
     <xsl:attribute name="FooterRowCount" select="." />
+  </xsl:template>
+  
+  <xsl:template match="@css:background-color" mode="xml2idml:storify">
+    <xsl:variable name="color-val" select="tr:convert-css-color(., 'cmyk')"/>
+    <xsl:variable name="color-name" select="replace($color-val, 'cmyk\((\d+),(\d+),(\d+),(\d+)\)', 'C=$1 M=$2 Y=$3 K=$4')"/>
+    <xsl:attribute name="FillColor" select="concat('Color/', $color-name)" />
+    <xsl:attribute name="FillTint" select="'100'" />
   </xsl:template>
 
   <xsl:template match="@aid5:tablestyle" mode="xml2idml:storify">

@@ -135,10 +135,40 @@
       <xsl:apply-templates select="TableStyleMapping" mode="#current" />
       <xsl:apply-templates select="CellStyleMapping" mode="#current" />
       <xsl:apply-templates select="IndexingSortOption" mode="#current" />
+      <xsl:apply-templates select="ColorGroup" mode="#current" />
       <xsl:apply-templates select="ABullet" mode="#current" />
       <xsl:apply-templates select="Assignment" mode="#current" />
       <xsl:apply-templates select="Article" mode="#current" />
      </xsl:copy>
+  </xsl:template>
+  
+  <xsl:template match="idPkg:Graphic" mode="#default">
+    <xsl:variable name="context" select="."/>
+    <xsl:copy copy-namespaces="no">
+      <xsl:apply-templates select="@*" mode="#current" />
+      <xsl:for-each select="distinct-values(collection()[2]//@FillColor)">
+        <xsl:if test="not(some $c in $context/Color satisfies $c/@Self eq current())">
+          <Color Self="{current()}" 
+            Model="Process" Space="CMYK" ColorValue="{replace(current(), 'Color/|[CMYK=]', '')}" Name="{replace(current(), 'Color/', '')}" 
+            ColorOverride="Hiddenreserved" AlternateSpace="NoAlternateColor" AlternateColorValue="" ColorEditable="true" 
+            ColorRemovable="true" Visible="true" SwatchColorGroupReference="ltxColorGroupSwatch{position()}" SwatchCreatorID="7937"/>          
+        </xsl:if>
+      </xsl:for-each>
+      <xsl:apply-templates select="node()" mode="#current" />
+    </xsl:copy>
+  </xsl:template>
+  
+  <xsl:template match="ColorGroup" mode="#default">
+    <xsl:variable name="context" select="."/>
+    <xsl:copy copy-namespaces="no">
+      <xsl:apply-templates select="@*" mode="#current" />
+      <xsl:for-each select="distinct-values(collection()[2]//@FillColor)">
+        <xsl:if test="not(some $c in $context/ColorGroupSwatch satisfies $c/@SwatchItemRef eq current())">
+          <ColorGroupSwatch Self="ltxColorGroupSwatch{position()}" SwatchItemRef="{current()}" />
+        </xsl:if>
+      </xsl:for-each>
+      <xsl:apply-templates select="node()" mode="#current" />
+    </xsl:copy>
   </xsl:template>
 
   <xsl:template mode="#default"
