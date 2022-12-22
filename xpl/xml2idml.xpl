@@ -268,7 +268,9 @@
     <p:xslt name="storify-pass2" initial-mode="xml2idml:storify_content-n-cleanup">
       <p:documentation>Cleanup mode in storify.xsl, i.e. remove unecessary 
         line break commands. See also the included stylesheet documentation.</p:documentation>
-      <p:input port="parameters"><p:empty/></p:input>
+      <p:input port="parameters">
+        <p:pipe port="paths" step="xml2idml"/>
+      </p:input>
       <p:input port="stylesheet">
         <p:pipe step="load-storify" port="result"/>
       </p:input>
@@ -325,7 +327,9 @@
   
     <p:xslt name="merge">
       <p:documentation>XSLT mode to merge the converted input XML with the idml template.</p:documentation>
-      <p:input port="parameters"><p:empty/></p:input>
+      <p:input port="parameters">
+        <p:pipe port="paths" step="xml2idml"/>
+      </p:input>
       <p:input port="source">
         <p:pipe step="template-as-single-doc" port="result" />
         <p:pipe step="stories" port="result" />
