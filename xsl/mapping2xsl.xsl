@@ -187,10 +187,8 @@
       <xslout:import href="http://transpect.io/xslt-util/lengths/xsl/lengths.xsl" />
       <xsl:apply-templates select="import[not(@href = $included-mappings/import/@href)],
                                    $included-mappings/import"/>
-      <xsl:apply-templates select="if(not(inline)) 
-                                   then $included-mappings/inline
-                                   else inline" />
-      
+      <xsl:apply-templates select="inline, $included-mappings/inline" />
+
       <xslout:output method="xml" encoding="UTF-8" indent="no" />
       <xslout:output name="debug" method="xml" encoding="UTF-8" indent="yes" />
 
