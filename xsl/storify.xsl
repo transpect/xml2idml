@@ -541,6 +541,12 @@
   <xsl:template match="@xml2idml:condition" mode="xml2idml:storify">
     <xsl:attribute name="AppliedConditions" select="concat('Condition/', .)" />
   </xsl:template>
+  
+  <xsl:template match="@xml2idml:font" mode="xml2idml:storify">
+    <Properties>
+      <AppliedFont type="string"><xsl:value-of select="."/></AppliedFont>
+    </Properties>
+  </xsl:template>
 
   <xsl:template match="*[@aid:cstyle]/@xml:lang" mode="xml2idml:storify">
     <xsl:sequence select="xml2idml:langAttr-to-AppliedLanguageAttr(.)"/>
@@ -628,22 +634,31 @@
       </xsl:if>
       <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/{@aid:cstyle}">
         <xsl:apply-templates select="@xml:lang, @xml2idml:condition" mode="#current"/>
+        <xsl:variable name="Properties">
+          <xsl:apply-templates select="@xml2idml:font" mode="#current"/>
+        </xsl:variable>
         <xsl:choose>
           <xsl:when test="@xml2idml:insert-special-char-method eq 'replace'">
             <xsl:attribute name="AppliedCharacterStyle" 
               select="concat('CharacterStyle/', (@xml2idml:insert-special-char-format, @aid:cstyle,'$ID/[No character style]')[1])"/>
+            <xsl:sequence select="$Properties"/>
             <xsl:sequence select="xml2idml:insert-special-char(@xml2idml:insert-special-char)"/>
           </xsl:when>
-          <xsl:when test="@xml2idml:insert-content-replace">
-            <xsl:sequence select="xml2idml:insert-content-wrapper(., 'replace')"/>
-          </xsl:when>
-          <xsl:when test="@xml2idml:insert-textvariable-instance-method eq 'replace'">
-            <xsl:sequence select="xml2idml:insert-textvariable-instance(@xml2idml:insert-textvariable-instance)"/>
-          </xsl:when>
           <xsl:otherwise>
-            <xsl:next-match>
-              <xsl:with-param name="pstyle" select="()" tunnel="yes" />
-            </xsl:next-match>
+            <xsl:sequence select="$Properties"/>
+            <xsl:choose>
+              <xsl:when test="@xml2idml:insert-content-replace">
+                <xsl:sequence select="xml2idml:insert-content-wrapper(., 'replace')"/>
+              </xsl:when>
+              <xsl:when test="@xml2idml:insert-textvariable-instance-method eq 'replace'">
+                <xsl:sequence select="xml2idml:insert-textvariable-instance(@xml2idml:insert-textvariable-instance)"/>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:next-match>
+                  <xsl:with-param name="pstyle" select="()" tunnel="yes" />
+                </xsl:next-match>
+              </xsl:otherwise>
+            </xsl:choose>
           </xsl:otherwise>
         </xsl:choose>
       </CharacterStyleRange>
@@ -1184,7 +1199,7 @@
   <xsl:template match="@xml2idml:keep-xml-space-preserve" mode="xml2idml:storify_content-n-cleanup"/>
  
   <xsl:variable name="xml2idml:ignorable-property-elements" as="xs:string*"
-    select="('TextFramePreference', 'BaselineFrameGridOption', 'Hyperlink')"/>
+    select="('TextFramePreference', 'BaselineFrameGridOption', 'Hyperlink','AppliedFont')"/>
 
   <xsl:function name="xml2idml:is-children-of-any-settings-element" as="xs:boolean">
     <xsl:param name="context" as="node()"/>

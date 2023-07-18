@@ -624,11 +624,14 @@
         <xslout:attribute name="aid:cstyle" select="'{(xml2idml:escape-style-name(format), '$ID/[No character style]')[. ne ''][1]}'" />
       </xsl:otherwise>
     </xsl:choose>
-        <xsl:if test="condition">
+    <xsl:if test="condition">
       <xslout:attribute name="xml2idml:condition" select="'{condition}'" />
       <xsl:if test="condition/@hidden = 'true'">
         <xslout:attribute name="xml2idml:hidden" select="'true'" />
       </xsl:if>
+    </xsl:if>
+    <xsl:if test="font">
+      <xslout:attribute name="xml2idml:font" select="'{font}'" />
     </xsl:if>
     <xsl:if test="xml2idml:insert-textvariable-instance/@name">
       <xslout:attribute name="xml2idml:insert-textvariable-instance" select="'{insert-textvariable-instance/@name}'" />
