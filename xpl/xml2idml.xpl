@@ -376,7 +376,9 @@
   
     <p:xslt name="add-nonexisting-styles">
       <p:documentation>Used styles not included in the idml file will be created here, so the mapping information cannot be lost.</p:documentation>
-      <p:input port="parameters"><p:empty/></p:input>
+      <p:input port="parameters">
+        <p:pipe port="paths" step="xml2idml"/>
+      </p:input>
       <p:input port="source">
         <p:pipe step="merged-document" port="result" />
       </p:input>
