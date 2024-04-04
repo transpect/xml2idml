@@ -826,7 +826,7 @@
             <xsl:attribute name="height" select="replace($boundingbox, '^[^:]+:\s[-]?[\d.]+\s[-]?[\d.]+\s[\d.]+\s([\d.]+)$', '$1')"/>
           </xsl:when>
           <xsl:otherwise>
-            <xsl:message select="'xml2idml, function xml2idml:get-image-info: mime-type of ', $mapped-image/@xml2idml:image-path, 'unknown!'"/>
+            <xsl:message select="'xml2idml, function xml2idml:get-image-info: mime-type of ', $mapped-image/@xml2idml:image-path/string(), 'unknown!'"/>
             <xsl:attribute name="width" select="($mapped-image/@css:width, '0')[1]"/>
             <xsl:attribute name="height" select="($mapped-image/@css:height, '0')[1]"/>
           </xsl:otherwise>
@@ -846,7 +846,7 @@
       </CharacterStyleRange>
     </xsl:variable>
     <xsl:sequence select="$csr"/>
-    <xsl:message select="'WARNING: Image', $mapped-image/@xml2idml:image-path, 'could not be found!'"/>
+    <xsl:message select="'WARNING: Image', $mapped-image/@xml2idml:image-path/string(), 'could not be found!'"/>
   </xsl:function>
 
   <xsl:template match="*[/*/@retain-tagging eq 'true']
