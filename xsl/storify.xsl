@@ -1140,12 +1140,10 @@
       ContentType="TextType"
       AppliedObjectStyle="{$AppliedObjectStyle}"
       xml2idml:anchoring="{@xml2idml:anchoring}">
-      <xsl:if test="$xml2idml:use-main-story-width-for-textframes">
-        <TextFramePreference TextColumnFixedWidth="{(tr:length-to-unitless-twip($text-width), 2000)[1] * 0.05}" 
-                             UseFixedColumnWidth="true"
-                             AutoSizingType="HeightOnly"
-                             AutoSizingReferencePoint="TopCenterPoint"/>
-      </xsl:if>
+      <TextFramePreference TextColumnFixedWidth="{(tr:length-to-unitless-twip($text-width), 2000)[1] * 0.05}" 
+                           UseFixedColumnWidth="true"
+                           AutoSizingType="HeightOnly"
+                           AutoSizingReferencePoint="TopCenterPoint"/>
       <xsl:if test="exists($expanded-template)">
         <xsl:copy-of select="key('object', $AppliedObjectStyle, $expanded-template)[1]/*" />
       </xsl:if>
