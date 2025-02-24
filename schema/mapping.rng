@@ -755,6 +755,11 @@
         <attribute name="path-to-image-uri">
           <data type="string" />
         </attribute>
+        <optional>
+          <attribute name="path-to-alt-text">
+            <data type="string" />
+          </attribute>
+        </optional>        
       </group>
     </optional>
   </define>

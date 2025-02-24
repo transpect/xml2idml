@@ -610,6 +610,9 @@
     <xsl:if test="@is-image eq 'true'">
       <xslout:attribute name="xml2idml:is-block-image" select="'true'" />
       <xslout:attribute name="xml2idml:image-path" select="{@path-to-image-uri}" />
+      <xsl:if test="@path-to-alt-text">
+        <xslout:attribute name="xml2idml:alt-text-path" select="{@path-to-alt-text}" />
+      </xsl:if>
     </xsl:if>
   </xsl:template>
 
@@ -681,6 +684,9 @@
     <xsl:if test="@is-image eq 'true'">
       <xslout:attribute name="xml2idml:is-inline-image" select="'true'" />
       <xslout:attribute name="xml2idml:image-path" select="{@path-to-image-uri}" />
+      <xsl:if test="@path-to-alt-text">
+        <xslout:attribute name="xml2idml:alt-text-path" select="{@path-to-alt-text}" />
+      </xsl:if>
     </xsl:if>
   </xsl:template>
   <xsl:template match="ObjectStyles/mapping-instruction" mode="xml2idml:style-atts"

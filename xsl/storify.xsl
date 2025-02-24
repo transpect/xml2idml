@@ -789,6 +789,12 @@
                      </GeometryPathType>
                   </PathGeometry>
                </Properties>
+               <xsl:if test="$mapped-image/@xml2idml:alt-text-path">
+                 <ObjectExportOption>
+                   <xsl:attribute name="AltTextSourceType" select="'SourceCustom'"/>
+                   <xsl:attribute name="CustomAltText" select="$mapped-image/@xml2idml:alt-text-path"/>
+                 </ObjectExportOption>
+               </xsl:if>
                <EPS Self="image_eps_{generate-id($mapped-image)}"
                  ItemTransform="1 0 0 1 -{$width-in-pt div 2} -{$height-in-pt div 2}">
                   <Link Self="image_eps_link_{generate-id($mapped-image)}"
