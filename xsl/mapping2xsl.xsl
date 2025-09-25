@@ -491,7 +491,13 @@
         <xslout:choose>
           <xslout:when test=". instance of text()">
             <xslout:element name="{{$context/name()}}">
-              <xslout:sequence select="$context/@*"/>
+              <xslout:sequence select="$context/(@* except (@xml2idml:insert-special-char,@xml2idml:insert-special-char-method))"/>
+              <xslout:if test="position() eq 1">
+                <xslout:sequence select="$context/@xml2idml:insert-content-before, $context[@xml2idml:insert-special-char-method='before']/@xml2idml:insert-special-char,$context[@xml2idml:insert-special-char-method='before']/@xml2idml:insert-special-char-method"/>
+              </xslout:if>
+              <xslout:if test="position() eq last()">
+                <xslout:sequence select="$context/@xml2idml:insert-content-after, $context[@xml2idml:insert-special-char-method='after']/@xml2idml:insert-special-char,$context[@xml2idml:insert-special-char-method='after']/@xml2idml:insert-special-char-method"/>
+              </xslout:if>
               <xslout:value-of select="."/>
             </xslout:element>
           </xslout:when>
