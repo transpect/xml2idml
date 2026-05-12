@@ -827,9 +827,8 @@
               select="tokenize($unparsed-text,
                         '\n'
                       )[matches(., '^%%(HiRes)?BoundingBox:')][last()]"/>
-            <xsl:attribute name="width" select="replace($boundingbox, '^[^:]+:\s[-]?[\d.]+\s[-]?[\d.]+\s([\d.]+)\s[\d.]+$', '$1')"/>
-            <xsl:attribute name="height" select="replace($boundingbox, '^[^:]+:\s[-]?[\d.]+\s[-]?[\d.]+\s[\d.]+\s([\d.]+)$', '$1')"/>
-            <xsl:attribute name="height" select="replace($boundingbox, '^[^:]+:\s[-]?[\d.]+\s[-]?[\d.]+\s[\d.]+\s([\d.]+)$', '$1')"/>
+            <xsl:attribute name="width" select="replace($boundingbox, '^[^:]+:\s[-]?[\d.]+\s[-]?[\d.]+\s([\d.]+)\s[\d.]+.*$', '$1')"/>
+            <xsl:attribute name="height" select="replace($boundingbox, '^[^:]+:\s[-]?[\d.]+\s[-]?[\d.]+\s[\d.]+\s([\d.]+).*$', '$1')"/>
           </xsl:when>
           <xsl:otherwise>
             <xsl:message select="'xml2idml, function xml2idml:get-image-info: mime-type of ', $mapped-image/@xml2idml:image-path/string(), 'unknown!'"/>
